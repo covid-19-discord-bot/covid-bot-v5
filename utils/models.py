@@ -93,7 +93,7 @@ class AutoupdaterData(Model):
     delay = fields.BigIntField(default=-1)  # Shouldn't run into issues, delay is able to be set to up
     # to 250 billion years and if someone is stupid enough to do that... oy vey. I will have little hope for humanity
     # making it through the rest of this pandemic :P
-    last_updated = fields.DatetimeField(auto_now=True)
+    last_updated = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
         table = "autoupdater_data"
@@ -183,7 +183,7 @@ async def get_from_db(discord_object, as_user=True):
             await db_obj.save()
         return db_obj
     elif isinstance(discord_object, discord.abc.GuildChannel):
-        db_obj = await DiscordChannel.filter(discord_id=discord_object.id).first()
+        db_obj = await DiscordChannel.filter(discord_id=discord_object.id).first().prefetch_related("autoupdater")
         if not db_obj:
             ad_data = AutoupdaterData()
             await ad_data.save()
@@ -202,7 +202,7 @@ async def get_from_db(discord_object, as_user=True):
             await db_obj.save()
         return db_obj
     elif isinstance(discord_object, discord.User) or isinstance(discord_object, discord.Member) and as_user:
-        db_obj = await DiscordUser.filter(discord_id=discord_object.id).first()
+        db_obj = await DiscordUser.filter(discord_id=discord_object.id).first().prefetch_related("future_simulation")
         if not db_obj:
             ad_data = AutoupdaterData()
             await ad_data.save()

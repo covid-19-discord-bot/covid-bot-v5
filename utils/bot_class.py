@@ -2,7 +2,7 @@ import asyncio
 import collections
 import datetime
 from typing import Optional
-
+import concurrent.futures
 import aiohttp
 import discord
 from discord.ext.commands.bot import AutoShardedBot
@@ -33,6 +33,8 @@ class MyBot(AutoShardedBot):
         self._vaccine_api = covid19api.VaccineStats()
         self._jhucsse_api = covid19api.Covid19JHUCSSEStats()
         self._client_session: Optional[aiohttp.ClientSession] = None
+        self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
+        self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
         asyncio.ensure_future(self.async_setup())
 
     @property
@@ -72,16 +74,22 @@ class MyBot(AutoShardedBot):
         """
         self._client_session = aiohttp.ClientSession()  # There is no need to call __aenter__, since that does nothing
         # in that case
-        await self._worldometers_api.update_covid_19_virus_stats()
-        await self._vaccine_api.update_covid_19_vaccine_stats()
-        await self._jhucsse_api.update_covid_19_virus_stats()
+        try:
+            await self._worldometers_api.update_covid_19_virus_stats()
+            await self._vaccine_api.update_covid_19_vaccine_stats()
+            await self._jhucsse_api.update_covid_19_virus_stats()
+        except RuntimeError as e:
+            self.logger.exception("Fatal error while running inital update!", exception_instance=e)
 
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if not self.is_ready():
             return  # Ignoring messages when not ready
 
         if message.author.bot:
             return  # ignore messages from other bots
+
+        if message.guild is None:
+            await message.channel.send("I don't support DMs due to Discord limitations!")
 
         ctx = await self.get_context(message, cls=MyContext)
         if ctx.prefix is not None:

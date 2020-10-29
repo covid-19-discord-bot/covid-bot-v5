@@ -29,7 +29,7 @@ class AutoUpdaterCog(Cog):
         1d updates daily, while 4m updates every 4 minutes
         Only Premium members/guilds can set the delay to less than 10 minutes.
         """
-        delta_seconds = (datetime.datetime.utcnow() - delay.dt).total_seconds()
+        delta_seconds = abs((datetime.datetime.utcnow() - delay.dt).total_seconds())
         human_update_time = human_timedelta(delay.dt, brief=True)
 
         if delta_seconds > 31536000:
@@ -105,7 +105,7 @@ class AutoUpdaterCog(Cog):
                                    "shorter delay (no point in doing so), check out the `/donate` command.")
                     return
 
-        country_list = await covid19api.get_all_countries()
+        country_list = await self.bot.worldometers_api.get_all_countries()
 
         if country != "OT":
             iso2_code = covid19api.get_iso2_code(country, country_list)
@@ -160,6 +160,11 @@ class AutoUpdaterCog(Cog):
         for channel in self.bot.get_all_channels():  # Holy hell is this a lot simpler...
             db_channel = await get_from_db(channel)
             if db_channel.autoupdater.already_set:
+                now = datetime.datetime.utcnow()
+                delta: datetime.timedelta = now - db_channel.autoupdater.last_updated
+                if not delta.total_seconds() >= db_channel.autoupdater.delay:
+                    continue
+                db_channel.autoupdater.last_updated = datetime.datetime.utcnow()
                 country = db_channel.autoupdater.country_name
                 try:
                     embed = await embeds.stats_embed(f"{'world' if country == 'OT' else country}", self.bot)

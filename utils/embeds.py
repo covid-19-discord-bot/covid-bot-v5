@@ -1,5 +1,6 @@
 # coding=utf-8
 # noinspection PyUnresolvedReferences
+from utils.bot_class import MyBot
 from typing import Any
 import datetime
 import discord
@@ -11,7 +12,7 @@ def add_zero_space(embed: discord.Embed, count: int):
         embed.add_field(name="\u200b", value="\u200b")
 
 
-def error_embed(bot: discord.Client, reason: Any = None):
+def error_embed(bot: MyBot, reason: Any = None):
     _error_embed = discord.Embed(title="Error!",
                                  description="",
                                  color=discord.Color.red())
@@ -20,6 +21,7 @@ def error_embed(bot: discord.Client, reason: Any = None):
                            value="Report this to {0} on the official Discord server, available via `/invite`".format(
                               zeroslashzero.mention))
     if reason:
+        bot.logger.exception("Exception while creating embed!", exception_instance=reason)
         if isinstance(reason, BaseException):
             _error_embed.add_field(name="Add this when you're reporting this message",
                                    value=f"`{str(reason)}`\n"
@@ -30,7 +32,7 @@ def error_embed(bot: discord.Client, reason: Any = None):
     return _error_embed
 
 
-async def stats_embed(country_name: str, bot: discord.Client, covid_api: covid19api.Covid19StatsWorldometers):
+async def stats_embed(country_name: str, bot: MyBot):
     data_points = (("Total Cases", "cases"),
                    ("New Cases", "todayCases"),
                    ("Cases per 1m People", "casesPerOneMillion"),
@@ -54,32 +56,38 @@ async def stats_embed(country_name: str, bot: discord.Client, covid_api: covid19
                    ("Population", "population"))
     try:
         if country_name != "world":
-            country_list = await covid_api.get_all_iso_codes()
+            country_list = await bot.worldometers_api.get_all_iso_codes()
             _id = covid19api.get_iso2_code(country_name, country_list)
-            name = covid19api.get_country_name(_id, country_list)
             if not _id:
-                return None
+                if country_name in bot.worldometers_api.continents:
+                    country_data = await bot.worldometers_api.get_continent_stats(country_name)
+                    name = country_name
+            else:
+                name = covid19api.get_country_name(_id, country_list)
+                country_data = await bot.worldometers_api.get_country_stats(_id)
         else:
             _id = "OT"
             name = "World"
-        country_data = await covid_api.get_country_stats(_id)
-        updated_time = datetime.datetime.utcfromtimestamp(country_data["updated"] / 1000)
+            country_data = bot.worldometers_api.global_stats
         embed = discord.Embed(title="COVID-19 Stats for {0}".format(name),
                               color=discord.Color.dark_red(),
-                              timestamp=updated_time)
+                              timestamp=bot.worldometers_api.last_updated_utc)
         embed.set_footer(text="Stats last updated at (UTC)")
-        if name != "world":
+        if name in bot.worldometers_api.country_stats:
             embed.set_thumbnail(url=country_data["countryInfo"]["flag"])
-        for name, key in data_points:
-            if name == "zero_space":
+        for dp in data_points:
+            if dp[0] == "zero_space":
                 add_zero_space(embed, 1)
             else:
-                if country_data[key] is not None:
-                    embed.add_field(name=name,
-                                    value=format(int(country_data[key]), ","))
-                else:
-                    embed.add_field(name=name,
-                                    value="no data")
+                try:
+                    if country_data[dp[1]] is not None:
+                        embed.add_field(name=dp[0],
+                                        value=format(int(country_data[dp[1]]), ","))
+                    else:
+                        embed.add_field(name=dp[0],
+                                        value="no data")
+                except KeyError:
+                    bot.logger.warning(f"Key {dp[1]} is missing from {name}!")
         if country_name == "world":
             embed.add_field(name="Affected Countries",
                             value=format(int(country_data["affectedCountries"]), ","))
@@ -90,10 +98,9 @@ async def stats_embed(country_name: str, bot: discord.Client, covid_api: covid19
         return _error_embed
 
 
-async def list_embed(bot: discord.Client, letter: str,
-                     covid_api: covid19api.Covid19StatsWorldometers) -> [discord.Embed, None]:
+async def list_embed(bot: MyBot, letter: str) -> [discord.Embed, None]:
     try:
-        _list = await covid_api.get_all_iso_codes()
+        _list = await bot.worldometers_api.get_all_iso_codes()
         embed = discord.Embed(color=discord.Color.blue(),
                               title="Country List",
                               description="Use either the country name, or the ISO2/ISO3 code when getting stats with "

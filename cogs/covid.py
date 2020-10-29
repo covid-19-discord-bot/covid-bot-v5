@@ -1,4 +1,5 @@
 # coding=utf-8
+import asyncio
 import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
@@ -9,6 +10,7 @@ from utils.models import get_from_db
 from utils import ai_system
 from utils import api as covid19api
 from utils import embeds
+from utils import graphs
 
 
 class CovidCog(Cog):
@@ -22,17 +24,17 @@ class CovidCog(Cog):
         else:
             is_premium = False
         if len(args) == 0:
-            stats_embed = await embeds.stats_embed("world", self.bot, self.bot.worldometers_api)
+            stats_embed = await embeds.stats_embed("world", self.bot)
             if stats_embed is None:
                 error_embed = embeds.error_embed(self.bot, reason="Severe error: no world data!")
                 await ctx.send(embed=error_embed)
                 return
-            await ctx.send(embed=stats_embed)
+            msg = await ctx.send(embed=stats_embed)
         else:
             country = str(" ".join(args)).lower()
             if country == "global":
                 country = "world"
-            stats_embed = await embeds.stats_embed(country, self.bot, self.bot.worldometers_api)
+            stats_embed = await embeds.stats_embed(country, self.bot)
             if stats_embed is None:
                 if is_premium:
                     await ctx.send("Couldn't find data for that country you tried to find, please wait as I try to "
@@ -54,7 +56,24 @@ class CovidCog(Cog):
                            f"(disable these tips with `{ctx.prefix}settings set enable_tips false`)"
                 await ctx.send(msg)
                 return
-            await ctx.send(embed=stats_embed)
+            msg = await ctx.send(embed=stats_embed)
+        return  # TODO: set up JHUCSSE API
+
+        # noinspection PyUnreachableCode
+        def reaction_add_event(reaction: discord.Reaction, user: discord.Member):
+            return reaction.emoji == "📈" and user.id == ctx.author.id and reaction.message.id == msg.id
+        await msg.add_reaction("📈")
+        while True:
+            try:
+                event_return = self.bot.wait_for("reaction_add", check=reaction_add_event, timeout=600)
+            except asyncio.TimeoutError:
+                return
+            else:
+                emoji: str = event_return[0]
+                await msg.remove_reaction(emoji, event_return[1])
+                process_pool = self.bot.premium_process_pool if is_premium else self.bot.basic_process_pool
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(process_pool, graphs.generate_line_plot())
 
     @commands.command(name="list")
     async def _list(self, ctx: MyContext, *first_letter):
@@ -62,7 +81,7 @@ class CovidCog(Cog):
             await ctx.send("I can't send the entire country list: it's over Discord's 6,000 character limit! Try "
                            "`/list <letter>` to get only countries starting with `<letter>`.")
             return
-        embed = await embeds.list_embed(self.bot, " ".join(first_letter), self.bot.worldometers_api)
+        embed = await embeds.list_embed(self.bot, " ".join(first_letter))
         if embed is not None:
             await ctx.author.send(embed=embed)
             if ctx.message.guild is not None:
@@ -102,6 +121,23 @@ class CovidCog(Cog):
     async def update_stats(self):
         # No need to do a self.bot.wait_until_ready() as it doesn't access anything to do with the bot
         await self.bot.worldometers_api.update_covid_19_virus_stats()  # Well that was simple :P
+
+    # ignore it here, as it may not be in the correct state
+    # noinspection PyProtectedMember
+    @commands.command(name="force_update", hidden=True)
+    async def update_force(self, ctx: MyContext):
+        await ctx.send("Loading...")
+        try:
+            await self.bot._worldometers_api.update_covid_19_virus_stats()
+            await self.bot._jhucsse_api.update_covid_19_virus_stats()
+            await self.bot._vaccine_api.update_covid_19_vaccine_stats()
+        except Exception as e:
+            self.bot.logger.exception("Fatal error while updating",
+                                      guild=ctx.guild,
+                                      channel=ctx.channel,
+                                      member=ctx.author,
+                                      exception_instance=e)
+            await ctx.send("Encountered error while updating. Printed out exception instance.")
 
 
 setup = CovidCog.setup

@@ -50,11 +50,6 @@ def check_if_enabled():
 
 
 class FutureSimulations(Cog):
-    def __init__(self, bot: MyBot, *args, **kwargs):
-        super().__init__(bot, *args, **kwargs)
-        self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
-        self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
-
     @staticmethod
     async def parse_simulation_data_for_date(data: dict, date_to_parse: int):
         infected: ndarray = data['infected']
@@ -102,7 +97,7 @@ class FutureSimulations(Cog):
                                           "liable for anything stemming from the use of this modeling system. Type "
                                           "`ok` within 15 seconds to agree to these terms.")
         try:
-            self.bot.wait_for("message", check=agree, timeout=15)
+            await self.bot.wait_for("message", check=agree, timeout=15)
         except asyncio.TimeoutError:
             await terms_of_service.edit(content=f"Didn't get a response. To try again, do "
                                                 f"`{ctx.prefix}{ctx.command.qualified_name}`.")
@@ -258,16 +253,16 @@ class FutureSimulations(Cog):
         self.run_basic_simulations.cancel()
         self.run_premium_simulations.cancel()  # if they still haven't stopped, cancel them
         await stats_msg.edit(content="Stopping broken process pools...")
-        self.basic_process_pool.shutdown(wait=False)
-        self.premium_process_pool.shutdown(wait=False)
+        self.bot.basic_process_pool.shutdown(wait=False)
+        self.bot.premium_process_pool.shutdown(wait=False)
         await stats_msg.edit(content="Waiting 20 seconds for the final tasks to stop...")
         await asyncio.sleep(20)
         await stats_msg.edit(content="Destroying pools...")
-        self.basic_process_pool = None
-        self.premium_process_pool = None
+        self.bot.basic_process_pool = None
+        self.bot.premium_process_pool = None
         await stats_msg.edit(content="Creating new pools...")
-        self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
-        self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
+        self.bot.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
+        self.bot.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
         await stats_msg.edit(content="Starting up simulation runners...")
         self.run_basic_simulations.start()
         self.run_premium_simulations.start()
@@ -307,7 +302,7 @@ class FutureSimulations(Cog):
         self.bot.logger.info(f"Running simulations for basic members... {basic_queue.qsize()} simulations "
                              f"need to be processed.")
         loop = asyncio.get_running_loop()
-        async with self.basic_process_pool as pp:
+        async with self.bot.basic_process_pool as pp:
             while True:
                 try:
                     kill_pools.get_nowait()
@@ -339,7 +334,7 @@ class FutureSimulations(Cog):
         self.bot.logger.info(f"Running simulations for premium members... {premium_queue.qsize()} simulations "
                              f"need to be processed.")
         loop = asyncio.get_running_loop()
-        async with self.premium_process_pool as pp:
+        async with self.bot.premium_process_pool as pp:
             while True:
                 try:
                     kill_pools.get_nowait()

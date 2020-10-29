@@ -105,7 +105,7 @@ async def get_data(session: aiohttp.ClientSession,
     """
     Returns JSON/text of a URL
 
-    :param session: aiohttp.ClientSession object to use
+    :param session: aiohttp.ClientSession object to use: must already be open.
     :param url: URL to grab data from
     :param formatted_as_json: Try to parse as JSON? If true, returns parsed JSON. If false, returns text directly
                               without parsing
@@ -184,12 +184,14 @@ class Covid19StatsWorldometers:
         self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
         self.global_stats: dict = {}
         self.country_stats: Dict[dict] = {}
+        self.continent_stats: list = []
+        self.continents: list = []
         self.iso_codes: List[dict] = []
         if update_stats:
             self.update_covid_19_virus_stats()
 
     # noinspection PyTypeChecker
-    async def update_covid_19_virus_stats(self, *, session: aiohttp.ClientSession = aiohttp.ClientSession()):
+    async def update_covid_19_virus_stats(self, *, session: aiohttp.ClientSession = None):
         """
         Updates the stats, parses them, and loads it into memory.
 
@@ -200,9 +202,9 @@ class Covid19StatsWorldometers:
         """
         self._update_tries += 1
         self.logger.info('Opening new AIOHttp session...')
-        session = session if session else aiohttp.ClientSession()
+        session = session if session is not None else aiohttp.ClientSession()
         async with session as session:
-            self.logger.info("Getting new data...")
+            self.logger.info("Getting new country data...")
             try:
                 data = await get_data(session, "https://disease.sh/v3/covid-19/countries?allowNull=true")
             except NetworkException as e:
@@ -217,19 +219,29 @@ class Covid19StatsWorldometers:
                     self.logger.fatal("Failed to update! Data will not be avalible! Expect exceptions on later calls!")
                     self._update_tries = 0
                 return
-            self.logger.info("Got data! Parsing data and loading it into memory...")
+            self.logger.info("Got country data! Parsing data and loading it into memory...")
             for country in data:
                 if country['countryInfo']['iso2'] is not None:
-                    country["activeCaseChange"] = country["todayCases"] - (country["todayDeaths"] +
-                                                                           country["todayRecovered"])
+                    try:
+                        country["activeCaseChange"] = country["todayCases"] - (country["todayDeaths"] +
+                                                                               country["todayRecovered"])
+                    except TypeError:
+                        country["activeCaseChange"] = None
                     self.country_stats[country['countryInfo']['iso2']] = country
                     iso_code = dict(country=country["country"], iso2=country["countryInfo"]["iso2"],
                                     iso3=country["countryInfo"]["iso3"])
                     self.iso_codes.append(iso_code)
-            self.logger.info("Getting more stats...")
+            self.logger.info("Getting world stats...")
             self.global_stats = await get_data(session, "https://disease.sh/v3/covid-19/all?allowNull=true")
+            self.logger.info("Got world stats.")
+            self.logger.info("Getting continent stats...")
+            self.continent_stats = await get_data(session, "https://disease.sh/v3/covid-19/continents?allowNull=true")
+            for continent in self.continent_stats:
+                self.continents.append(continent["continent"])
+            self.logger.info("Got continent stats.")
         self.last_updated_utc = datetime.datetime.utcnow()
         self._has_been_updated = True
+        self.data_is_valid = True
         self.logger.info("Done!")
 
     async def _check_stats_are_valid(self):
@@ -273,7 +285,9 @@ class Covid19StatsWorldometers:
         """
         await self._check_stats_are_valid()
         if iso2_code not in self.country_stats:
-            iso2_code = self.get_iso2_code(iso2_code, self.iso_codes)
+            iso2_code = get_iso2_code(iso2_code, self.iso_codes)
+        if iso2_code not in self.country_stats:
+            return None
         return self.country_stats[iso2_code]
 
     async def get_all_country_stats(self, *, use_list: bool = False):
@@ -308,7 +322,12 @@ class Covid19StatsWorldometers:
         if sort_id not in SORT_TYPES:
             raise IncorrectSortType("Need to sort by a valid sort type!")
         country_list = await self.get_all_country_stats(use_list=True)
-        return sorted(country_list, key=lambda k: k[sort_id], reverse=reverse)
+        try:
+            self.logger.debug(f"Country list: {country_list}")
+            self.logger.debug(f"Sort ID: {sort_id}")
+            return sorted(country_list, key=lambda k: k[sort_id], reverse=reverse)
+        except TypeError:
+            raise IncorrectSortType()
 
     async def get_single_data(self, data: str):
         """
@@ -325,6 +344,18 @@ class Covid19StatsWorldometers:
         for country in country_list:
             final_data[country['countryInfo']['iso2']] = country[data]
         return final_data
+
+    async def get_continent_stats(self, continent_name: str):
+        await self._check_stats_are_valid()
+        if continent_name.lower() not in self.continents:
+            return None
+        else:
+            for continent in self.continent_stats:
+                if continent_name.lower() == continent["continent"].lower():
+                    return continent
+            else:  # Should never happen
+                raise RuntimeError("Data in self.continent_stats must have been modified between entering this "
+                                   "function and trying to return data!")
 
 
 class VaccineStats:
@@ -359,7 +390,7 @@ class VaccineStats:
     async def update_covid_19_vaccine_stats(self, *, session: Optional[aiohttp.ClientSession] = None):
         self.update_tries += 1
         self.logger.info('Opening new AIOHttp session...')
-        session = session if session else aiohttp.ClientSession()
+        session = session if session is not None else aiohttp.ClientSession()
         async with session as session:
             self.logger.info("Getting new vaccine data...")
             try:

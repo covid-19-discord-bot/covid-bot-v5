@@ -19,9 +19,9 @@ class Utils(Cog):
         A simple credits screen
         """
         credits_embed = discord.Embed(color=discord.Color.dark_green(), title="Credits")
-        symphonic = self.bot.get_user(263128260009787392)
-        zeroslashzero = self.bot.get_user(661660243033456652)
-        eyes = self.bot.get_user(138751484517941259)
+        symphonic: discord.User = self.bot.get_user(263128260009787392)
+        zeroslashzero: discord.User = self.bot.get_user(661660243033456652)
+        eyes: discord.User = self.bot.get_user(138751484517941259)
         symphonic_mention: str = symphonic.mention
         zeroslashzero_mention: str = zeroslashzero.mention
         eyes_mention: str = eyes.mention
