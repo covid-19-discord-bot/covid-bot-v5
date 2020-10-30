@@ -15,6 +15,13 @@ from utils.models import get_from_db
 from utils import api as covid19api
 
 
+class BotStats:
+    def __init__(self):
+        self.total_members: int = 0
+        self.total_guilds: int = 0
+        self.days_since_creation: int = 0
+
+
 class MyBot(AutoShardedBot):
     def __init__(self, *args, **kwargs):
         self.logger = FakeLogger()
@@ -35,6 +42,7 @@ class MyBot(AutoShardedBot):
         self._client_session: Optional[aiohttp.ClientSession] = None
         self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
         self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
+        self.stats = BotStats()
         asyncio.ensure_future(self.async_setup())
 
     @property
@@ -79,7 +87,9 @@ class MyBot(AutoShardedBot):
             await self._vaccine_api.update_covid_19_vaccine_stats()
             await self._jhucsse_api.update_covid_19_virus_stats()
         except RuntimeError as e:
-            self.logger.exception("Fatal error while running inital update!", exception_instance=e)
+            self.logger.exception("Fatal RuntimeError while running inital update!", exception_instance=e)
+        except Exception as e:
+            self.logger.exception("Fatal general error while running initial update!", exception_instance=e)
 
     async def on_message(self, message: discord.Message):
         if not self.is_ready():

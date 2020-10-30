@@ -7,25 +7,21 @@ from utils.ctx_class import MyContext
 from utils.models import get_from_db
 import json
 
-config_file = open("config.json", "r")
-config_data = json.load(config_file)
-config_file.close()
 
-
-class Utils(Cog):
+class UtilsCommands(Cog):
     @commands.command()
     async def credits(self, ctx: MyContext):
         """
         A simple credits screen
         """
         credits_embed = discord.Embed(color=discord.Color.dark_green(), title="Credits")
-        symphonic: discord.User = self.bot.get_user(263128260009787392)
-        zeroslashzero: discord.User = self.bot.get_user(661660243033456652)
-        eyes: discord.User = self.bot.get_user(138751484517941259)
+        symphonic: discord.User = await self.bot.fetch_user(263128260009787392)
+        zeroslashzero: discord.User = await self.bot.fetch_user(661660243033456652)
+        eyes: discord.User = await self.bot.fetch_user(138751484517941259)
         symphonic_mention: str = symphonic.mention
         zeroslashzero_mention: str = zeroslashzero.mention
         eyes_mention: str = eyes.mention
-        credits_embed.set_footer(text="current bot version: {0}".format(config_data["VERSION"]))
+        credits_embed.set_footer(text="current bot version: v5.0.0-alpha3")
         credits_embed.add_field(name="v3+ Creator", value=zeroslashzero_mention)
         credits_embed.add_field(name="Original Creator", value=symphonic_mention)
         credits_embed.add_field(name="Bot Framework", value=eyes_mention)
@@ -75,7 +71,7 @@ class Utils(Cog):
         await ctx.send(msg)
 
 
-setup = Utils.setup
+setup = UtilsCommands.setup
 
 
 '''

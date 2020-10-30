@@ -138,6 +138,8 @@ class CovidCog(Cog):
                                       member=ctx.author,
                                       exception_instance=e)
             await ctx.send("Encountered error while updating. Printed out exception instance.")
+        else:
+            await ctx.send("Updated sucessfully!")
 
 
 setup = CovidCog.setup

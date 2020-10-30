@@ -1,30 +1,13 @@
 # coding=utf-8
+import traceback
+
 import discord
 from discord.ext import commands
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-from utils.bot_class import MyBot
 
 
-def submit_error_message(self, exc: BaseException, doing: str, ctx: MyContext, bot: MyBot):
-    error_channel = await bot.get_channel(771065447561953298)
-    error_embed = discord.Embed(title=f"Fatal error while working on {doing}!",
-                                description=f"```Guild details:\n"
-                                            f"    ID: {ctx.guild.id}\n"
-                                            f"    Name: {ctx.guild.name}\n\n"
-                                            f"Channel details:\n"
-                                            f"    ID: {ctx.channel.id}\n"
-                                            f"    Name: {ctx.channel.name}\n\n"
-                                            f"Invoking message details:\n"
-                                            f"    ID: {ctx.message.id}\n\n"
-                                            f"Author details:\n"
-                                            f"    ID: {ctx.author.id}\n"
-                                            f"    Name: {str(ctx.author)}\n\n"  # Quick way to get name#disc
-                                )
-    error_embed.add_field(name="Exception Name", value="")
-
-
-class Template(Cog):
+class SuggestionsCommands(Cog):
     @commands.command()
     async def suggest(self, ctx: MyContext, *suggestion):
         suggestion = " ".join(suggestion)
@@ -48,4 +31,4 @@ class Template(Cog):
         pass
 
 
-setup = Template.setup
+setup = SuggestionsCommands.setup

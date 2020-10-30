@@ -1,12 +1,36 @@
+# coding=utf-8
 import datetime
 import traceback
 from cogs.future_simulations import SimulationsDisabled
 from babel import dates
 from discord.ext import commands
+import discord
 from utils import checks
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
+from utils.bot_class import MyBot
 from utils.interaction import escape_everything
+
+
+async def submit_error_message(exc: BaseException, doing: str, ctx: MyContext, bot: MyBot):
+    error_channel = await bot.get_channel(771065447561953298)
+    error_embed = discord.Embed(title=f"Fatal error while working on {doing}!",
+                                description=f"Guild details:\n"
+                                            f"    ID: `{ctx.guild.id}`\n"
+                                            f"    Name: `{ctx.guild.name}`\n\n"
+                                            f"Channel details:\n"
+                                            f"    ID: `{ctx.channel.id}`\n"
+                                            f"    Name: `{ctx.channel.name}`\n\n"
+                                            f"Invoking message details:\n"
+                                            f"    ID: `{ctx.message.id}`\n\n"
+                                            f"Author details:\n"
+                                            f"    ID: `{ctx.author.id}`\n"
+                                            f"    Name: `{str(ctx.author)}`"  # Quick way to get name#disc
+                                )
+    error_embed.add_field(name="Exception Name", value=str(exc.__class__), inline=False)
+    error_embed.add_field(name="Exception Reason", value=str(exc))
+    error_embed.add_field(name="Exception Traceback", value="".join(traceback.format_tb(exc.__traceback__)))
+    await error_channel.send(embed=error_embed)
 
 
 class CommandErrorHandler(Cog):
@@ -150,7 +174,9 @@ class CommandErrorHandler(Cog):
             elif isinstance(exception, commands.errors.DisabledCommand):
                 message = _("That command has been disabled.")
             elif isinstance(exception, commands.CommandInvokeError):
-                message = _("There was an error running the specified command. Contact the bot admins.")
+                message = _("There was an error running the specified command. This error has been logged.")
+                # we want the original instead of the CommandError one
+                await submit_error_message(exception.original, "unknown thing", ctx, self.bot)
                 ctx.logger.error(
                     "".join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
             elif isinstance(exception, commands.errors.CommandOnCooldown):
