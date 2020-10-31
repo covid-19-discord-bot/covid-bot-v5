@@ -31,7 +31,7 @@ class CovidCog(Cog):
                 return
             msg = await ctx.send(embed=stats_embed)
         else:
-            country = str(" ".join(args)).lower()
+            country = " ".join(args).lower()
             if country == "global":
                 country = "world"
             stats_embed = await embeds.stats_embed(country, self.bot)

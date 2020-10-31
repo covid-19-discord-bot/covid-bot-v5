@@ -347,7 +347,7 @@ class Covid19StatsWorldometers:
 
     async def get_continent_stats(self, continent_name: str):
         await self._check_stats_are_valid()
-        if continent_name.lower() not in self.continents:
+        if continent_name.lower() not in [i.lower() for i in self.continents]:
             return None
         else:
             for continent in self.continent_stats:

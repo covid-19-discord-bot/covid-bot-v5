@@ -21,7 +21,7 @@ class UtilsCommands(Cog):
         symphonic_mention: str = symphonic.mention
         zeroslashzero_mention: str = zeroslashzero.mention
         eyes_mention: str = eyes.mention
-        credits_embed.set_footer(text="current bot version: v5.0.0-alpha3")
+        credits_embed.set_footer(text="current bot version: v5.0.0-alpha4")
         credits_embed.add_field(name="v3+ Creator", value=zeroslashzero_mention)
         credits_embed.add_field(name="Original Creator", value=symphonic_mention)
         credits_embed.add_field(name="Bot Framework", value=eyes_mention)
@@ -69,6 +69,20 @@ class UtilsCommands(Cog):
         else:
             msg += "To get a few perks and 0/0#0001's unconditional love, check out the `/donate` command!"
         await ctx.send(msg)
+
+    @commands.command()
+    async def ping(self, ctx: MyContext):
+        """
+        Check that the bot is online, and give the latency between the bot and discord servers.
+        """
+        _ = await ctx.get_translate_function()
+
+        t_1 = time.perf_counter()
+        await ctx.trigger_typing()  # tell Discord that the bot is "typing", which is a very simple request
+        t_2 = time.perf_counter()
+        time_delta = round((t_2 - t_1) * 1000)  # calculate the time needed to trigger typing
+        await ctx.send(_("Pong. — Time taken: {miliseconds}ms", miliseconds=time_delta))  # send a message telling the
+        # user the calculated ping time
 
 
 setup = UtilsCommands.setup
