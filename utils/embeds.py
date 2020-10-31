@@ -54,48 +54,43 @@ async def stats_embed(country_name: str, bot: MyBot):
                    ("zero_space", "zero_space")*2,
                    ("Critical Cases", "critical"),
                    ("Population", "population"))
-    try:
-        if country_name != "world":
-            country_list = await bot.worldometers_api.get_all_iso_codes()
-            _id = covid19api.get_iso2_code(country_name, country_list)
-            if not _id:
-                if country_name in bot.worldometers_api.continents:
-                    country_data = await bot.worldometers_api.get_continent_stats(country_name)
-                    name = country_name
-            else:
-                name = covid19api.get_country_name(_id, country_list)
-                country_data = await bot.worldometers_api.get_country_stats(_id)
+    if country_name != "world":
+        country_list = await bot.worldometers_api.get_all_iso_codes()
+        _id = covid19api.get_iso2_code(country_name, country_list)
+        if not _id:
+            country_data = await bot.worldometers_api.get_continent_stats(country_name)
+            if country_data is not None:
+                name = country_name.title()
         else:
-            _id = "OT"
-            name = "World"
-            country_data = bot.worldometers_api.global_stats
-        embed = discord.Embed(title="COVID-19 Stats for {0}".format(name),
-                              color=discord.Color.dark_red(),
-                              timestamp=bot.worldometers_api.last_updated_utc)
-        embed.set_footer(text="Stats last updated at (UTC)")
-        if name in bot.worldometers_api.country_stats:
-            embed.set_thumbnail(url=country_data["countryInfo"]["flag"])
-        for dp in data_points:
-            if dp[0] == "zero_space":
-                add_zero_space(embed, 1)
-            else:
-                try:
-                    if country_data[dp[1]] is not None:
-                        embed.add_field(name=dp[0],
-                                        value=format(int(country_data[dp[1]]), ","))
-                    else:
-                        embed.add_field(name=dp[0],
-                                        value="no data")
-                except KeyError:
-                    bot.logger.warning(f"Key {dp[1]} is missing from {name}!")
-        if country_name == "world":
-            embed.add_field(name="Affected Countries",
-                            value=format(int(country_data["affectedCountries"]), ","))
-        return embed
-    except Exception as e:
-        _error_embed = error_embed(bot,
-                                   reason=e)
-        return _error_embed
+            name = covid19api.get_country_name(_id, country_list)
+            country_data = await bot.worldometers_api.get_country_stats(_id)
+    else:
+        _id = "OT"
+        name = "World"
+        country_data = bot.worldometers_api.global_stats
+    embed = discord.Embed(title="COVID-19 Stats for {0}".format(name),
+                          color=discord.Color.dark_red(),
+                          timestamp=bot.worldometers_api.last_updated_utc)
+    embed.set_footer(text="Stats last updated at (UTC)")
+    if name in bot.worldometers_api.country_stats:
+        embed.set_thumbnail(url=country_data["countryInfo"]["flag"])
+    for dp in data_points:
+        if dp[0] == "zero_space":
+            add_zero_space(embed, 1)
+        else:
+            try:
+                if country_data[dp[1]] is not None:
+                    embed.add_field(name=dp[0],
+                                    value=format(int(country_data[dp[1]]), ","))
+                else:
+                    embed.add_field(name=dp[0],
+                                    value="no data")
+            except KeyError:
+                bot.logger.warning(f"Key {dp[1]} is missing from {name}!")
+    if country_name == "world":
+        embed.add_field(name="Affected Countries",
+                        value=format(int(country_data["affectedCountries"]), ","))
+    return embed
 
 
 async def list_embed(bot: MyBot, letter: str) -> [discord.Embed, None]:

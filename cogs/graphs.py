@@ -6,13 +6,7 @@ from utils import graphs
 
 
 class Template(Cog):
-    @commands.command()
-    async def ping(self, ctx: MyContext):
-        pass
-
-    @commands.Cog.listener()
-    async def on_error(self, ctx: MyContext):
-        pass
+    pass
 
 
 setup = Template.setup

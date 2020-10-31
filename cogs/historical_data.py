@@ -5,13 +5,7 @@ from utils.ctx_class import MyContext
 
 
 class HistoricalData(Cog):
-    @commands.command()
-    async def ping(self, ctx: MyContext):
-        pass
-
-    @commands.Cog.listener()
-    async def on_error(self, ctx: MyContext):
-        pass
+    pass
 
 
-setup = Template.setup
+setup = HistoricalData.setup

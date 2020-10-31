@@ -13,7 +13,7 @@ from utils.interaction import escape_everything
 
 
 async def submit_error_message(exc: BaseException, doing: str, ctx: MyContext, bot: MyBot):
-    error_channel = await bot.get_channel(771065447561953298)
+    error_channel = bot.get_channel(771065447561953298)
     error_embed = discord.Embed(title=f"Fatal error while working on {doing}!",
                                 description=f"Guild details:\n"
                                             f"    ID: `{ctx.guild.id}`\n"
@@ -27,9 +27,11 @@ async def submit_error_message(exc: BaseException, doing: str, ctx: MyContext, b
                                             f"    ID: `{ctx.author.id}`\n"
                                             f"    Name: `{str(ctx.author)}`"  # Quick way to get name#disc
                                 )
-    error_embed.add_field(name="Exception Name", value=str(exc.__class__), inline=False)
-    error_embed.add_field(name="Exception Reason", value=str(exc))
-    error_embed.add_field(name="Exception Traceback", value="".join(traceback.format_tb(exc.__traceback__)))
+    error_embed.add_field(name="Exception Name", value=str(exc.__class__))
+    error_embed.add_field(name="Exception Reason", value=str(exc), inline=False)
+    error_embed.add_field(name="Exception Traceback", value=f"```py\n"
+                                                            f"{''.join(traceback.format_tb(exc.__traceback__))}\n"
+                                                            f"```")
     await error_channel.send(embed=error_embed)
 
 

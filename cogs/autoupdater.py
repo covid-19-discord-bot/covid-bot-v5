@@ -38,102 +38,72 @@ class AutoUpdaterCog(Cog):
 
         db_user = await get_from_db(ctx.author)  # Put it here that way it can be checked quickly if needed
 
-        if ctx.guild is None:  # DMs Only
-            if not db_user.is_premium:
-                await ctx.send(
-                    "❌ We're in a private channel! Go to a server where you have the MANAGE MESSAGES permission "
-                    "and try again!\n"
-                    "HINT: to get autoupdates in DMs, upgrade to premium. Check out the `/donate` command for more "
-                    "details.")
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+        is_premium = db_guild.is_premium or db_user.is_premium
+        if db_channel.autoupdater.already_set:
+            await ctx.send("❌ You already have a autoupdater set in this channel! Remove it with "
+                           "`/disable_updates` and try again!")
+            return
+        if delta_seconds > 86400 and not db_guild.overtime_confirmed:
+            def pred(c):
+                return c.author.id == ctx.author.id and c.channel.id == ctx.channel.id and \
+                       c.message.content.lower() == "ok"
+
+            await ctx.send("⚠ You're setting a delay longer than 1 day! Are you sure you want to do this? To "
+                           "confirm, type `ok` within 15 seconds.")
+            try:
+                await self.bot.wait_for("message", check=pred, timeout=15)
+            except asyncio.TimeoutError:
+                await ctx.send("Action cancelled. Set up a new autoupdater with `/autoupdate <delay>`.")
+                return
             else:
-                if db_user.autoupdater.already_set:
-                    await ctx.send("❌ You already have a autoupdater set in DMs! Remove it with `/disable_updates` and "
-                                   "try again!")
-                    return
-                elif delta_seconds > 3600:
-                    await ctx.send("To avoid clogging up DMs with autoupdates, the minimum autoupdate delay in DMs is "
-                                   "1 hour. Try setting it to that and trying again.")
-                    return
-
-                if delta_seconds > 86400:
-                    def pred(c):
-                        return c.author.id == ctx.author.id and c.channel.id == ctx.channel.id and \
-                               c.message.content.lower() == "ok"
-
-                    await ctx.send("⚠ You're setting a delay longer than 1 day! Are you sure you want to do this? To "
-                                   "confirm, type `ok` within 15 seconds.")
-                    try:
-                        await self.bot.wait_for("message", check=pred, timeout=15)
-                    except asyncio.TimeoutError:
-                        await ctx.send("Action cancelled. Set up a new autoupdater with the same command.")
-                        return
-                    else:
-                        await ctx.send("Continuing setup...")
-        else:  # Guilds Only
-            db_guild = await get_from_db(ctx.guild)
-            db_channel = await get_from_db(ctx.channel)
-            is_premium = db_guild.is_premium or db_user.is_premium
-            if db_channel.autoupdater.already_set:
-                await ctx.send("❌ You already have a autoupdater set in this channel! Remove it with "
-                               "`/disable_updates` and try again!")
+                await ctx.send("Continuing setup...")
+                db_guild.overtime_confirmed = True
+                await db_guild.save()
+        elif delta_seconds < 600:
+            if is_premium:
+                await ctx.send("You're setting the autoupdater to less than 10 minutes delay. I'll skip the check "
+                               "because you are a premium guild/user. <3 from 0/0#0001")
+            else:
+                await ctx.send("❌ You can't set the autoupdater delay to less than 10 minutes unless you are a "
+                               "premium guild.\n"
+                               "Hint: there's no point in setting it to less than 10 minutes due to the fact the "
+                               "stats updater only fires once every 10 minutes. If you really want to get a "
+                               "shorter delay (no point in doing so), check out the `/donate` command.")
                 return
-            if delta_seconds > 86400 and not db_guild.overtime_confirmed:
-                def pred(c):
-                    return c.author.id == ctx.author.id and c.channel.id == ctx.channel.id and \
-                           c.message.content.lower() == "ok"
 
-                await ctx.send("⚠ You're setting a delay longer than 1 day! Are you sure you want to do this? To "
-                               "confirm, type `ok` within 15 seconds.")
-                try:
-                    await self.bot.wait_for("message", check=pred, timeout=15)
-                except asyncio.TimeoutError:
-                    await ctx.send("Action cancelled. Set up a new autoupdater with `/autoupdate <delay>`.")
-                    return
+        if country != "world":
+            country_list = await self.bot.worldometers_api.get_all_iso_codes()
+            _id = covid19api.get_iso2_code(country, country_list)
+            if not _id:
+                country_data = await self.bot.worldometers_api.get_continent_stats(country)
+                if country_data is not None:
+                    friendly_country_name = iso2_code = country.title()
                 else:
-                    await ctx.send("Continuing setup...")
-                    db_guild.overtime_confirmed = True
-                    await db_guild.save()
-            elif delta_seconds < 600:
-                if is_premium:
-                    await ctx.send("You're setting the autoupdater to less than 10 minutes delay. I'll skip the check "
-                                   "because you are a premium guild/user. <3 from 0/0#0001")
-                else:
-                    await ctx.send("❌ You can't set the autoupdater delay to less than 10 minutes unless you are a "
-                                   "premium guild.\n"
-                                   "Hint: there's no point in setting it to less than 10 minutes due to the fact the "
-                                   "stats updater only fires once every 10 minutes. If you really want to get a "
-                                   "shorter delay (no point in doing so), check out the `/donate` command.")
+                    await ctx.send("Failed to get a ISO2 code for the country! `/list` will show you a list of "
+                                   "countries and their IDs.")
                     return
-
-        country_list = await self.bot.worldometers_api.get_all_countries()
-
-        if country != "OT":
-            iso2_code = covid19api.get_iso2_code(country, country_list)
-            if not iso2_code:
-                await ctx.send("Failed to get a ISO2 code for the country! `/list` will show you a list of countries "
-                               "and their IDs.")
-                return
-            friendly_country_name = covid19api.get_country_name(iso2_code, country_list)
+            else:
+                friendly_country_name = covid19api.get_country_name(_id, country_list)
         else:
-            iso2_code = "OT"  # OT stands for "global"
+            _id = "OT"
             friendly_country_name = "World"
 
         update_delay = delta_seconds
 
-        if ctx.guild is None:
-            db_user.autoupdater.country_name = iso2_code
-            db_user.autoupdater.delay = update_delay
-            db_user.save()
-        else:
-            db_channel.autoupdater.country_name = iso2_code
-            db_channel.autoupdater.delay = update_delay
-            db_channel.save()
+        db_channel.autoupdater.already_set = True
+        db_channel.autoupdater.country_name = iso2_code
+        db_channel.autoupdater.delay = update_delay
+        await db_channel.autoupdater.save()
+        await db_channel.save()
 
         await ctx.send(f"✅ Posting stats for {friendly_country_name} in this "
                        f"{'DM' if ctx.guild is None else 'channel'} every {human_update_time} minutes.")
         return
 
     @commands.command(name="disable_updates", aliases=["disableUpdates"])
+    @commands.has_permissions(manage_messages=True)
     async def disable_updates(self, ctx: MyContext):
         if ctx.guild is None:  # DMs only
             db_user = await get_from_db(ctx.author)
