@@ -94,6 +94,7 @@ class AutoupdaterData(Model):
     # to 250 billion years and if someone is stupid enough to do that... oy vey. I will have little hope for humanity
     # making it through the rest of this pandemic :P
     last_updated = fields.DatetimeField(auto_now_add=True)
+    force_update = fields.BooleanField(default=False)
 
     class Meta:
         table = "autoupdater_data"

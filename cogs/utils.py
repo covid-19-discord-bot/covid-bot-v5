@@ -1,7 +1,7 @@
 # coding=utf-8
 import discord
 from discord.ext import commands
-
+import time
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.models import get_from_db
@@ -21,7 +21,7 @@ class UtilsCommands(Cog):
         symphonic_mention: str = symphonic.mention
         zeroslashzero_mention: str = zeroslashzero.mention
         eyes_mention: str = eyes.mention
-        credits_embed.set_footer(text="current bot version: v5.0.0-alpha4")
+        credits_embed.set_footer(text="current bot version: v5.0.0-alpha6")
         credits_embed.add_field(name="v3+ Creator", value=zeroslashzero_mention)
         credits_embed.add_field(name="Original Creator", value=symphonic_mention)
         credits_embed.add_field(name="Bot Framework", value=eyes_mention)

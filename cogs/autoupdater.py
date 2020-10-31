@@ -20,6 +20,11 @@ from utils.human_time import ShortTime, human_timedelta
 
 
 class AutoUpdaterCog(Cog):
+    def __init__(self, bot, *args, **kwargs):
+        super().__init__(bot, *args, **kwargs)
+        self.index = 0
+        self.push_auto_updates.start()
+
     @commands.command(name="autoupdate", aliases=["autoupdate_country", "autoupdateCountry"])
     @commands.has_permissions(manage_messages=True)
     async def autoupdate(self, ctx: MyContext, delay: ShortTime, country: Optional[str] = "OT"):
@@ -29,6 +34,7 @@ class AutoUpdaterCog(Cog):
         1d updates daily, while 4m updates every 4 minutes
         Only Premium members/guilds can set the delay to less than 10 minutes.
         """
+
         delta_seconds = abs((datetime.datetime.utcnow() - delay.dt).total_seconds())
         human_update_time = human_timedelta(delay.dt, brief=True)
 
@@ -121,15 +127,32 @@ class AutoUpdaterCog(Cog):
             db_channel = await get_from_db(ctx.channel)
             if db_channel.autoupdater.already_set:
                 db_channel.autoupdater.already_set = False
+                await db_channel.autoupdater.save()
+                await db_channel.save()
                 await ctx.send("Disabled autoupdates in this channel.")
             else:
                 await ctx.send("You don't have a autoupdater set here!")
 
+    @commands.command(name="force_update")
+    @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 150, type=commands.BucketType.channel)
+    async def force_updates(self, ctx: MyContext):
+        db_channel = await get_from_db(ctx.channel)
+        if not db_channel.autoupdater.already_set:
+            await ctx.send("You don't have a autoupdater set here!")
+            return
+        db_channel.autoupdater.force_update = True
+        await db_channel.autoupdater.save()
+        await db_channel.save()
+        await ctx.send("Forcing a update sometime in the next minute.")
+
     @tasks.loop(minutes=1.0)
     async def push_auto_updates(self):
+        self.bot.logger.info("Running autoupdater...")
         for channel in self.bot.get_all_channels():  # Holy hell is this a lot simpler...
             db_channel = await get_from_db(channel)
-            if db_channel.autoupdater.already_set:
+            if db_channel.autoupdater.already_set or db_channel.autoupdater.force_update:
+                db_channel.autoupdater.force_update = False
                 now = datetime.datetime.utcnow()
                 delta: datetime.timedelta = now - db_channel.autoupdater.last_updated
                 if not delta.total_seconds() >= db_channel.autoupdater.delay:
@@ -141,17 +164,10 @@ class AutoUpdaterCog(Cog):
                     await channel.send(embed=embed)
                 except discord.DiscordException as e:
                     self.bot.logger.exception("Exception in autoupdater!", exception_instance=e, channel=channel)
-
-        for user in self.bot.users:
-            user: discord.User
-            db_user = await get_from_db(user)
-            if db_user.autoupdater.already_set:
-                country = db_user.autoupdater.country_name
-                try:
-                    embed = await embeds.stats_embed(f"{'world' if country == 'OT' else country}", self.bot)
-                    await user.send(embed=embed)
-                except discord.DiscordException as e:
-                    self.bot.logger.exception("Exception in autoupdater!", exception_instance=e)
+                    continue  # Since it failed this time, don't save it and force a update.
+                await db_channel.autoupdater.save()
+                await db_channel.save()
+        self.bot.logger.info("Done autoupdater!")
 
     @push_auto_updates.before_loop
     async def before_updates_pushed(self):

@@ -124,8 +124,8 @@ class CovidCog(Cog):
 
     # ignore it here, as it may not be in the correct state
     # noinspection PyProtectedMember
-    @commands.command(name="force_update", hidden=True)
-    async def update_force(self, ctx: MyContext):
+    @commands.command(name="force_stats_update", hidden=True)
+    async def stats_update(self, ctx: MyContext):
         await ctx.send("Loading...")
         try:
             await self.bot._worldometers_api.update_covid_19_virus_stats()
