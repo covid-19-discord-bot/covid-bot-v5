@@ -50,8 +50,6 @@ def get_iso2_code(_input: str, _list: list) -> [str, None]:
                              str(country['iso3']).lower())
             if _input in country_codes:
                 return country['iso2']
-        else:
-            return None
     except IndexError:
         raise NoCountryDataFields()
 
@@ -71,8 +69,6 @@ def get_iso3_code(_input: str, _list: list) -> [str, None]:
         for country in _list:
             if _input == str(country["iso2"]):
                 return country["iso3"]
-        else:
-            return
     except IndexError:
         raise NoCountryDataFields()
 
@@ -92,8 +88,6 @@ def get_country_name(_input, _list) -> [str, None]:
         for country in _list:
             if _input == str(country["iso2"]):
                 return country["country"]
-        else:
-            return
     except IndexError:
         raise NoCountryDataFields()
 
@@ -143,14 +137,14 @@ class Covid19JHUCSSEStats:
         self.data_is_valid: bool = False
         self.add_ids: bool = add_ids
         self.logger: logging.Logger = logging.Logger("COVID-19 Stats Worldometers", level=logging_level)
-        self.last_updated_utc: int = -1  # 0 is 00:00:00 1 Jan 1970, don't want that
+        self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
         self.global_historical_stats: dict = {}
         self.historical_stats: dict = {}
         if update_stats:
             self.update_covid_19_virus_stats()
 
     # noinspection PyTypeChecker
-    async def update_covid_19_virus_stats(self, *, session: aiohttp.ClientSession = aiohttp.ClientSession()):
+    async def update_covid_19_virus_stats(self, *, session: aiohttp.ClientSession = None):
         """
         Updates the stats, parses them, and loads it into memory.
 
@@ -159,7 +153,49 @@ class Covid19JHUCSSEStats:
         :raises NetworkException: if a AIOHttp error is raised, this error is raised. You can get the original
                                   exception via e.exc.
         """
-        pass
+        self._update_tries += 1
+        self.logger.info('Opening new AIOHttp session...')
+        session = session if session is not None else aiohttp.ClientSession()
+        async with session as session:
+            self.logger.info("Getting new country data...")
+            try:
+                data = await get_data(session, "https://disease.sh/v3/covid-19/historical/all?lastdays=all")
+            except NetworkException as e:
+                self.logger.exception("ClientException while getting vaccine data!",
+                                      e.exc)
+                if self._has_been_updated:
+                    return  # We know there's valid data in here, so leave it be
+                if self._update_tries <= MAX_UPDATE_TRIES:
+                    await self.update_covid_19_virus_stats()  # Force another update if we haven't reached the max
+                    # tries count
+                else:
+                    self.logger.fatal("Failed to update! Data will not be avalible! Expect exceptions on later calls!")
+                    self._update_tries = 0
+                return
+            self.logger.info("Got country data! Parsing data and loading it into memory...")
+            for country in data:
+                if country['countryInfo']['iso2'] is not None:
+                    try:
+                        country["activeCaseChange"] = country["todayCases"] - (country["todayDeaths"] +
+                                                                               country["todayRecovered"])
+                    except TypeError:
+                        country["activeCaseChange"] = None
+                    self.country_stats[country['countryInfo']['iso2']] = country
+                    iso_code = dict(country=country["country"], iso2=country["countryInfo"]["iso2"],
+                                    iso3=country["countryInfo"]["iso3"])
+                    self.iso_codes.append(iso_code)
+            self.logger.info("Getting world stats...")
+            self.global_stats = await get_data(session, "https://disease.sh/v3/covid-19/all?allowNull=true")
+            self.logger.info("Got world stats.")
+            self.logger.info("Getting continent stats...")
+            self.continent_stats = await get_data(session, "https://disease.sh/v3/covid-19/continents?allowNull=true")
+            for continent in self.continent_stats:
+                self.continents.append(continent["continent"])
+            self.logger.info("Got continent stats.")
+        self.last_updated_utc = datetime.datetime.utcnow()
+        self._has_been_updated = True
+        self.data_is_valid = True
+        self.logger.info("Done!")
 
 
 class Covid19StatsWorldometers:
@@ -212,7 +248,7 @@ class Covid19StatsWorldometers:
                                       e.exc)
                 if self._has_been_updated:
                     return  # We know there's valid data in here, so leave it be
-                elif self._update_tries <= MAX_UPDATE_TRIES:
+                if self._update_tries <= MAX_UPDATE_TRIES:
                     await self.update_covid_19_virus_stats()  # Force another update if we haven't reached the max
                     # tries count
                 else:
@@ -353,9 +389,6 @@ class Covid19StatsWorldometers:
             for continent in self.continent_stats:
                 if continent_name.lower() == continent["continent"].lower():
                     return continent
-            else:  # Should never happen
-                raise RuntimeError("Data in self.continent_stats must have been modified between entering this "
-                                   "function and trying to return data!")
 
 
 class VaccineStats:
@@ -401,7 +434,7 @@ class VaccineStats:
                                       e.exc)
                 if self.has_been_updated:
                     return  # We know there's valid data in here, so leave it be
-                elif self.update_tries <= MAX_UPDATE_TRIES:
+                if self.update_tries <= MAX_UPDATE_TRIES:
                     await self.update_covid_19_vaccine_stats()  # Force another update if we haven't reached the max
                     # tries count
                 else:

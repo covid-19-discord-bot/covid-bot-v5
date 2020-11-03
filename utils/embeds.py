@@ -117,8 +117,6 @@ async def list_embed(bot: MyBot, letter: str) -> [discord.Embed, None]:
                                 value=country["iso3"])
                 add_zero_space(embed, 1)
             return embed
-        else:
-            return None
     except Exception as e:
         _error_embed = error_embed(bot, reason=e)
         return _error_embed
