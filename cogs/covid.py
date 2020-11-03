@@ -14,6 +14,11 @@ from utils import graphs
 
 
 class CovidCog(Cog):
+    def __init__(self, bot: MyBot, *args, **kwargs):
+        super().__init__(bot, *args, **kwargs)
+        self.index = 0
+        self.update_stats.start()
+
     @commands.command()
     @commands.cooldown(1, 0.25, BucketType.user)  # No average user will be hitting this command once every 250ms
     async def covid(self, ctx: MyContext, *args):
@@ -119,8 +124,13 @@ class CovidCog(Cog):
 
     @tasks.loop(minutes=10)
     async def update_stats(self):
-        # No need to do a self.bot.wait_until_ready() as it doesn't access anything to do with the bot
-        await self.bot.worldometers_api.update_covid_19_virus_stats()  # Well that was simple :P
+        await self.bot.wait_until_ready()
+        try:
+            await self.bot.worldometers_api.update_covid_19_virus_stats()
+        except Exception as e:
+            await self.bot.worldometers_api.logger.exception("Fatal error while updating stats!",
+                                                             exc_info=e)
+        # Well that was simple :P
 
     # ignore it here, as it may not be in the correct state
     # noinspection PyProtectedMember
@@ -131,13 +141,9 @@ class CovidCog(Cog):
             await self.bot._worldometers_api.update_covid_19_virus_stats()
             await self.bot._jhucsse_api.update_covid_19_virus_stats()
             await self.bot._vaccine_api.update_covid_19_vaccine_stats()
-        except Exception as e:
-            self.bot.logger.exception("Fatal error while updating",
-                                      guild=ctx.guild,
-                                      channel=ctx.channel,
-                                      member=ctx.author,
-                                      exception_instance=e)
-            await ctx.send("Encountered error while updating. Printed out exception instance.")
+        except Exception:
+            await ctx.send("Encountered error while updating. This error has been logged.")
+            raise
         else:
             await ctx.send("Updated sucessfully!")
 

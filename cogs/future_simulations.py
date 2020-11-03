@@ -235,7 +235,7 @@ class FutureSimulations(Cog):
     async def restart_process_pool(self, ctx: MyContext):
         author: discord.Member = ctx.author
         for role in author.roles:
-            if role.id == 00000:  # TODO: get the mod role ID
+            if role.id == 686939763927678986:
                 break
         else:
             await ctx.send("You aren't a mod in the bot's support server! You can't run this command. If simulations "

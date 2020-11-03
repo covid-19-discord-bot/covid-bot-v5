@@ -72,8 +72,9 @@ async def stats_embed(country_name: str, bot: MyBot):
                           color=discord.Color.dark_red(),
                           timestamp=bot.worldometers_api.last_updated_utc)
     embed.set_footer(text="Stats last updated at (UTC)")
-    if name in bot.worldometers_api.country_stats:
-        embed.set_thumbnail(url=country_data["countryInfo"]["flag"])
+    if "countryInfo" in country_data:
+        if "flag" in country_data["countryInfo"]:
+            embed.set_thumbnail(url=country_data["countryInfo"]["flag"])
     for dp in data_points:
         if dp[0] == "zero_space":
             add_zero_space(embed, 1)
