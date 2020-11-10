@@ -4,21 +4,15 @@ File designed for you to copy over and over again as a template for new parts of
 """
 from discord.ext import commands
 from discord.ext import tasks
-import aiofiles
 import discord
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-
-map_identifiers = {"total_cases_per_million": ["total_covid_cases_per_million.png", "Total COVID-19 Cases Per Million"],
-                   "total_cases": ["total_covid_cases.png", "Total COVID-19 Cases"],
-                   "total_deaths": ["total_deaths.png", "Total COVID-19 Deaths"],
-                   "total_deaths_per_million": ["total_deaths_per_million.png", "Total COVID-19 Deaths Per Million"],
-                   "tests": ["tests.png", "Total COVID-19 Tests"],
-                   "tests_per_thousand": ["tests_per_1k.png", "Total COVID-19 Tests per Thousand"]}
+from utils.maps import map_identifiers
+from utils.async_helpers import wrap_in_async
 
 
 class MapsCommands(Cog):
-    @commands.command()
+    @commands.group()
     async def maps(self, ctx: MyContext):
         if ctx.invoked_subcommand is None:
             await ctx.send_help("maps")
@@ -41,7 +35,8 @@ class MapsCommands(Cog):
                              f"maps I can show you!"))
             return
         map_embed = discord.Embed(title=f"Map for {map_identifiers[map_type][1]}")
-        img_file = discord.File(f"{self.bot.maps_api.base_path}/{map_identifiers[map_type][0]}", filename="map.png")
+        map_buffer = self.bot.maps_api.get_map(map_type)
+        img_file = discord.File(map_buffer, filename="map.png")
         map_embed.set_image(url="attachment://map.png")
         await ctx.send(embed=map_embed, file=img_file)
 

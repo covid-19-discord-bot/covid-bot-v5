@@ -94,8 +94,9 @@ class MyBot(AutoShardedBot):
         """
         This funtcion is run once, and is used to setup the bot async features, like the ClientSession from aiohttp.
         """
-        self._client_session = aiohttp.ClientSession()  # There is no need to call __aenter__, since that does nothing
-        # in that case
+        if self._client_session is None:
+            self._client_session = aiohttp.ClientSession()  # There is no need to call __aenter__, since that does
+            # nothing in this case
         try:
             await self._worldometers_api.update_covid_19_virus_stats()
             await self._vaccine_api.update_covid_19_vaccine_stats()
@@ -105,8 +106,10 @@ class MyBot(AutoShardedBot):
         except Exception as e:
             self.logger.exception("Fatal general error while running initial update!", exception_instance=e)
         try:
-            self._map_client = MapGetter("/home/pi/covid_bot/maps/")
-            await wrap_in_async(self._map_client.initalize_firefox, thread_pool=True)
+            if not self._map_client:
+                self._map_client = MapGetter("/home/pi/covid_bot/maps/")
+                if not self._map_client.set_up:
+                    await wrap_in_async(self._map_client.initalize_firefox, thread_pool=True)
         except Exception as e:
             self.logger.exception("Fatal error while initalizing Firefox!", exception_instance=e)
 
