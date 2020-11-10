@@ -13,6 +13,11 @@ from utils.ctx_class import MyContext
 from utils.logger import FakeLogger
 from utils.models import get_from_db
 from utils import api as covid19api
+from utils.maps import MapGetter
+from utils.async_helpers import wrap_in_async
+
+
+_runtime_error = RuntimeError("The bot hasn't been set up yet! Ensure bot.async_setup is called ASAP!")
 
 
 class BotStats:
@@ -44,6 +49,7 @@ class MyBot(AutoShardedBot):
         self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
         self.stats = BotStats()
         self.statcord: Optional[statcord.Client] = None
+        self._map_client: Optional[MapGetter] = None
         asyncio.ensure_future(self.async_setup())
 
     @property
@@ -51,28 +57,35 @@ class MyBot(AutoShardedBot):
         if self._client_session:
             return self._client_session
         else:
-            raise RuntimeError("The bot haven't been setup yet. Ensure you call bot.async_setup asap.")
+            raise _runtime_error
 
     @property
     def worldometers_api(self):
         if self._worldometers_api.data_is_valid:
             return self._worldometers_api
         else:
-            raise RuntimeError("The bot haven't been setup yet. Ensure you call bot.async_setup asap.")
+            raise _runtime_error
 
     @property
     def vaccine_api(self):
         if self._vaccine_api.data_is_valid:
             return self._vaccine_api
         else:
-            raise RuntimeError("The bot haven't been setup yet. Ensure you call bot.async_setup asap.")
+            raise _runtime_error
 
     @property
     def jhucsse_api(self):
         if self._jhucsse_api.data_is_valid:
             return self._jhucsse_api
         else:
-            raise RuntimeError("The bot haven't been setup yet. Ensure you call bot.async_setup asap.")
+            raise _runtime_error
+
+    @property
+    def maps_api(self):
+        if self._map_client.set_up:
+            return self._map_client
+        else:
+            raise _runtime_error
 
     def reload_config(self):
         self.config = config.load_config()
@@ -91,6 +104,11 @@ class MyBot(AutoShardedBot):
             self.logger.exception("Fatal RuntimeError while running inital update!", exception_instance=e)
         except Exception as e:
             self.logger.exception("Fatal general error while running initial update!", exception_instance=e)
+        try:
+            self._map_client = MapGetter("/home/pi/covid_bot/maps/")
+            await wrap_in_async(self._map_client.initalize_firefox, thread_pool=True)
+        except Exception as e:
+            self.logger.exception("Fatal error while initalizing Firefox!", exception_instance=e)
 
     async def on_message(self, message: discord.Message):
         if not self.is_ready():
@@ -101,6 +119,7 @@ class MyBot(AutoShardedBot):
 
         if message.guild is None:
             await message.channel.send("I don't support DMs due to Discord limitations!")
+            return
 
         ctx = await self.get_context(message, cls=MyContext)
         if ctx.prefix is not None:

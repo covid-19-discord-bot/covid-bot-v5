@@ -176,6 +176,10 @@ class CommandErrorHandler(Cog):
             elif isinstance(exception, commands.errors.DisabledCommand):
                 message = _("That command has been disabled.")
             elif isinstance(exception, commands.CommandInvokeError):
+                if isinstance(exception.original, discord.errors.Forbidden):
+                    await ctx.author.send(_("I don't have permissions to send messages there! Try again somewhere I do "
+                                            "have permissions to send messages!"))
+                    return
                 message = _("There was an error running the specified command. This error has been logged.")
                 # we want the original instead of the CommandError one
                 await submit_error_message(exception.original, "unknown thing", ctx, self.bot)
@@ -189,7 +193,7 @@ class CommandErrorHandler(Cog):
                     delta = datetime.timedelta(seconds=min(round(exception.retry_after, 1), 1))
                     # NOTE : This message uses a formatted, direction date in some_time. Formatted, it'll give something
                     # like: "This command is overused. Please try again *in 4 seconds*"
-                    message = _("This command is overused. Please try again {some_time}.",
+                    message = _("You are being ratelimited. Please try again {some_time}.",
                                 some_time=dates.format_timedelta(delta, add_direction=True,
                                                                  locale=await ctx.get_language_code()))
             elif isinstance(exception, commands.errors.MaxConcurrencyReached):

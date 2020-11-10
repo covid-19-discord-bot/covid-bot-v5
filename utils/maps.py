@@ -5,6 +5,7 @@ from time import sleep
 from selenium.webdriver.firefox.options import Options
 import os
 import logging
+import io
 from utils.async_helpers import wrap_in_async
 from typing import Optional
 
@@ -48,33 +49,36 @@ class MapGetter:
 
         self.options = options
         self.firefox_profile = profile
-
+        self.base_path = base_path
         self.firefox: Optional[webdriver.Firefox] = None
+        self.set_up = False
 
-    async def initalize_firefox(self):
+    def _check_if_set_up(self):
+        if not self.set_up:
+            raise RuntimeError("The map system is not initialized! Call initalize_firefox() ASAP!")
+
+    def initalize_firefox(self):
         """
-        Simply starts up Firefox.
-        :return:
+        Simply starts up Firefox. Running this function means the client is ready to use.
+        :return: always None
         """
-        self.firefox = await wrap_in_async(webdriver.Firefox, firefox_profile=self.firefox_profile, options=self.options)
+        self.firefox = await wrap_in_async(webdriver.Firefox, thread_pool=True,
+                                           firefox_profile=self.firefox_profile, options=self.options)
+        self.set_up = True
 
-    def get_maps(self):
-        print("Initalizing Firefox... ", end="")
-        try:
-            ff = self.firefox
-            ff.set_window_size(1920, 1080)  # 1080p
-        except:
-            print("\n", end="")
-            raise
-        else:
-            print("done!")
+    def download_maps(self):
+        self._check_if_set_up()
+        self.logger.info("Setting up Firefox...")
+        ff = self.firefox
+        ff.set_window_size(1920, 1080)  # 1080p
+        self.logger.info("Done setting up Firefox!")
 
-        print("Downloading graphs...")
+        self.logger.info("Getting maps...")
         for each_graph in data:
-            print(f"Getting graph {each_graph[0].split('.')[0]}...", end=" ")
+            self.logger.info(f"Getting graph {each_graph[0].split('.')[0]}...")
             ff.get(each_graph[1])
 
-            sleep(15)
+            sleep(15)  # it takes a little while to load the page
 
             try:
                 share_button = ff.find_element_by_css_selector("li.tab:nth-child(5)")
@@ -99,7 +103,7 @@ class MapGetter:
                 download.location_once_scrolled_into_view
                 download.click()
             sleep(5)
-            os.rename(f"{BASE_PATH}/coronavirus-data-explorer.png", f"{BASE_PATH}/{each_graph[0]}")
+            os.rename(f"{self.base_path}/coronavirus-data-explorer.png", f"{self.base_path}/{each_graph[0]}")
             print("done!")
 
         print("Shutting down Firefox...", end=" ")

@@ -107,7 +107,6 @@ class AutoUpdaterCog(Cog):
 
         await ctx.send(_("✅ Posting stats for {0} in this "
                          "channel every {1} minutes.".format(friendly_country_name, human_update_time)))
-        return
 
     @commands.command(name="disable_updates", aliases=["disableUpdates"])
     @commands.has_permissions(manage_messages=True)
@@ -177,8 +176,9 @@ class AutoUpdaterCog(Cog):
                     continue
                 db_channel.autoupdater.last_updated = now
                 country = db_channel.autoupdater.country_name
+                country = 'world' if country == 'OT' else country
                 try:
-                    embed = await embeds.stats_embed(f"{'world' if country == 'OT' else country}", self.bot)
+                    embed = await embeds.stats_embed(f"{country}", self.bot)
                     await channel.send(embed=embed)
                 except discord.DiscordException as e:
                     if isinstance(e, discord.Forbidden):
