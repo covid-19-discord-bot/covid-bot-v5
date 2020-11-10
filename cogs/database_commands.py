@@ -84,7 +84,11 @@ class DatabaseCommands(Cog):
         db_guild.enable_tips = enabled
         await db_guild.save()
         _ = await ctx.get_translate_function()
-        await ctx.send(_(f"{'Enabled' if enabled else 'Disabled'} tips for this guild."))
+        if enabled:
+            e = "Enabled"
+        else:
+            e = "Disabled"
+        await ctx.send(_("{0} tips for this guild.".format(e)))
 
 
 setup = DatabaseCommands.setup

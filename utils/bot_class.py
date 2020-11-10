@@ -7,7 +7,7 @@ import aiohttp
 import discord
 from discord.ext.commands.bot import AutoShardedBot
 from discord.ext import commands
-
+import statcord
 from utils import config as config
 from utils.ctx_class import MyContext
 from utils.logger import FakeLogger
@@ -43,6 +43,7 @@ class MyBot(AutoShardedBot):
         self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
         self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
         self.stats = BotStats()
+        self.statcord: Optional[statcord.Client] = None
         asyncio.ensure_future(self.async_setup())
 
     @property
@@ -107,6 +108,7 @@ class MyBot(AutoShardedBot):
 
     async def on_command(self, ctx: MyContext):
         self.commands_used[ctx.command.name] += 1
+        self.statcord.command_run(ctx)
         ctx.logger.info(f"{ctx.message.clean_content}")
 
     async def on_shard_ready(self, shard_id):

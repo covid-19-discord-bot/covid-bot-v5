@@ -9,7 +9,7 @@ import json
 
 
 class UtilsCommands(Cog):
-    @commands.command()
+    @commands.command(name="credits", aliases=["info"])
     async def credits(self, ctx: MyContext):
         """
         A simple credits screen
@@ -18,15 +18,18 @@ class UtilsCommands(Cog):
         symphonic: discord.User = await self.bot.fetch_user(263128260009787392)
         zeroslashzero: discord.User = await self.bot.fetch_user(661660243033456652)
         eyes: discord.User = await self.bot.fetch_user(138751484517941259)
+        stalin: discord.User = await self.bot.fetch_user(628291559158448129)
         symphonic_mention: str = symphonic.mention
         zeroslashzero_mention: str = zeroslashzero.mention
         eyes_mention: str = eyes.mention
-        credits_embed.set_footer(text="current bot version: v5.0.0-alpha6")
+        stalin_mention: str = stalin.mention
+        credits_embed.set_footer(text="current bot version: v5.0.0-alpha9")
         credits_embed.add_field(name="v3+ Creator", value=zeroslashzero_mention)
         credits_embed.add_field(name="Original Creator", value=symphonic_mention)
         credits_embed.add_field(name="Bot Framework", value=eyes_mention)
+        credits_embed.add_field(name="Moral Support", value=stalin_mention)
         credits_embed.add_field(name='API Providers', value="https://corona.lmao.ninja", inline=False)
-        credits_embed.add_field(name="Creators of discord.py", value="https://discordpy.readthedocs.io", inline=False)
+        credits_embed.add_field(name="discord.py Devs", value="https://github.com/Rapptz/discord.py", inline=False)
         await ctx.send(embed=credits_embed)
 
     @commands.command()
@@ -34,7 +37,7 @@ class UtilsCommands(Cog):
         invite_embed = discord.Embed(color=discord.Color.purple(), title="Invite Links")
         oauth_url = discord.utils.oauth_url(client_id=str(self.bot.user.id),
                                             permissions=discord.Permissions(read_messages=True, send_messages=True,
-                                                                            embed_links=True),
+                                                                            embed_links=True, manage_messages=True),
                                             redirect_uri="https://discord.com/oauth2/authorized")
         invite_embed.add_field(name="Bot Invite Link", value=oauth_url)
         invite_embed.add_field(name="Discord Server Invite Link", value="https://discord.gg/v8qDQDc")

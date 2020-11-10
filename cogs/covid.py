@@ -6,6 +6,7 @@ from discord.ext.commands import BucketType
 from random import randint
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
+from utils.bot_class import MyBot
 from utils.models import get_from_db
 from utils import ai_system
 from utils import api as covid19api

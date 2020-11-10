@@ -3,11 +3,11 @@
 # licence: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 import asyncio
-import warnings
+import time
 import logging
 import aiohttp
 import datetime
-from typing import Optional, List, AnyStr, Dict, Union
+from typing import Optional, List, AnyStr, Dict
 
 MAX_UPDATE_TRIES = 5
 SORT_TYPES = ("cases", "recovered", "deaths", "critical", "tests", "population")
@@ -117,6 +117,18 @@ async def get_data(session: aiohttp.ClientSession,
         raise NetworkException(e)
 
 
+def from_time_to_date(in_time: time.struct_time) -> datetime.date:
+    """
+    Convert a time.struct_time object to a datetime.date object quickly.
+
+    :param in_time: The time.struct_time object you would like to convert.
+    :return: datetime.date object that contains the same month/day/year as the struct_time object passed in.
+    """
+    return datetime.date(year=in_time.tm_year,
+                         month=in_time.tm_mon,
+                         day=in_time.tm_mday)
+
+
 # TODO: fix JHUCSSE API: basically everything about it
 class Covid19JHUCSSEStats:
     """
@@ -143,7 +155,6 @@ class Covid19JHUCSSEStats:
         if update_stats:
             self.update_covid_19_virus_stats()
 
-    # noinspection PyTypeChecker
     async def update_covid_19_virus_stats(self, *, session: aiohttp.ClientSession = None):
         """
         Updates the stats, parses them, and loads it into memory.
@@ -157,9 +168,10 @@ class Covid19JHUCSSEStats:
         self.logger.info('Opening new AIOHttp session...')
         session = session if session is not None else aiohttp.ClientSession()
         async with session as session:
-            self.logger.info("Getting new country data...")
+            self.logger.info("Getting new global data...")
             try:
-                data = await get_data(session, "https://disease.sh/v3/covid-19/historical/all?lastdays=all")
+                data: dict = await get_data(session,
+                                            "https://disease.sh/v3/covid-19/historical/all?lastdays=all&allowNull=1")
             except NetworkException as e:
                 self.logger.exception("ClientException while getting vaccine data!",
                                       e.exc)
@@ -172,30 +184,26 @@ class Covid19JHUCSSEStats:
                     self.logger.fatal("Failed to update! Data will not be avalible! Expect exceptions on later calls!")
                     self._update_tries = 0
                 return
-            self.logger.info("Got country data! Parsing data and loading it into memory...")
-            for country in data:
-                if country['countryInfo']['iso2'] is not None:
-                    try:
-                        country["activeCaseChange"] = country["todayCases"] - (country["todayDeaths"] +
-                                                                               country["todayRecovered"])
-                    except TypeError:
-                        country["activeCaseChange"] = None
-                    self.country_stats[country['countryInfo']['iso2']] = country
-                    iso_code = dict(country=country["country"], iso2=country["countryInfo"]["iso2"],
-                                    iso3=country["countryInfo"]["iso3"])
-                    self.iso_codes.append(iso_code)
-            self.logger.info("Getting world stats...")
-            self.global_stats = await get_data(session, "https://disease.sh/v3/covid-19/all?allowNull=true")
-            self.logger.info("Got world stats.")
-            self.logger.info("Getting continent stats...")
-            self.continent_stats = await get_data(session, "https://disease.sh/v3/covid-19/continents?allowNull=true")
-            for continent in self.continent_stats:
-                self.continents.append(continent["continent"])
-            self.logger.info("Got continent stats.")
+            self.global_historical_stats = {"cases": await self._parse_datetime_strings(data["cases"]),
+                                            "recovered": await self._parse_datetime_strings(data["recovered"]),
+                                            "deaths": await self._parse_datetime_strings(data["deaths"])}
         self.last_updated_utc = datetime.datetime.utcnow()
         self._has_been_updated = True
         self.data_is_valid = True
         self.logger.info("Done!")
+
+    @staticmethod
+    async def _parse_datetime_strings(data_dict: dict):
+        """
+        Parses date strings from a dict and returns datetime.date objects instead of strings
+        :param data_dict:
+        :return:
+        """
+        out_dict = {}
+        for key in data_dict:
+            dt = from_time_to_date(time.strptime(key, "%m/%d/%y"))
+            out_dict[dt] = data_dict[key]
+        return out_dict
 
 
 class Covid19StatsWorldometers:
@@ -309,7 +317,7 @@ class Covid19StatsWorldometers:
         return self.global_stats
 
     # noinspection PyTypeChecker
-    async def get_country_stats(self, iso2_code: str) -> dict:
+    async def get_country_stats(self, iso2_code: str) -> Optional[dict]:
         """
         Returns stats on a single country.
 

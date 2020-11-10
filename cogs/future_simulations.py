@@ -51,7 +51,7 @@ def check_if_enabled():
 
 class FutureSimulations(Cog):
     @staticmethod
-    async def parse_simulation_data_for_date(data: dict, date_to_parse: int):
+    async def parse_simulation_data_for_date(data: dict, date_to_parse: int) -> Optional[discord.Embed]:
         infected: ndarray = data['infected']
         if len(infected) < date_to_parse:
             return None
@@ -63,7 +63,7 @@ class FutureSimulations(Cog):
             add_field(name="Deaths", value=str(round(deaths[date_to_parse - 1])))
         return data_embed
 
-    @commands.group()
+    @commands.group(hidden=True, disabled=True)
     @no_dms()
     @check_if_enabled()
     async def simulate(self, ctx: MyContext):

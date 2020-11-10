@@ -28,7 +28,7 @@ class Vaccine(Cog):
 
     @vaccine.group()
     async def list_all_candidates(self, ctx: MyContext):
-        vaccine_embed = discord.Embed()
+        vaccine_embed = discord.Embed(title="Vaccine Canadites")
 
     @tasks.loop(minutes=10)
     async def do_vaccine_update(self):

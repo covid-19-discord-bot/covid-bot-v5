@@ -116,7 +116,7 @@ def generate_pie_chart(overall_data: dict,
                          This dict must contain a 'all' key that is the total count of cases/deaths/etc..
     :param title: Chart title.
     :param force_include: Forcibly include this country in the list, no matter the percentage it makes up. If this is
-                          passed, ignore_below_percent is set to at least 1.5.
+                          passed, ignore_below_percent is set to at least 2.25.
     :param ignore_below_pct: Group countries making up less than this percentage of the total into "Other". Defaults to
                              1.5%.
     :param randomize: If true, randomize the order in which data is placed into the chart.
