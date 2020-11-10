@@ -35,7 +35,7 @@ class MapsCommands(Cog):
                              f"maps I can show you!"))
             return
         map_embed = discord.Embed(title=f"Map for {map_identifiers[map_type][1]}")
-        map_buffer = self.bot.maps_api.get_map(map_type)
+        map_buffer = await wrap_in_async(self.bot.maps_api.get_map, map_type, thread_pool=True)
         img_file = discord.File(map_buffer, filename="map.png")
         map_embed.set_image(url="attachment://map.png")
         await ctx.send(embed=map_embed, file=img_file)
