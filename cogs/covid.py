@@ -1,5 +1,7 @@
 # coding=utf-8
 import asyncio
+from typing import Optional
+
 import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import BucketType
@@ -14,12 +16,33 @@ from utils import embeds
 from utils import graphs
 
 
-class CovidCog(Cog):
-    def __init__(self, bot: MyBot, *args, **kwargs):
-        super().__init__(bot, *args, **kwargs)
-        self.index = 0
-        self.update_stats.start()
+async def list_file(ctx: MyContext, letter: str) -> Optional[str]:
+    iso_codes = await ctx.bot.worldometers_api.get_all_iso_codes()
+    countries = []
+    letter = str(letter).lower()
+    for field in iso_codes:
+        country_name = field["country"].lower()
+        if country_name.startswith(letter):
+            countries.append(field)
+    longest_name = 0
+    if len(countries) != 0:
+        for country in countries:
+            if len(country["country"]) > longest_name:
+                longest_name = len(country["country"])
 
+        msg_str = "{0:<{1}} | ISO2 Code | ISO3 Code".format(country_name, longest_name)
+        msgs = [msg_str, "-" * len(msg_str)]
+        for country in countries:
+            msgs.append("{0:<{1}} | {2}        | {3}      ".format(country["country"],
+                                                                   longest_name,
+                                                                   country["iso2"],
+                                                                   country["iso3"]))
+        return "\n".join(msgs)
+    return None
+
+
+
+class CovidCog(Cog):
     @commands.command()
     @commands.cooldown(1, 0.25, BucketType.user)  # No average user will be hitting this command once every 250ms
     async def covid(self, ctx: MyContext, *args):
@@ -42,25 +65,8 @@ class CovidCog(Cog):
                 country = "world"
             stats_embed = await embeds.stats_embed(country, self.bot)
             if stats_embed is None:
-                if is_premium:
-                    await ctx.send("Couldn't find data for that country you tried to find, please wait as I try to "
-                                   "find the nearest match!")
-                    nearest_match = await ai_system.find_nearest_match(country,
-                                                                       await self.bot.worldometers_api.
-                                                                       get_all_iso_codes())
-                    if nearest_match:
-                        await ctx.send(f"Found a possible match!\n"
-                                       f"Please let me know if this match was a good one by sending me a yes/no "
-                                       f"message in DMs within 30 seconds!\n"
-                                       f"`{nearest_match}`")
-                    else:
-                        await ctx.send("Didn't find any possible matches. Sorry!")
-                    return
-                msg = "Couldn't find a country with that ID (`/list` for a list of IDs) or the country has no cases! "
-                if db_guild.enable_tips and not is_premium and randint(1, 100) < 82:
-                    msg += f"To get a possible AI-powered correction, level up this guild to premium: `/donate`! " \
-                           f"(disable these tips with `{ctx.prefix}settings set enable_tips false`)"
-                await ctx.send(msg)
+                await ctx.send("Couldn't find a country with that ID (`/list` for a list of IDs) or the country has "
+                               "no cases!")
                 return
             msg = await ctx.send(embed=stats_embed)
         return  # TODO: set up JHUCSSE API
@@ -87,8 +93,27 @@ class CovidCog(Cog):
             await ctx.send("I can't send the entire country list: it's over Discord's 6,000 character limit! Try "
                            "`/list <letter>` to get only countries starting with `<letter>`.")
             return
+        first_letter = " ".join(first_letter)
         embed = await embeds.list_embed(self.bot, " ".join(first_letter))
         if embed is not None:
+            if len(embed) >= 6000:
+                def file(reaction: discord.Reaction, user: discord.Member):
+                    return reaction.message.id == ctx.message.id and ctx.author.id == user.id and reaction.emoji == "📔"
+
+                msg = await ctx.send("Whatever you have requested, it is over 6,000 characters. I can send a text "
+                                     "file, however. React with 📔 any time in the next 15 seconds to be DMed a text "
+                                     "file instead of a embed.")
+                await msg.add_reaction("📔")
+                try:
+                    await self.bot.wait_for("reaction_add", check=file, timeout=15)
+                except asyncio.TimeoutError:
+                    await msg.edit(content="Timed out.")
+                else:
+                    msg = await list_file(ctx, first_letter)
+                    await ctx.author.send(msg)  # the bot will convert this to a file for us, how nice
+                    if ctx.guild is not None:
+                        await ctx.send("Sent you a DM!")
+
             await ctx.author.send(embed=embed)
             if ctx.message.guild is not None:
                 await ctx.send("DMed a list to you!")
@@ -96,14 +121,14 @@ class CovidCog(Cog):
             await ctx.send("Couldn't find any countries starting with those letters!")
 
     @commands.command()
-    async def top(self, ctx: MyContext, *_type):
+    async def top(self, ctx: MyContext, _type: str):
         """
         /top <type>
 
         where <type> is one of "cases", "recovered", "deaths", "critical", "tests"
         """
         try:
-            _list = await self.bot.worldometers_api.get_sorted_list(_type[0].lower())
+            _list = await self.bot.worldometers_api.get_sorted_list(_type.lower())
         except covid19api.IncorrectSortType:
             not_correct_type_embed = discord.Embed(title="Incorrect Top List Type",
                                                    description="Try sorting with one of the following:")
@@ -120,7 +145,7 @@ class CovidCog(Cog):
             return
         top_embed = discord.Embed(title="Top List", description="Run `/help list` for a list of all possible sorts")
         for country, i in zip(_list, range(1, len(_list))):
-            top_embed.add_field(name=f"{i}: {country['country']}", value=country[_type[0].lower()])
+            top_embed.add_field(name=f"{i}: {country['country']}", value=country[_type.lower()])
         await ctx.send(embed=top_embed)
 
     @tasks.loop(minutes=10)
