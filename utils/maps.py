@@ -111,7 +111,6 @@ class MapGetter:
                 # noinspection PyStatementEffect
                 share_button.location_once_scrolled_into_view
                 share_button.click()
-
             sleep(5)
 
             try:
@@ -124,11 +123,11 @@ class MapGetter:
                 # noinspection PyStatementEffect
                 download.location_once_scrolled_into_view
                 download.click()
-            sleep(5)
+            sleep(10)
 
-            with open(f"{self.base_path}/coronavirus_data_explorer.png", "rb") as f:
+            with open(f"{self.base_path}/coronavirus-data-explorer.png", "rb") as f:
                 self.maps[each_graph] = io.BytesIO(f.read())
-            os.unlink(f"{self.base_path}/coronavirus_data_explorer.png")
+            os.unlink(f"{self.base_path}/coronavirus-data-explorer.png")
             self.logger.info("done!")
         if self.save_resources:
             ff.quit()
@@ -138,6 +137,7 @@ class MapGetter:
         return [key for key in map_identifiers]
 
     def get_map(self, map_name: str) -> Optional[io.BytesIO]:
+        self._check_if_set_up()
         if map_name not in map_identifiers:
             return None
         return copy.deepcopy(self.maps[map_name])  # we know it's already a io.BytesIO object

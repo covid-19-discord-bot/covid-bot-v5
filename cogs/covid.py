@@ -95,25 +95,24 @@ class CovidCog(Cog):
             return
         first_letter = " ".join(first_letter)
         embed = await embeds.list_embed(self.bot, " ".join(first_letter))
-        if embed is not None:
-            if len(embed) >= 6000:
-                def file(reaction: discord.Reaction, user: discord.Member):
-                    return reaction.message.id == ctx.message.id and ctx.author.id == user.id and reaction.emoji == "📔"
+        if embed is not None and len(embed) >= 6000:  # if it is none, the second will never be evaluated
+            def file(reaction: discord.Reaction, user: discord.Member):
+                return reaction.message.id == ctx.message.id and ctx.author.id == user.id and reaction.emoji == "📔"
 
-                msg = await ctx.send("Whatever you have requested, it is over 6,000 characters. I can send a text "
-                                     "file, however. React with 📔 any time in the next 15 seconds to be DMed a text "
-                                     "file instead of a embed.")
-                await msg.add_reaction("📔")
-                try:
-                    await self.bot.wait_for("reaction_add", check=file, timeout=15)
-                except asyncio.TimeoutError:
-                    await msg.edit(content="Timed out.")
-                else:
-                    msg = await list_file(ctx, first_letter)
-                    await ctx.author.send(msg)  # the bot will convert this to a file for us, how nice
-                    if ctx.guild is not None:
-                        await ctx.send("Sent you a DM!")
-
+            msg = await ctx.send("Whatever you have requested, it is over 6,000 characters. I can send a text "
+                                 "file, however. React with 📔 any time in the next 15 seconds to be DMed a text "
+                                 "file instead of a embed.")
+            await msg.add_reaction("📔")
+            try:
+                await self.bot.wait_for("reaction_add", check=file, timeout=15)
+            except asyncio.TimeoutError:
+                await msg.edit(content="Timed out.")
+            else:
+                msg = await list_file(ctx, first_letter)
+                await ctx.author.send(msg)  # the bot will convert this to a file for us, how nice
+                if ctx.guild is not None:
+                    await ctx.send("Sent you a DM!")
+        elif embed is not None:
             await ctx.author.send(embed=embed)
             if ctx.message.guild is not None:
                 await ctx.send("DMed a list to you!")

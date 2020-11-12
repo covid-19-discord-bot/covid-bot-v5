@@ -1,5 +1,6 @@
 # coding=utf-8
 import traceback
+from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -43,9 +44,9 @@ class SuggestionsCommands(Cog):
                 await msg.edit(embed=denied_suggestion)
                 await msg.clear_reactions()
             else:
-                user = self.bot.get_user(payload.user_id)
+                user: Optional[discord.User] = self.bot.get_user(payload.user_id)
                 if user is not None:
-                    await user.send("You don't have permissions to deny this suggestion.")
+                    await user.send("You don't have permission to deny this suggestion!")
 
 
 setup = SuggestionsCommands.setup

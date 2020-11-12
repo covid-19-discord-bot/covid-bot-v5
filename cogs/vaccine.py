@@ -13,7 +13,7 @@ class Vaccine(Cog):
         super().__init__(bot, *args, **kwargs)
         self.vaccine_data = VaccineStats()
 
-    @commands.group()
+    @commands.group(disabled=True)
     async def vaccine(self, ctx: MyContext):
         if ctx.invoked_subcommand is None:
             vaccine_phases = ""

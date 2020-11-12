@@ -61,6 +61,8 @@ async def stats_embed(country_name: str, bot: MyBot):
             country_data = await bot.worldometers_api.get_continent_stats(country_name)
             if country_data is not None:
                 name = country_name.title()
+            else:
+                return None
         else:
             name = covid19api.get_country_name(_id, country_list)
             country_data = await bot.worldometers_api.get_country_stats(_id)

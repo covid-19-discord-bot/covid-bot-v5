@@ -41,16 +41,20 @@ class SupportServerCommands(Cog):
         await purge_channel_messages(status_channel)
         embed = discord.Embed(colour=discord.Colour.blurple(),
                               title=f"{self.bot.user.name}'s status")
+        user_count = 0
+        for guild in self.bot.guilds:
+            guild: discord.Guild
+            user_count += guild.member_count
 
         embed.add_field(name="Guilds Count", value=f"{len(self.bot.guilds)}", inline=True)
-        embed.add_field(name="Users Count", value=f"{len(self.bot.users)}", inline=True)
+        embed.add_field(name="Users Count", value=f"{user_count}", inline=True)
         embed.add_field(name="Messages in cache", value=f"{len(self.bot.cached_messages)}", inline=True)
 
         ping_f = status_channel.trigger_typing()
         t_1 = time.perf_counter()
         await ping_f  # tell Discord that the bot is "typing", which is a very simple request
         t_2 = time.perf_counter()
-        ping = round((t_2 - t_1) * 1000)  # calculate the time needed to trigger typing
+        ping = round(t_2 - t_1)  # calculate the time needed to trigger typing
 
         embed.add_field(name="Average Latency", value=f"{round(self.bot.latency, 2)}ms", inline=True)
         embed.add_field(name="Current ping", value=f"{ping}ms", inline=True)

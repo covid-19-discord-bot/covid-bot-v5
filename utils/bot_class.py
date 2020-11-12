@@ -107,7 +107,7 @@ class MyBot(AutoShardedBot):
             self.logger.exception("Fatal general error while running initial update!", exception_instance=e)
         try:
             if not self._map_client:
-                self._map_client = MapGetter("/home/pi/covid_bot/maps/")
+                self._map_client = MapGetter("/home/pi/covid_bot_beta/maps")
                 if not self._map_client.set_up:
                     await wrap_in_async(self._map_client.initalize_firefox, thread_pool=True)
         except Exception as e:

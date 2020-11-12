@@ -26,7 +26,7 @@ class DatabaseCommands(Cog):
                          ))
 
     @commands.group()
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_permissions(manage_guild=True)
     async def settings(self, ctx: MyContext):
         """
         Commands to view and edit settings

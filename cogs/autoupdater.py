@@ -12,11 +12,14 @@ import datetime
 import utils.api as covid19api
 import utils.embeds as embeds
 from discord.ext import tasks, commands
-from typing import Optional
+from typing import Optional, List
 from utils.models import get_from_db
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.human_time import ShortTime, human_timedelta, FutureTime
+
+
+utc_zero = datetime.datetime.utcfromtimestamp(-1)
 
 
 class AutoUpdaterCog(Cog):
@@ -24,6 +27,14 @@ class AutoUpdaterCog(Cog):
         super().__init__(bot, *args, **kwargs)
         self.index = 0
         self.push_auto_updates.start()
+
+    @staticmethod
+    def split_seq(seq, size):
+        newseq = []
+        splitsize = 1.0 / size * len(seq)
+        for i in range(size):
+            newseq.append(seq[int(round(i * splitsize)):int(round((i + 1) * splitsize))])
+        return newseq
 
     @commands.command(name="autoupdate", aliases=["autoupdate_country", "autoupdateCountry"])
     @commands.has_permissions(manage_messages=True)
@@ -80,9 +91,9 @@ class AutoUpdaterCog(Cog):
                                  "shorter delay (no point in doing so), check out the `/donate` command."))
                 return
 
-        if country != "world":
+        if country not in ("world", "global"):
             country_list = await self.bot.worldometers_api.get_all_iso_codes()
-            _id = covid19api.get_iso2_code(country, country_list)
+            _id = iso2_code = covid19api.get_iso2_code(country, country_list)
             if not _id:
                 country_data = await self.bot.worldometers_api.get_continent_stats(country)
                 if country_data is not None:
@@ -94,7 +105,7 @@ class AutoUpdaterCog(Cog):
             else:
                 friendly_country_name = covid19api.get_country_name(_id, country_list)
         else:
-            _id = "OT"
+            _id = iso2_code = "OT"
             friendly_country_name = "World"
 
         update_delay = delta_seconds
@@ -106,7 +117,7 @@ class AutoUpdaterCog(Cog):
         await db_channel.save()
 
         await ctx.send(_("✅ Posting stats for {0} in this "
-                         "channel every {1} minutes.".format(friendly_country_name, human_update_time)))
+                         "channel every {1}.".format(friendly_country_name, human_update_time)))
 
     @commands.command(name="disable_updates", aliases=["disableUpdates"])
     @commands.has_permissions(manage_messages=True)
@@ -142,22 +153,46 @@ class AutoUpdaterCog(Cog):
         # need to calculate the timedelta and set the last update to be at minus timedelta to keep the code in
         # push_auto_updates the same
         time_to_update_at: datetime.datetime = at.dt
-        if time_to_update_at < datetime.date.today() + datetime.timedelta(days=30):
-            await ctx.send("You can't force a update further than 30 days away!")
-            return
         db_channel = await get_from_db(ctx.channel)
-        delta = time_to_update_at - datetime.timedelta(seconds=db_channel.autoupdater.delay - 15)  # get rid of 15 seconds to make it better
-        db_channel.autoupdater.last_updated = delta
-        await ctx.send("Next update {0}.".format(human_timedelta(delta)))
+        db_channel.autoupdater.do_update_at = time_to_update_at
+        await db_channel.autoupdater.save()
+        await db_channel.save()
+        await ctx.send("Next update: {0}".format(human_timedelta(time_to_update_at)))
 
     @tasks.loop(minutes=1.0)
     async def push_auto_updates(self):
-        self.bot.logger.info("Running autoupdater...")
-        for channel in self.bot.get_all_channels():  # Holy hell is this a lot simpler...
+        channel_count = 0
+        channel_list = []
+        for channel in self.bot.get_all_channels():
+            channel_count += 1
+            channel_list.append(channel)
+        self.bot.logger.info(f"Doing autoupdater in {channel_count} channels...")
+        sized_list = self.split_seq(channel_list, 250)
+        loop = asyncio.get_event_loop()
+        futures = []
+        for sublist in sized_list:
+            futures.append(loop.create_task(self.run_updates_in_channels(sublist)))
+        for future in futures:
+            await future
+        self.bot.logger.info("Done autoupdater!")
+
+    @push_auto_updates.before_loop
+    async def before_updates_pushed(self):
+        await self.bot.wait_until_ready()
+
+    def cog_unload(self):
+        self.push_auto_updates.cancel()
+
+    async def run_updates_in_channels(self, channels: List[discord.TextChannel]):
+        for channel in channels:
             if not isinstance(channel, discord.TextChannel):  # shouldn't be triggered, but who knows...
                 continue
             channel: discord.TextChannel
             db_channel = await get_from_db(channel)
+            if db_channel.autoupdater.do_update_at is None:
+                db_channel.autoupdater.do_update_at = utc_zero
+                await db_channel.autoupdater.save()
+                await db_channel.save()
             perms_for = channel.permissions_for(channel.guild.me)
             if not perms_for.send_messages and perms_for.embed_links:
                 self.bot.logger.info("Idiots can have fun trying to figure out why this isn't working",
@@ -168,23 +203,36 @@ class AutoUpdaterCog(Cog):
                 # big brains will figure out it's missing perms
                 # small brains will complain wHy BoT nO wOrK?
                 continue
-            if db_channel.autoupdater.already_set or db_channel.autoupdater.force_update:
-                db_channel.autoupdater.force_update = False
+            if db_channel.autoupdater.already_set:
                 now = datetime.datetime.utcnow()
-                delta: datetime.timedelta = now - db_channel.autoupdater.last_updated
-                if not delta.total_seconds() >= db_channel.autoupdater.delay:
-                    continue
-                db_channel.autoupdater.last_updated = now
+                if db_channel.autoupdater.force_update:
+                    db_channel.autoupdater.force_update = False
+                elif db_channel.autoupdater.do_update_at != utc_zero:
+                    delta: datetime.timedelta = now - db_channel.autoupdater.do_update_at
+                    if delta.total_seconds() > 120:
+                        continue
+                    db_channel.autoupdater.do_update_at = utc_zero
+                    db_channel.autoupdater.last_updated = now
+                else:
+                    delta: datetime.timedelta = now - db_channel.autoupdater.last_updated
+                    if not delta.total_seconds() >= db_channel.autoupdater.delay:
+                        continue
+                    db_channel.autoupdater.last_updated = now
                 country = db_channel.autoupdater.country_name
-                country = 'world' if country == 'OT' else country
+                country = "world" if country == "OT" else country
                 try:
-                    embed = await embeds.stats_embed(f"{country}", self.bot)
+                    embed = await embeds.stats_embed(country, self.bot)
                     await channel.send(embed=embed)
-                except discord.DiscordException as e:
+                except TypeError:
+                    db_channel.autoupdater.already_set = False  # channel is gone
+                    await db_channel.autoupdater.save()
+                    await db_channel.save()
+                    continue
+                except (discord.DiscordException, discord.errors.Forbidden) as e:
                     if isinstance(e, discord.Forbidden):
                         # how da hell did that happen? should've been caught on L162
-                        await self.bot.logger.info("No permissions to send messages here!",
-                                                   channel=channel, guild=channel.guild)
+                        self.bot.logger.info("No permissions to send messages here!",
+                                             channel=channel, guild=channel.guild)
                         db_channel.autoupdater.already_set = False  # no perms? heh: have fun
                         await db_channel.autoupdater.save()
                         await db_channel.save()
@@ -196,14 +244,6 @@ class AutoUpdaterCog(Cog):
                     continue
                 await db_channel.autoupdater.save()
                 await db_channel.save()
-        self.bot.logger.info("Done autoupdater!")
-
-    @push_auto_updates.before_loop
-    async def before_updates_pushed(self):
-        await self.bot.wait_until_ready()
-
-    def cog_unload(self):
-        self.push_auto_updates.cancel()
 
 
 setup = AutoUpdaterCog.setup

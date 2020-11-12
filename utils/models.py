@@ -3,6 +3,7 @@ import discord
 import typing
 from tortoise import Tortoise, fields
 from tortoise.models import Model
+import datetime
 
 if typing.TYPE_CHECKING:
     from utils.ctx_class import MyContext
@@ -95,6 +96,7 @@ class AutoupdaterData(Model):
     # making it through the rest of this pandemic :P
     last_updated = fields.DatetimeField(auto_now_add=True)
     force_update = fields.BooleanField(default=False)
+    do_update_at = fields.DatetimeField(default=datetime.datetime.utcfromtimestamp(-1))
 
     class Meta:
         table = "autoupdater_data"

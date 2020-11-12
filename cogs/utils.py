@@ -6,6 +6,7 @@ from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.models import get_from_db
 import json
+import datetime
 
 
 class UtilsCommands(Cog):
@@ -37,8 +38,7 @@ class UtilsCommands(Cog):
         invite_embed = discord.Embed(color=discord.Color.purple(), title="Invite Links")
         oauth_url = discord.utils.oauth_url(client_id=str(self.bot.user.id),
                                             permissions=discord.Permissions(read_messages=True, send_messages=True,
-                                                                            embed_links=True, manage_messages=True),
-                                            redirect_uri="https://discord.com/oauth2/authorized")
+                                                                            embed_links=True, manage_messages=True))
         invite_embed.add_field(name="Bot Invite Link", value=oauth_url)
         invite_embed.add_field(name="Discord Server Invite Link", value="https://discord.gg/v8qDQDc")
         await ctx.send(embed=invite_embed)
@@ -86,6 +86,50 @@ class UtilsCommands(Cog):
         time_delta = round((t_2 - t_1) * 1000)  # calculate the time needed to trigger typing
         await ctx.send(_("Pong. — Time taken: {miliseconds}ms", miliseconds=time_delta))  # send a message telling the
         # user the calculated ping time
+
+    @commands.is_owner()
+    @commands.command(name="async_setup")
+    async def async_setup(self, ctx: MyContext):
+        msg = await ctx.send("Calling `self.bot.async_setup()`...")
+        await self.bot.async_setup()
+        await msg.edit(content="Bot has been setup!")
+
+    @commands.command()
+    async def vote(self, ctx: MyContext):
+        vote_embed = discord.Embed(title="Vote Sites",
+                                   description="Voting for the bot gives it more visibility, which means it ends up in "
+                                               "more servers, giving me (the dev) more incentive to add more "
+                                               "features!\n"
+                                               "If you want a specific feature, let me know with the `/suggest` "
+                                               "command!")
+        vote_embed.add_field(name="discord.boats",
+                             value="https://discord.boats/bot/675390513020403731/vote")
+        vote_embed.add_field(name="bots.discordlabs.org",
+                             value="https://bots.discordlabs.org/bot/675390513020403731?vote")
+        vote_embed.add_field(name="top.gg",
+                             value="https://top.gg/bot/675390513020403731/vote")
+        vote_embed.set_footer(text="**DO NOT disable adblockers!**")
+        await ctx.send(embed=vote_embed)
+
+    @commands.command()
+    @commands.is_owner()
+    async def migrate_to_db(self, ctx: MyContext):
+        msg = await ctx.send("Loading old database...")
+        with open("autoupdates.json", "r") as f:
+            autoupdater_data = json.load(f)
+        await msg.edit(content=f"Now parsing {len(autoupdater_data)} autoupdaters...")
+        for chnl in autoupdater_data:
+            channel = self.bot.get_channel(chnl["ChannelID"])
+            db_channel = await get_from_db(channel)
+            if db_channel is None:
+                continue
+            db_channel.autoupdater.already_set = True
+            db_channel.autoupdater.update_time = chnl["UpdateTime"]
+            db_channel.autoupdater.country_name = chnl["Country"]
+            db_channel.autoupdater.last_updated = datetime.datetime.utcfromtimestamp(chnl["LastUpdateTime"])
+            await db_channel.autoupdater.save()
+            await db_channel.save()
+        await msg.edit(content=f"Success!")
 
 
 setup = UtilsCommands.setup
