@@ -450,7 +450,7 @@ class VaccineStats:
                     self.update_tries = 0
                 return
             self.logger.info("Got vaccine data! Parsing and loading it into memory...")
-            self.total_candidates = data['totalCandidates']
+            self.total_candidates = int(data['totalCandidates'])
             self.source = data['source']
             self.phases = data['phases']
             self.candidates = data['data']
