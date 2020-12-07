@@ -14,24 +14,23 @@ from utils.interaction import escape_everything
 
 async def submit_error_message(exc: BaseException, doing: str, ctx: MyContext, bot: MyBot):
     error_channel = bot.get_channel(771065447561953298)
-    error_embed = discord.Embed(title=f"Fatal error while working on {doing}!",
-                                description=f"Guild details:\n"
-                                            f"    ID: `{ctx.guild.id}`\n"
-                                            f"    Name: `{ctx.guild.name}`\n\n"
-                                            f"Channel details:\n"
-                                            f"    ID: `{ctx.channel.id}`\n"
-                                            f"    Name: `{ctx.channel.name}`\n\n"
-                                            f"Invoking message details:\n"
-                                            f"    ID: `{ctx.message.id}`\n\n"
-                                            f"Author details:\n"
-                                            f"    ID: `{ctx.author.id}`\n"
-                                            f"    Name: `{str(ctx.author)}`"  # Quick way to get name#disc
+    error_embed = discord.Embed(title="Fatal error while working on {doing}!",
+                                description="Guild details:\n"
+                                            "    ID: `{ctx.guild.id}`\n"
+                                            "    Name: `{ctx.guild.name}`\n\n"
+                                            "Channel details:\n"
+                                            "    ID: `{ctx.channel.id}`\n"
+                                            "    Name: `{ctx.channel.name}`\n\n"
+                                            "Invoking message details:\n"
+                                            "    ID: `{ctx.message.id}`\n\n"
+                                            "Author details:\n"
+                                            "    ID: `{ctx.author.id}`\n"
+                                            "    Name: `{str(ctx.author)}`"  # Quick way to get name#disc
                                 )
+    tb = "```py\n{''.join(traceback.format_tb(exc.__traceback__))}\n```"
     error_embed.add_field(name="Exception Name", value=str(exc.__class__))
     error_embed.add_field(name="Exception Reason", value=str(exc), inline=False)
-    error_embed.add_field(name="Exception Traceback", value=f"```py\n"
-                                                            f"{''.join(traceback.format_tb(exc.__traceback__))}\n"
-                                                            f"```")
+    error_embed.add_field(name="Exception Traceback", value=tb if len(tb) < 1024 else "Too long!")
     await error_channel.send(embed=error_embed)
 
 
@@ -54,9 +53,9 @@ class CommandErrorHandler(Cog):
             return
 
         delete_error_message_after = 60
-        command_invoke_help = f"{ctx.prefix}{ctx.command.qualified_name} {ctx.command.signature}"
+        command_invoke_help = "{ctx.prefix}{ctx.command.qualified_name} {ctx.command.signature}"
 
-        ctx.logger.warning(f"Error during processing: {exception} ({repr(exception)})")
+        ctx.logger.warning("Error during processing: {exception} ({repr(exception)})")
 
         # https://discordpy.readthedocs.io/en/latest/ext/commands/api.html#discord.ext.commands.CommandError
         if isinstance(exception, commands.CommandError):
@@ -108,7 +107,7 @@ class CommandErrorHandler(Cog):
                                 "`{command_invoke_help}`.", command_invoke_help=command_invoke_help,
                                 exception=str(exception))
                 else:
-                    message = f"{str(exception)} ({type(exception).__name__})"
+                    message = "{str(exception)} ({type(exception).__name__})"
                     ctx.logger.error("".join(traceback.format_exception(type(exception), exception,
                                                                         exception.__traceback__)))
 
@@ -125,17 +124,17 @@ class CommandErrorHandler(Cog):
                 # We could edit and change the message here, but the lib messages are fine and specify exactly what
                 # permissions are missing
                 elif isinstance(exception, commands.MissingPermissions):
-                    message = f"{str(exception)}"
+                    message = "{str(exception)}"
                 elif isinstance(exception, commands.BotMissingPermissions):
-                    message = f"{str(exception)}"
+                    message = "{str(exception)}"
                 elif isinstance(exception, commands.MissingRole):
-                    message = f"{str(exception)}"
+                    message = "{str(exception)}"
                 elif isinstance(exception, commands.BotMissingRole):
-                    message = f"{str(exception)}"
+                    message = "{str(exception)}"
                 elif isinstance(exception, commands.MissingAnyRole):
-                    message = f"{str(exception)}"
+                    message = "{str(exception)}"
                 elif isinstance(exception, commands.BotMissingAnyRole):
-                    message = f"{str(exception)}"
+                    message = "{str(exception)}"
                 elif isinstance(exception, commands.NSFWChannelRequired):
                     message = _("You need to be in a NSFW channel to run that.")
 
@@ -167,7 +166,7 @@ class CommandErrorHandler(Cog):
                 elif isinstance(exception, checks.BotIgnore):
                     return
                 else:
-                    message = f"Check error running this command : {str(exception)} ({type(exception).__name__})"
+                    message = "Check error running this command : {str(exception)} ({type(exception).__name__})"
                     ctx.logger.error("".join(traceback.format_exception(type(exception), exception,
                                                                         exception.__traceback__)))
             elif isinstance(exception, commands.CommandNotFound):
@@ -197,12 +196,12 @@ class CommandErrorHandler(Cog):
                                 some_time=dates.format_timedelta(delta, add_direction=True,
                                                                  locale=await ctx.get_language_code()))
             elif isinstance(exception, commands.errors.MaxConcurrencyReached):
-                message = f"{str(exception)}"  # The message from the lib is great.
+                message = "{str(exception)}"  # The message from the lib is great.
             elif isinstance(exception, SimulationsDisabled):
                 message = _("Simulations have been disabled in this guild due to a missing permission. Ask a admin to "
                             "give me the Manage Messages permission.")
             else:
-                message = f"{str(exception)} ({type(exception).__name__})"
+                message = "{str(exception)} ({type(exception).__name__})"
                 ctx.logger.error(
                     "".join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
         else:
@@ -211,7 +210,9 @@ class CommandErrorHandler(Cog):
             ctx.logger.error("".join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
 
         if message:
-            await ctx.send("❌ " + message, delete_after=delete_error_message_after)
+            await ctx.send("❌ " + message + _("\nFor help, join the bot's support server at "
+                                              "{self.bot.support_server_invite}"),
+                           delete_after=delete_error_message_after)
 
 
 setup = CommandErrorHandler.setup

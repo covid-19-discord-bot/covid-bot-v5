@@ -5,9 +5,13 @@
 import asyncio
 import time
 import logging
+import json
+from pprint import pprint
+
+import aiofiles
 import aiohttp
 import datetime
-from typing import Optional, List, AnyStr, Dict
+from typing import Optional, List, AnyStr, Dict, Tuple
 
 MAX_UPDATE_TRIES = 5
 SORT_TYPES = ("cases", "recovered", "deaths", "critical", "tests", "population")
@@ -31,7 +35,15 @@ class NoCountryDataFields(BaseAPIException):
     pass
 
 
-class NoDataAvalible(BaseAPIException):
+class NoDataAvailable(BaseAPIException):
+    pass
+
+
+class CountryNotFound(BaseAPIException):
+    pass
+
+
+class ProvinceNotFound(BaseAPIException):
     pass
 
 
@@ -129,7 +141,50 @@ def from_time_to_date(in_time: time.struct_time) -> datetime.date:
                          day=in_time.tm_mday)
 
 
-# TODO: fix JHUCSSE API: basically everything about it
+async def _check_stats_are_valid(cls):
+    if not cls._has_been_updated:
+        raise NoDataAvailable()
+
+
+async def _handle_client_exceptions(cls, e):
+    cls.logger.exception(f"ClientException while getting data in class {cls.__class__.__name__}!",
+                         e.exc)
+    if cls._has_been_updated:
+        return
+    elif cls._update_tries <= MAX_UPDATE_TRIES:
+        await cls._do_update()
+    else:
+        cls.logger.fatal("Failed to update! Data will not be available! Expect exceptions on later calls!")
+        cls._update_tries = 0
+
+
+class ISOCodeHelper:
+    def __init__(self):
+        self.iso_codes = []
+        self.logger = logging.Logger(self.__class__.__name__)
+        self._has_been_updated = False
+        self._update_tries = 0
+
+    # noinspection PyTypeChecker
+    async def update_data(self, *, session: Optional[aiohttp.ClientSession] = None):
+        session = session or aiohttp.ClientSession()
+        async with session as session:
+            self.logger.info("Getting new country data...")
+            try:
+                data = await get_data(session, "https://disease.sh/v3/covid-19/countries?allowNull=true")
+            except NetworkException as e:
+                await _handle_client_exceptions(self, e)
+                return
+            self.logger.info("Got ISO codes! Parsing data and loading it into memory...")
+            for country in filter(lambda x: x["countryInfo"]["iso2"] is not None, data):
+                iso_code = dict(country=country["country"], iso2=country["countryInfo"]["iso2"],
+                                iso3=country["countryInfo"]["iso3"])
+                self.iso_codes.append(iso_code)
+
+    async def _do_update(self):
+        await self.update_data()
+
+
 class Covid19JHUCSSEStats:
     """
     Class for stats on COVID-19 via the https://disease.sh API's JHUCSSE section.
@@ -148,12 +203,29 @@ class Covid19JHUCSSEStats:
         self._update_tries: int = 0
         self.data_is_valid: bool = False
         self.add_ids: bool = add_ids
-        self.logger: logging.Logger = logging.Logger("COVID-19 Stats Worldometers", level=logging_level)
+        self.logger: logging.Logger = logging.Logger("COVID-19 Stats JHUCSSE", level=logging_level)
         self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
         self.global_historical_stats: dict = {}
         self.historical_stats: dict = {}
+        self.american_state_stats: dict = {}
+        self.iso_codes = ISOCodeHelper()
+        self.logger.setLevel(logging.INFO)
         if update_stats:
             self.update_covid_19_virus_stats()
+            self.iso_codes.update_data()
+
+    async def _do_update(self):
+        await self.update_covid_19_virus_stats()
+
+    async def _check_stats_are_valid(self):
+        """
+        Checks that all stats are valid.
+
+        :raises NoDataAvalible: when data isn't valid
+        :return: always None
+        """
+        if not self._has_been_updated:
+            raise NoDataAvailable()
 
     async def update_covid_19_virus_stats(self, *, session: aiohttp.ClientSession = None):
         """
@@ -166,44 +238,120 @@ class Covid19JHUCSSEStats:
         """
         self._update_tries += 1
         self.logger.info('Opening new AIOHttp session...')
-        session = session if session is not None else aiohttp.ClientSession()
+        session = session or aiohttp.ClientSession()
         async with session as session:
+            self.logger.info("Getting ISO codes...")
+            await self.iso_codes.update_data()
+            self.logger.info("Done!")
             self.logger.info("Getting new global data...")
             try:
                 data: dict = await get_data(session,
                                             "https://disease.sh/v3/covid-19/historical/all?lastdays=all&allowNull=1")
             except NetworkException as e:
-                self.logger.exception("ClientException while getting vaccine data!",
-                                      e.exc)
-                if self._has_been_updated:
-                    return  # We know there's valid data in here, so leave it be
-                if self._update_tries <= MAX_UPDATE_TRIES:
-                    await self.update_covid_19_virus_stats()  # Force another update if we haven't reached the max
-                    # tries count
-                else:
-                    self.logger.fatal("Failed to update! Data will not be avalible! Expect exceptions on later calls!")
-                    self._update_tries = 0
+                await _handle_client_exceptions(self, e)
                 return
-            self.global_historical_stats = {"cases": await self._parse_datetime_strings(data["cases"]),
-                                            "recovered": await self._parse_datetime_strings(data["recovered"]),
-                                            "deaths": await self._parse_datetime_strings(data["deaths"])}
+            self.global_historical_stats = data
+            data: list = await get_data(session, "https://disease.sh/v3/covid-19/historical?lastdays=all")
+            for country in self.iso_codes.iso_codes:
+                cty_data = {}
+                for i in filter(lambda x: x["country"] == country["country"], data):
+                    # for j in ["cases", "deaths", "recovered"]:
+                    #     i["timeline"][j] = await self._parse_datetime_strings(i["timeline"][j])
+                    if i["province"] is None:
+                        cty_data["all"] = i
+                    else:
+                        cty_data[i["province"]] = i
+                self.historical_stats[country["iso2"]] = cty_data
         self.last_updated_utc = datetime.datetime.utcnow()
         self._has_been_updated = True
         self.data_is_valid = True
         self.logger.info("Done!")
 
+    async def log_data(self):
+        with open("cty_data.txt", "w") as f:
+            pprint(self.historical_stats, stream=f)
+
     @staticmethod
     async def _parse_datetime_strings(data_dict: dict):
         """
         Parses date strings from a dict and returns datetime.date objects instead of strings
-        :param data_dict:
-        :return:
+
+        :param data_dict: Dictionary of data that will be parsed.
+        :return: Same data dict, but with date objects instead of strings.
         """
         out_dict = {}
         for key in data_dict:
+            if isinstance(key, str):
+                continue
             dt = from_time_to_date(time.strptime(key, "%m/%d/%y"))
             out_dict[dt] = data_dict[key]
         return out_dict
+
+    async def get_country_stats(self, country: str):
+        """
+        Return historical stats for any given country.
+
+        :param country: ISO-3166 2-digit country code, or anything accepted by get_iso2_code.
+        :return: The stats for the country if found. Provinces are included in the data. If not found, returns None.
+        """
+        await self._check_stats_are_valid()
+        if country not in self.historical_stats:
+            iso2_code = get_iso2_code(country.lower(), self.iso_codes.iso_codes)
+            if iso2_code not in self.historical_stats:
+                raise CountryNotFound()
+        else:
+            iso2_code = country
+        return self.historical_stats[iso2_code]
+
+    async def get_province_stats(self, country: str, province: str):
+        """"""
+        cty_stats = await self.get_country_stats(country)
+        for i in filter(lambda x: x.lower() == province.lower(), cty_stats):
+            return cty_stats[i]
+        raise ProvinceNotFound()
+
+    @staticmethod
+    async def _get_stats_for_day(stats: dict, date: datetime.date):
+        if date in stats["timeline"]["cases"]:
+            return {"cases": stats["timeline"]["cases"][date],
+                    "recovered": stats["timeline"]["recovered"][date],
+                    "deaths": stats["timeline"]["deaths"][date]}
+        date_str = f"{date.month}/{date.day}/{str(date.year)[2:4]}"
+        if date_str in stats["timeline"]["cases"]:
+            return {"cases": stats["timeline"]["cases"][date_str],
+                    "recovered": stats["timeline"]["recovered"][date_str],
+                    "deaths": stats["timeline"]["deaths"][date_str]}
+        return None
+
+    @staticmethod
+    async def _get_stats_for_dates(stats: dict, dates: List[datetime.date]):
+        final_data = {"cases": {},
+                      "recovered": {},
+                      "deaths": {}}
+        for key in ["cases", "recovered", "deaths"]:
+            for date in filter(lambda x: x in dates, stats["timeline"][key]):
+                final_data[key][date] = stats["timeline"][key][date]
+        return final_data
+
+    async def get_country_stats_for_day(self, country: str, date: datetime.date):
+        """"""
+        cty_stats = await self.get_country_stats(country)
+        return await self._get_stats_for_day(cty_stats, date)
+
+    async def get_province_stats_for_day(self, country: str, province: str, date: datetime.date):
+        """"""
+        cty_stats = await self.get_province_stats(country, province)
+        return await self._get_stats_for_day(cty_stats, date)
+
+    async def get_country_stats_for_dates(self, country: str, dates: List[datetime.date]):
+        """"""
+        cty_stats = await self.get_country_stats(country)
+        return await self._get_stats_for_dates(cty_stats, dates)
+
+    async def get_province_stats_for_dates(self, country: str, province: str, dates: List[datetime.date]):
+        """"""
+        cty_stats = await self.get_province_stats(country, province)
+        return await self._get_stats_for_dates(cty_stats, dates)
 
 
 class Covid19StatsWorldometers:
@@ -230,9 +378,14 @@ class Covid19StatsWorldometers:
         self.country_stats: Dict[dict] = {}
         self.continent_stats: list = []
         self.continents: list = []
+        self.american_states: list = []
+        self.american_state_stats: Dict[dict] = {}
         self.iso_codes: List[dict] = []
         if update_stats:
             self.update_covid_19_virus_stats()
+
+    async def _do_update(self):
+        await self.update_covid_19_virus_stats()
 
     # noinspection PyTypeChecker
     async def update_covid_19_virus_stats(self, *, session: aiohttp.ClientSession = None):
@@ -252,16 +405,7 @@ class Covid19StatsWorldometers:
             try:
                 data = await get_data(session, "https://disease.sh/v3/covid-19/countries?allowNull=true")
             except NetworkException as e:
-                self.logger.exception("ClientException while getting vaccine data!",
-                                      e.exc)
-                if self._has_been_updated:
-                    return  # We know there's valid data in here, so leave it be
-                if self._update_tries <= MAX_UPDATE_TRIES:
-                    await self.update_covid_19_virus_stats()  # Force another update if we haven't reached the max
-                    # tries count
-                else:
-                    self.logger.fatal("Failed to update! Data will not be avalible! Expect exceptions on later calls!")
-                    self._update_tries = 0
+                await _handle_client_exceptions(self, e)
                 return
             self.logger.info("Got country data! Parsing data and loading it into memory...")
             for country in data:
@@ -283,10 +427,32 @@ class Covid19StatsWorldometers:
             for continent in self.continent_stats:
                 self.continents.append(continent["continent"])
             self.logger.info("Got continent stats.")
+            self.logger.info("Getting American state stats...")
+            us_state_stats = await get_data(session, "https://disease.sh/v3/covid-19/states?allowNull=true")
+            for state in us_state_stats:
+                self.american_states.append(state["state"].lower())
+                self.american_state_stats[state["state"].lower()] = state
         self.last_updated_utc = datetime.datetime.utcnow()
         self._has_been_updated = True
         self.data_is_valid = True
         self.logger.info("Done!")
+
+    async def try_to_get_name(self, test_name: str) -> Optional[Tuple[str, Optional[str]]]:
+        test_name = test_name.lower()
+        if test_name in ("global", "world", "ot"):
+            return "world", None
+        possible_country_names = (get_country_name(test_name, self.iso_codes),
+                                  get_iso2_code(test_name, self.iso_codes),
+                                  get_iso3_code(test_name, self.iso_codes))
+        if test_name in (x.lower() for x in possible_country_names if x is not None):
+            return "country", test_name
+        for name in self.continents:
+            if test_name == name.lower():
+                return "continent", test_name
+        for name in self.american_states:
+            if test_name == name.lower():
+                return "state", test_name
+        return None
 
     async def _check_stats_are_valid(self):
         """
@@ -296,7 +462,7 @@ class Covid19StatsWorldometers:
         :return: always None
         """
         if not self._has_been_updated:
-            raise NoDataAvalible()
+            raise NoDataAvailable()
 
     async def get_all_iso_codes(self) -> list:
         """
@@ -345,7 +511,7 @@ class Covid19StatsWorldometers:
         if use_list:
             country_stats = []
             for country in self.country_stats:
-                country_stats.append(country)
+                country_stats.append(self.country_stats[country])
             return country_stats
         else:
             return self.country_stats
@@ -367,9 +533,9 @@ class Covid19StatsWorldometers:
             raise IncorrectSortType("Need to sort by a valid sort type!")
         country_list = await self.get_all_country_stats(use_list=True)
         try:
-            self.logger.debug(f"Country list: {country_list}")
-            self.logger.debug(f"Sort ID: {sort_id}")
-            return sorted(country_list, key=lambda k: k[sort_id], reverse=reverse)
+            self.logger.info(f"Country list: {country_list}")
+            self.logger.info(f"Sort ID: {sort_id}")
+            return sorted(country_list, key=lambda k: k[sort_id], reverse=not reverse)
         except TypeError:
             raise IncorrectSortType()
 
@@ -397,6 +563,13 @@ class Covid19StatsWorldometers:
             for continent in self.continent_stats:
                 if continent_name.lower() == continent["continent"].lower():
                     return continent
+
+    async def get_state_stats(self, state_name: str):
+        await self._check_stats_are_valid()
+        if state_name.lower() not in self.american_states:
+            return None
+        else:
+            return self.american_state_stats[state_name.lower()]
 
 
 class VaccineStats:
@@ -426,29 +599,23 @@ class VaccineStats:
         if update_stats:
             self.update_covid_19_vaccine_stats()
 
+    async def _do_update(self):
+        await self.update_covid_19_vaccine_stats()
+
     # noinspection PyTypeChecker
     # PyCharm ain't smart here
     async def update_covid_19_vaccine_stats(self, *, session: Optional[aiohttp.ClientSession] = None):
         self.update_tries += 1
         self.logger.info('Opening new AIOHttp session...')
-        session = session if session is not None else aiohttp.ClientSession()
+        session = session or aiohttp.ClientSession()
         async with session as session:
             self.logger.info("Getting new vaccine data...")
             try:
                 data = await get_data(session, "https://disease.sh/v3/covid-19/vaccine")
-                self.logger.debug(f"Vaccine data: {data}")
             except NetworkException as e:
-                self.logger.exception("ClientException while getting vaccine data!",
-                                      e.exc)
-                if self.has_been_updated:
-                    return  # We know there's valid data in here, so leave it be
-                if self.update_tries <= MAX_UPDATE_TRIES:
-                    await self.update_covid_19_vaccine_stats()  # Force another update if we haven't reached the max
-                    # tries count
-                else:
-                    self.logger.fatal("Failed to update! Data will not be avalible! Expect exceptions on later calls!")
-                    self.update_tries = 0
+                await _handle_client_exceptions(self, e)
                 return
+            self.logger.debug(f"Vaccine data: {data}")
             self.logger.info("Got vaccine data! Parsing and loading it into memory...")
             self.total_candidates = int(data['totalCandidates'])
             self.source = data['source']

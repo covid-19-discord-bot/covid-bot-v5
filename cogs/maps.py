@@ -23,8 +23,8 @@ class MapsCommands(Cog):
         Shows all maps that can be used in maps show <map_name>
         """
         map_type_embed = discord.Embed(title="Map Types",
-                                       description=f"Use one of these map types when running `{ctx.prefix}maps "
-                                                   f"show <name>`.")
+                                       description="Use one of these map types when running `{ctx.prefix}maps "
+                                                   "show <name>`.")
         for item in map_identifiers:
             map_type_embed.add_field(name=map_identifiers[item][1], value=item)
 
@@ -38,10 +38,10 @@ class MapsCommands(Cog):
         _ = await ctx.get_translate_function()
         map_type = map_type.lower().strip()
         if map_type not in map_identifiers:
-            await ctx.send(_(f"I don't know what map you're looking for! Run `{ctx.prefix}maps types` to see all the "
-                             f"maps I can show you!"))
+            await ctx.send(_("I don't know what map you're looking for! Run `{ctx.prefix}maps types` to see all the "
+                             "maps I can show you!"))
             return
-        map_embed = discord.Embed(title=f"Map for {map_identifiers[map_type][1]}")
+        map_embed = discord.Embed(title="Map for {map_identifiers[map_type][1]}")
         map_buffer = await wrap_in_async(self.bot.maps_api.get_map, map_type, thread_pool=True)
         img_file = discord.File(map_buffer, filename="map.png")
         map_embed.set_image(url="attachment://map.png")

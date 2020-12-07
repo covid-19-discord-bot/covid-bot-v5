@@ -45,23 +45,13 @@ class UtilsCommands(Cog):
 
     @commands.command()
     async def stats(self, ctx: MyContext):
-        with open("stats.json", "r") as sf:
-            sd = json.loads(sf.read())
-        stats_embed = discord.Embed(color=discord.Color.blue(), title="Bot Stats")
-        stats_embed.add_field(name="Number of servers the bot is in", value=sd["guildCount"])
-        stats_embed.add_field(name="Number of users the bot can see", value=sd["userCount"])
-        try:
-            stats_embed.add_field(name="Number of shards the bot is running on", value=sd["shardCount"])
-        except KeyError:
-            pass
-        stats_embed.add_field(name="Total days since bot was created", value=sd["daysSinceCreation"])
-        await ctx.send(embed=stats_embed)
+        await ctx.send("https://statcord.com/bot/{self.bot.user.id}")
 
     @commands.command(name="is_premium_guild")
     async def is_premium(self, ctx: MyContext):
         db_guild = await get_from_db(ctx.guild)
         premium = db_guild.is_premium
-        msg = f"This guild ({ctx.guild.name}, ID `{ctx.guild.id}`) is "
+        msg = "This guild ({ctx.guild.name}, ID `{ctx.guild.id}`) is "
         if premium:
             msg += " a "
         else:
@@ -81,10 +71,15 @@ class UtilsCommands(Cog):
         _ = await ctx.get_translate_function()
 
         t_1 = time.perf_counter()
-        await ctx.trigger_typing()  # tell Discord that the bot is "typing", which is a very simple request
+        try:
+            await ctx.channel.trigger_typing()  # tell Discord that the bot is "typing", which is a very simple request
+        except discord.NotFound:
+            await ctx.send("I seem to be having issues, apparently I can't find the channel you ran that command in! "
+                           "Please try again.")
+            return
         t_2 = time.perf_counter()
         time_delta = round((t_2 - t_1) * 1000)  # calculate the time needed to trigger typing
-        await ctx.send(_("Pong. — Time taken: {miliseconds}ms", miliseconds=time_delta))  # send a message telling the
+        await ctx.send(_("Pong. — Time taken: {milliseconds}ms", milliseconds=time_delta))  # send a message telling the
         # user the calculated ping time
 
     @commands.is_owner()
@@ -117,19 +112,19 @@ class UtilsCommands(Cog):
         msg = await ctx.send("Loading old database...")
         with open("autoupdates.json", "r") as f:
             autoupdater_data = json.load(f)
-        await msg.edit(content=f"Now parsing {len(autoupdater_data)} autoupdaters...")
+        await msg.edit(content="Now parsing {len(autoupdater_data)} autoupdaters...")
         for chnl in autoupdater_data:
             channel = self.bot.get_channel(chnl["ChannelID"])
             db_channel = await get_from_db(channel)
             if db_channel is None:
                 continue
             db_channel.autoupdater.already_set = True
-            db_channel.autoupdater.update_time = chnl["UpdateTime"]
+            db_channel.autoupdater.delay = chnl["UpdateTime"]
             db_channel.autoupdater.country_name = chnl["Country"]
             db_channel.autoupdater.last_updated = datetime.datetime.utcfromtimestamp(chnl["LastUpdateTime"])
             await db_channel.autoupdater.save()
             await db_channel.save()
-        await msg.edit(content=f"Success!")
+        await msg.edit(content="Success!")
 
 
 setup = UtilsCommands.setup

@@ -19,7 +19,7 @@ class PremiumSettings(Cog):
         else:
             db_item = await get_from_db(ctx.guild)
             msg = "This guild is "
-        msg += f"{'a' if db_item.is_premium else 'not a'} premium {'user' if user_or_guild else 'guild'}."
+        msg += "{'a' if db_item.is_premium else 'not a'} premium {'user' if user_or_guild else 'guild'}."
         await ctx.send(msg)
 
     @commands.command(hidden=True)

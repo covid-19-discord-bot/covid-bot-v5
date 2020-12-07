@@ -15,10 +15,10 @@ class SuggestionsCommands(Cog):
     async def suggest(self, ctx: MyContext, *suggestion):
         suggestion = " ".join(suggestion)
         suggestion_embed = discord.Embed(title="Suggestion",
-                                         description=f"By {ctx.author.mention}.\n"
-                                                     f"React with ✅ to vote for this suggestion, and ❌ to vote "
-                                                     f"against this suggestion.\n"
-                                                     f"0/0 can deny a suggestion by reacting with 🛑.\n")
+                                         description="By {ctx.author.mention}.\n"
+                                                     "React with ✅ to vote for this suggestion, and ❌ to vote "
+                                                     "against this suggestion.\n"
+                                                     "0/0 can deny a suggestion by reacting with 🛑.\n")
         suggestion_embed.add_field(name="Suggestion", value=suggestion)
         try:
             suggestion_channel = self.bot.get_channel(681498131699073139)

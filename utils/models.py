@@ -97,6 +97,7 @@ class AutoupdaterData(Model):
     last_updated = fields.DatetimeField(auto_now_add=True)
     force_update = fields.BooleanField(default=False)
     do_update_at = fields.DatetimeField(default=datetime.datetime.utcfromtimestamp(-1))
+    channel: fields.ManyToManyRelation[DiscordChannel]
 
     class Meta:
         table = "autoupdater_data"

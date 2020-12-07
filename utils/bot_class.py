@@ -5,6 +5,7 @@ from typing import Optional
 import concurrent.futures
 import aiohttp
 import discord
+import traceback
 from discord.ext.commands.bot import AutoShardedBot
 from discord.ext import commands
 import statcord
@@ -15,6 +16,7 @@ from utils.models import get_from_db
 from utils import api as covid19api
 from utils.maps import MapGetter
 from utils.async_helpers import wrap_in_async
+from copy import deepcopy
 
 
 _runtime_error = RuntimeError("The bot hasn't been set up yet! Ensure bot.async_setup is called ASAP!")
@@ -50,6 +52,7 @@ class MyBot(AutoShardedBot):
         self.stats = BotStats()
         self.statcord: Optional[statcord.Client] = None
         self._map_client: Optional[MapGetter] = None
+        self.support_server_invite = "https://discord.gg/myJh5hkjpS"
         asyncio.ensure_future(self.async_setup())
 
     @property
@@ -111,7 +114,7 @@ class MyBot(AutoShardedBot):
                 if not self._map_client.set_up:
                     await wrap_in_async(self._map_client.initalize_firefox, thread_pool=True)
         except Exception as e:
-            self.logger.exception("Fatal error while initalizing Firefox!", exception_instance=e)
+            self.logger.exception("Fatal error while initializing Firefox!", exception_instance=e)
 
     async def on_message(self, message: discord.Message):
         if not self.is_ready():
@@ -156,14 +159,12 @@ class MyBot(AutoShardedBot):
 
 
 async def get_prefix(bot: MyBot, message: discord.Message):
-    forced_prefixes = bot.config["bot"]["prefixes"]
+    forced_prefixes = deepcopy(bot.config["bot"]["prefixes"])
 
     if not message.guild:
         # Need no prefix when in DMs
         return commands.when_mentioned_or(*forced_prefixes, "")(bot, message)
-
     else:
-
         if bot.config["database"]["enable"]:
             db_guild = await get_from_db(message.guild)
             guild_prefix = db_guild.prefix

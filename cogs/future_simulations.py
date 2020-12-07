@@ -99,11 +99,12 @@ class FutureSimulations(Cog):
         try:
             await self.bot.wait_for("message", check=agree, timeout=15)
         except asyncio.TimeoutError:
-            await terms_of_service.edit(content=f"Didn't get a response. To try again, do "
-                                                f"`{ctx.prefix}{ctx.command.qualified_name}`.")
+            await terms_of_service.edit(content=_("Didn't get a response. To try again, do "
+                                                  "`{prefix}{qn}`.",
+                                                  prefix=ctx.prefix, qn=ctx.command.qualified_name))
         if ping_when_done:
             await ctx.send(f"{ctx.author.mention} > I'll ping you when this is done, you can go do other stuff.")
-        msg = await ctx.send("Please wait, initalizing...")
+        msg = await ctx.send("Please wait, initializing...")
         db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
         if ctx.guild is not None:
             db_guild = await get_from_db(ctx.guild)

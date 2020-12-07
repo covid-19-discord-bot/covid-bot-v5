@@ -1,19 +1,15 @@
 # coding=utf-8
 import asyncio
+from math import ceil
 from typing import Optional
 
 import discord
 from discord.ext import commands, tasks
-from discord.ext.commands import BucketType
-from random import randint
+import datetime
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-from utils.bot_class import MyBot
-from utils.models import get_from_db
-from utils import ai_system
 from utils import api as covid19api
 from utils import embeds
-from utils import graphs
 
 
 async def list_file(ctx: MyContext, letter: str) -> Optional[str]:
@@ -41,90 +37,212 @@ async def list_file(ctx: MyContext, letter: str) -> Optional[str]:
     return None
 
 
-
 class CovidCog(Cog):
-    @commands.command()
-    @commands.cooldown(1, 0.25, BucketType.user)  # No average user will be hitting this command once every 250ms
-    async def covid(self, ctx: MyContext, *args):
-        db_guild = await get_from_db(ctx.guild)
-        db_user = await get_from_db(ctx.author, as_user=True)
-        if db_user.is_premium or db_guild.is_premium:
-            is_premium = True
-        else:
-            is_premium = False
-        if len(args) == 0:
-            stats_embed = await embeds.stats_embed("world", self.bot)
-            if stats_embed is None:
-                error_embed = embeds.error_embed(self.bot, reason="Severe error: no world data!")
-                await ctx.send(embed=error_embed)
-                return
-            msg = await ctx.send(embed=stats_embed)
-        else:
-            country = " ".join(args).lower()
-            if country == "global":
-                country = "world"
-            stats_embed = await embeds.stats_embed(country, self.bot)
-            if stats_embed is None:
-                await ctx.send("Couldn't find a country with that ID (`/list` for a list of IDs) or the country has "
-                               "no cases!")
-                return
-            msg = await ctx.send(embed=stats_embed)
-        return  # TODO: set up JHUCSSE API
+    @commands.group()
+    async def covid(self, ctx: MyContext):
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help("covid")
 
-        # noinspection PyUnreachableCode
-        def reaction_add_event(reaction: discord.Reaction, user: discord.Member):
-            return reaction.emoji == "📈" and user.id == ctx.author.id and reaction.message.id == msg.id
-        await msg.add_reaction("📈")
-        while True:
-            try:
-                event_return = self.bot.wait_for("reaction_add", check=reaction_add_event, timeout=600)
-            except asyncio.TimeoutError:
-                return
+    @covid.command(aliases=["global"])
+    async def world(self, ctx: MyContext):
+        """
+        Stats for the entire world.
+        """
+        emb = await embeds.advanced_stats_embed(await self.bot.worldometers_api.try_to_get_name("world"), ctx)
+        if emb is None:
+            _ = await ctx.get_translate_function()
+            await ctx.reply(_("A fatal error has happened! The world data seems to have gone missing. Please let a "
+                              "mod in the bot's support server know."))
+        else:
+            await ctx.reply(embed=emb)
+
+    @covid.command()
+    async def continent(self, ctx: MyContext, continent_name: str):
+        """
+        Stats for any given continent.
+        """
+        real_name = await self.bot.worldometers_api.try_to_get_name(continent_name)
+        if real_name is None or real_name[0] != "continent":
+            _ = await ctx.get_translate_function()
+            await ctx.reply(_("Didn't find any continents with that name!"))
+        else:
+            emb = await embeds.advanced_stats_embed(real_name, ctx)
+            await ctx.reply(embed=emb)
+
+    @covid.command()
+    async def country(self, ctx: MyContext, *args):
+        """
+        Get stats on COVID-19 for any country!
+        """
+        _ = await ctx.get_translate_function()
+        country = " ".join(args).lower().strip()
+        if country == "global":
+            country = "world"
+        if country == "world" or country in ("", " "):
+            await ctx.reply(_("Use the `{prefix}covid world` command instead.", prefix=ctx.prefix))
+        country_test = await self.bot.worldometers_api.try_to_get_name(country)
+        if country_test is None:
+            if "korea" in country:
+                msg = _("Didn't find a country with that name, or the country has no cases! Try searching for the name "
+                        "with `{prefix}list country`.\n"
+                        "Hint: if you're looking for North or South Korea, try "
+                        "`{prefix}covid KP` or `{prefix}covid KR` for North and South Korea, "
+                        "respectively!", prefix=ctx.prefix)
             else:
-                emoji: str = event_return[0]
-                await msg.remove_reaction(emoji, event_return[1])
-                process_pool = self.bot.premium_process_pool if is_premium else self.bot.basic_process_pool
-                loop = asyncio.get_running_loop()
-                await loop.run_in_executor(process_pool, graphs.generate_line_plot())
+                msg = _("Didn't find a country with that name, or the country has no cases! Try searching for the name " \
+                        "with `{prefix}list country`.", prefix=ctx.prefix)
+            await ctx.reply(msg)
+        elif country_test[0] != "country":
+            await ctx.reply(_("You've used a incorrect command: try `{ctx.prefix}covid {country_test[0]}`"))
+        else:
+            stats_embed = await embeds.advanced_stats_embed(country_test, self.bot)
+            await ctx.reply(embed=stats_embed)
 
-    @commands.command(name="list")
-    async def _list(self, ctx: MyContext, *first_letter):
+    @covid.command()
+    async def province(self, ctx: MyContext, *args):
+        """
+        Get stats on COVID-19 for any given province!
+
+        You MUST split the country and province names with a semicolon followed by a space (; ), like so:
+        /covid province canada; alberta
+        """
+        args = " ".join(args)
+        if len(args.split("; ")) < 2:
+            await ctx.send("You haven't split the country name and province with a `; `!")
+            return
+        elif len(args.split("; ")) > 2:
+            await ctx.send("You've placed too many `; ` in your message! You can use only one to split the country "
+                           "and province names! For help, run `{ctx.prefix}help covid province`!")
+            return
+        else:
+            country, province = args.split("; ")
+        today = datetime.date.today()
+        today = today - datetime.timedelta(days=1)
+        try:
+            embed = await embeds.basic_stats_embed(country, province, today, ctx)
+        except covid19api.CountryNotFound:
+            await ctx.reply("Couldn't find a country with that ID (`/list` for a list of IDs) or the country has no "
+                            "cases!")
+            return
+        except covid19api.ProvinceNotFound:
+            await ctx.reply("Couldn't find a province with that name! If you're looking for US states, see the "
+                            "`{ctx.prefix}covid states` command.")
+            return
+        else:
+            if embed is None:
+                await ctx.reply("Something went wrong, I can't find today's stats! I'm currently trying to find stats "
+                                "for {today!s}!")
+            else:
+                await ctx.reply(embed=embed)
+
+    @covid.command()
+    async def states(self, ctx: MyContext, *state):
+        """
+        Get stats for US states!
+        """
+        if len(state) == 0:
+            await ctx.reply("You need to specify a US state! For a list, run `{ctx.prefix}list states`.")
+            return
+        state = " ".join(state)
+        state_test = await self.bot.worldometers_api.try_to_get_name(state)
+        if state_test is None:
+            await ctx.reply("Didn't find a state with that name! For a list, run `{ctx.prefix}list states`.")
+        if state_test[0] != "state":
+            await ctx.reply("That isn't a state! Try the `{ctx.prefix}covid {state_test[0]}` command.")
+        else:
+            await ctx.reply(embed=await embeds.advanced_stats_embed(state_test, self.bot))
+
+    @commands.group(name="list")
+    async def _list(self, ctx: MyContext):
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help("list")
+
+    @_list.command(name="countries", aliases=["country"])
+    async def _countries(self, ctx: MyContext, *first_letter):
+        """
+        List countries that can be used in /covid country.
+        """
         if len(first_letter) == 0:
-            await ctx.send("I can't send the entire country list: it's over Discord's 6,000 character limit! Try "
-                           "`/list <letter>` to get only countries starting with `<letter>`.")
+            await ctx.reply("I can't send the entire country list: it's over Discord's 6,000 character limit! Try "
+                            "`{ctx.prefix}{ctx.command.qualified_name} <letter>` to get only "
+                            "countries starting with `<letter>`.")
             return
         first_letter = " ".join(first_letter)
         embed = await embeds.list_embed(self.bot, " ".join(first_letter))
-        if embed is not None and len(embed) >= 6000:  # if it is none, the second will never be evaluated
-            def file(reaction: discord.Reaction, user: discord.Member):
-                return reaction.message.id == ctx.message.id and ctx.author.id == user.id and reaction.emoji == "📔"
-
-            msg = await ctx.send("Whatever you have requested, it is over 6,000 characters. I can send a text "
-                                 "file, however. React with 📔 any time in the next 15 seconds to be DMed a text "
-                                 "file instead of a embed.")
-            await msg.add_reaction("📔")
+        if embed is not None:
             try:
-                await self.bot.wait_for("reaction_add", check=file, timeout=15)
-            except asyncio.TimeoutError:
-                await msg.edit(content="Timed out.")
-            else:
-                msg = await list_file(ctx, first_letter)
-                await ctx.author.send(msg)  # the bot will convert this to a file for us, how nice
-                if ctx.guild is not None:
-                    await ctx.send("Sent you a DM!")
-        elif embed is not None:
-            await ctx.author.send(embed=embed)
+                await ctx.author.send(embed=embed)
+            except discord.HTTPException:
+                def file(reaction: discord.Reaction, user: discord.Member):
+                    return reaction.message.id == ctx.message.id and ctx.author.id == user.id and reaction.emoji == "📔"
+
+                msg = await ctx.reply("Whatever you have requested, it is over 6,000 characters. I can send a text "
+                                      "file, however. React with 📔 any time in the next 15 seconds to be DMed a text "
+                                      "file instead of a embed.")
+                await msg.add_reaction("📔")
+                try:
+                    await self.bot.wait_for("reaction_add", check=file, timeout=15)
+                except asyncio.TimeoutError:
+                    await msg.edit(content="Timed out.")
+                else:
+                    msg = await list_file(ctx, first_letter)
+                    await ctx.author.send(msg)  # the bot will convert this to a file for us, how nice
+                    if ctx.guild is not None:
+                        await ctx.reply("Sent you a DM!")
             if ctx.message.guild is not None:
-                await ctx.send("DMed a list to you!")
+                await ctx.reply("DMed a list to you!")
         else:
-            await ctx.send("Couldn't find any countries starting with those letters!")
+            await ctx.reply("Couldn't find any countries starting with those letters!")
+
+    @staticmethod
+    async def generate_list_embed(ctnts: list, type: tuple, ctx: MyContext):
+        emb = discord.Embed(title="List of {type[1]}",
+                            description="Use `{ctx.prefix}covid {type[0]} <name>` when getting stats for a {type[0]}!")
+        for ctnt in ctnts:
+            emb.add_field(name="Name", value=ctnt)
+        return emb
+
+    @_list.command(name="continents", aliases=["continent"])
+    async def _continents(self, ctx: MyContext):
+        """
+        DMs you a list of all continents that can be used in the /covid continent command!
+        """
+        await ctx.author.send(embed=await self.generate_list_embed(self.bot.worldometers_api.continents,
+                                                                   ("continent", "continents"),
+                                                                   ctx))
+        if ctx.guild is not None:
+            await ctx.reply("DMed a list to you!")
+
+    @_list.command(name="states", aliases=["state"])
+    async def _states(self, ctx: MyContext, page: int = 1):
+        """
+        DMs you a list of all continents that can be used in the /covid state command!
+        """
+        state_list_embed = discord.Embed(title="List of American States",
+                                         description="Use the `{ctx.prefix}covid states <name>` command when getting "
+                                                     "stats for `<name>`!")
+        max_pages = ceil(len(self.bot.worldometers_api.american_states) / 24)
+        if not 0 < page <= max_pages:
+            await ctx.reply("The page number you have selected is not between 1 and "
+                            "{max_pages}. Please try again.")
+            return
+        sect = self.bot.worldometers_api.american_states[(page - 1) * 24: page * 24]
+        for state_name in sect:
+            state_list_embed.add_field(name="Name", value=state_name)
+        if len(sect) == 24:
+            state_list_embed.add_field(name="Page {page} of {max_pages}",
+                                       value="To go to the next page, run "
+                                             "`{ctx.prefix}{ctx.command.full_parent_name} {ctx.invoked_with} {page + 1}`")
+        else:
+            state_list_embed.add_field(name="Page {page} of {max_pages}", value="\u200b")
+        await ctx.author.send(embed=state_list_embed)
+        if ctx.guild is not None:
+            await ctx.reply("DMed a list to you!")
 
     @commands.command()
     async def top(self, ctx: MyContext, _type: str):
         """
-        /top <type>
-
-        where <type> is one of "cases", "recovered", "deaths", "critical", "tests"
+        <_type> can be one of "cases", "recovered", "deaths", "critical" or "tests"
         """
         try:
             _list = await self.bot.worldometers_api.get_sorted_list(_type.lower())
@@ -142,9 +260,10 @@ class CovidCog(Cog):
                 not_correct_type_embed.add_field(name="\u200b", value=_type)
             await ctx.send(embed=not_correct_type_embed)
             return
-        top_embed = discord.Embed(title="Top List", description="Run `/help list` for a list of all possible sorts")
+        top_embed = discord.Embed(title="Top List",
+                                  description="Run `{ctx.prefix}help top` for a list of all possible sorts")
         for country, i in zip(_list, range(1, len(_list))):
-            top_embed.add_field(name=f"{i}: {country['country']}", value=country[_type.lower()])
+            top_embed.add_field(name="{i}: {country['country']}", value=format(int(country[_type.lower()]), ","))
         await ctx.send(embed=top_embed)
 
     @tasks.loop(minutes=10)

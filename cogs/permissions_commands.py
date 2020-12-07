@@ -133,7 +133,7 @@ class PermissionsCommands(Cog):
 
                 for permission, value in role_permissions.items():
                     sign = "+" if value else "-"
-                    message.append(f"{sign} {permission}")
+                    message.append("{sign} {permission}")
                 message.append("```")
                 said_something = True
                 await ctx.send("\n".join(message))
@@ -164,7 +164,7 @@ class PermissionsCommands(Cog):
 
                 for permission, value in role_permissions.items():
                     sign = "+" if value else "-"
-                    message.append(f"{sign} {permission}")
+                    message.append("{sign} {permission}")
                 message.append("```")
                 said_something = True
                 await ctx.send("\n".join(message))
@@ -191,7 +191,7 @@ class PermissionsCommands(Cog):
 
             for permission, value in permissions.items():
                 sign = "+" if value else "-"
-                message.append(f"{sign} {permission}")
+                message.append("{sign} {permission}")
             message.append("```")
             await ctx.send("\n".join(message))
         else:
