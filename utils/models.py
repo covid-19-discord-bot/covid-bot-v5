@@ -40,6 +40,8 @@ class DiscordChannel(Model):
     name = fields.TextField()
     autoupdater = fields.ForeignKeyField('models.AutoupdaterData')
     permissions = fields.JSONField(default={})
+    api_key = fields.CharField(32, default="0"*32)
+    disabled_api = fields.BooleanField(default=False)
 
     class Meta:
         table = "channels"

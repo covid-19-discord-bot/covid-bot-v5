@@ -1,17 +1,20 @@
 # coding=utf-8
+import json
 from datetime import datetime
 
 import aiohttp_cors
+import discord
 from aiohttp import web
-from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden
-from discord.ext import commands, tasks
+from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest
+import datetime
+
 from utils.cog_class import Cog
 from utils.models import get_from_db
 
 
 class RestAPI(Cog):
     """
-    If someone wants to do a dashboard or something to control DuckHunt, there are a few api routes already. They all return JSON or HTTP404/403/500.
+    If someone wants to do a dashboard or something to control the bot, there are a few api routes already. They all return JSON or HTTP404/403/500.
     **Routes**:
     `/api/channels`  [Global Authentication required] -> Returns some information about all channels enabled on the bot.
     `/api/channels/{channel_id}`  [Authentication required] -> Returns information about the channel, like the ducks currently spawned.
@@ -22,7 +25,7 @@ class RestAPI(Cog):
     If you have one, pass the API key on the Authorization HTTP header.
     Two types of keys exist :
     - Channel specific keys, available with `settings api_key`. They only work for a specific channel data.
-    - Global keys, that allow UNLIMITED access to every channel data. They are available on request with me.
+    - Global keys, that allow UNLIMITED access to every channel data. They are available on request with me (0/0#0001).
     Api keys (local or global) are uuid4, and look like this : `d84af260-c806-4066-8387-1d5144b7fa72`
     """
 
@@ -35,7 +38,7 @@ class RestAPI(Cog):
         bot.loop.create_task(self.run())
 
     def cog_unload(self):
-        self.bot.logger.info(f"DuckHunt JSON API is shutting down...")
+        self.bot.logger.info(f"COVID-19 Bot JSON API is shutting down...")
         self.bot.loop.create_task(self.site.stop())
 
     async def authenticate_request(self, request, channel=None):
@@ -54,6 +57,9 @@ class RestAPI(Cog):
         if channel:
             db_channel = await get_from_db(channel)
             channel_api_key = str(db_channel.api_key)
+            if api_key == "00000000000000000000000000000000":
+                raise HTTPForbidden(reason="No API key has been generated for this channel yet. Run '/settings api_key "
+                                           "set' to generate a key.")
             if channel_api_key != api_key:
                 raise HTTPForbidden(reason="The API key provided isn't valid for the specified channel.")
             else:
@@ -89,63 +95,98 @@ class RestAPI(Cog):
 
         return web.json_response(channel_data)
 
-    async def channel_settings(self, request):
-        """
-        /channels/<channel_id>/settings
-        Get information about a specific channel ID
-        """
-        channel = self.bot.get_channel(int(request.match_info['channel_id']))
-
-        if channel is None:
-            raise HTTPNotFound(reason="Unknown channel")
-
-        await self.authenticate_request(request, channel=channel)
-
+    async def manage_updater(self, request: web.Request):
+        channel = self.bot.get_channel(int(request.match_info["channel_id"]))
+        await self.authenticate_request(request, channel)
         db_channel = await get_from_db(channel)
+        try:
+            data = json.load(request.content)
+        except MemoryError:  # if someone wants to try to DoS this by sending large data forms...
+            # they aren't getting anything, since it'll just time out
+            return ""
+        except json.JSONDecodeError:
+            raise HTTPBadRequest(reason="Malformed JSON") from None
+        if "autoupdater" not in data:
+            raise HTTPBadRequest(reason="No autoupdater data sent")
+        ad = data["autoupdater"]
+        if "enabled" not in ad:
+            raise HTTPBadRequest(reason="Didn't specify whether to enable updater.")
+        if ad["enabled"]:
+            db_channel.autoupdater.already_set = True
+            if "country_name" in ad:
+                name = await self.bot.worldometers_api.try_to_get_name(ad["country_name"])
+                if name[0] in ("country", "world"):
+                    db_channel.autoupdater.country_name = name[1]
+                else:
+                    raise HTTPBadRequest(reason="Country not found")
+            if "delay" in ad:
+                try:
+                    delay = int(ad["delay"])
+                except ValueError:
+                    raise HTTPBadRequest(reason="Delay is not numeric")
+                if 600 <= delay < 31536000:
+                    raise HTTPBadRequest(reason="Delay outside of constraints: 3153600 > delay >= 600")
+                db_channel.autoupdater.delay = delay
+            if "force_update" in ad:
+                try:
+                    force_update = bool(ad["force_update"])
+                except ValueError:
+                    raise HTTPBadRequest(reason="Force update not boolean")
+                db_channel.autoupdater.force_update = force_update
+            if "do_update_at" in ad:
+                try:
+                    do_update_at = datetime.utcfromtimestamp(float(ad["do_update_at"]))
+                except ValueError:
+                    raise HTTPBadRequest(reason="Update time not a valid UTC unix timestamp")
+                db_channel.autoupdater.do_update_at = do_update_at
+        else:
+            db_channel.autoupdater.already_set = False
+        await db_channel.autoupdater.save()
+        await db_channel.save()
+        return web.json_response({"result": "ok"})
 
-        return web.json_response(db_channel.serialize())
-
-    async def channel_top(self, request):
+    async def bot_is_in_server(self, request):
         """
-        /channels/<channel_id>/top
-        Get players data, ordered by experience
+        /protected/is_in_server/<server_id>
+        Returns JSON data, with one key ("is_in_server") that is True if the bot is in the server, False if not.
+        Requires global API key.
         """
-        channel = self.bot.get_channel(int(request.match_info['channel_id']))
+        await self.authenticate_request(request)
 
-        if not channel:
-            raise HTTPNotFound(reason="Unknown channel")
+        guild = self.bot.get_guild(int(request.match_info["guild_id"])) or self.bot.fetch_guild(int(
+            request.match_info["guild_id"]))
 
-        players = await Player.all().filter(channel__discord_id=channel.id).order_by('-experience').prefetch_related(
-            "member__user")
+        if guild:
+            resp = {"is_in_server": True}
+        else:
+            resp = {"is_in_server": False}
+        return web.json_response(resp)
 
-        if not players:
-            raise HTTPNotFound(reason="Unknown channel in database")
-
-        fields = ["experience", "best_times", "killed", "last_giveback"]
-
-        return web.json_response([
-            player.serialize(serialize_fields=fields) for player in players
-        ])
-
-    async def player_info(self, request):
+    async def check_channel_permissions(self, request):
         """
-        /channels/<channel_id>/player/<player_id>
-        Get players data, ordered by experience
+        /protected/manage_channel/<guild_id>/<user_id>
+        Returns a list of dicts of details of channels where the user has permissions to manage messages.
+        The dicts have two keys: 'id' for channel ID and 'name' for channel name.
+        Could return nothing but a empty list, and probably will do so often
+        Requires global API key.
         """
-        channel = self.bot.get_channel(int(request.match_info['channel_id']))
-
-        await self.authenticate_request(request, channel=channel)
-
-        player = await Player \
-            .filter(channel__discord_id=channel.id,
-                    member__user__discord_id=int(request.match_info['player_id'])) \
-            .first() \
-            .prefetch_related("member__user")
-
-        if not player:
-            raise HTTPNotFound(reason="Unknown player/channel/user")
-
-        return web.json_response(player.serialize())
+        await self.authenticate_request(request)
+        guild: discord.Guild = self.bot.get_guild(request.match_info["guild_id"])
+        if not guild:
+            guild: discord.Guild = await self.bot.fetch_guild(request.match_info["guild_id"])
+            if not guild:
+                raise HTTPNotFound(reason="No guild with that ID found")
+        member: discord.Member = await guild.get_member(request.match_info["user_id"])
+        if not member:
+            member: discord.Member = await guild.fetch_member(request.match_info["user_id"])
+            if not member:
+                raise HTTPNotFound(reason="No member with that ID found")
+        channels_with_permissions = []
+        for channel in guild.channels:
+            channel: discord.TextChannel
+            if channel.permissions_for(member).manage_messages:
+                channels_with_permissions.append({"name": channel.name, "id": channel.id})
+        return web.json_response(channels_with_permissions)
 
     async def run(self):
         await self.bot.wait_until_ready()
@@ -154,8 +195,9 @@ class RestAPI(Cog):
         route_prefix = self.config()['route_prefix']
         routes = [
             ('GET', f'{route_prefix}/channels/{{channel_id:\\d+}}', self.channel_info),
-            ('GET', f'{route_prefix}/channels/{{channel_id:\\d+}}/settings', self.channel_settings),
-            ('POST', f'{route_prefix}/channels/{{channel_id:\\d+}}/settings/{{setting:\\d+}}', self.player_info),
+            ('GET', f'{route_prefix}/protected/bot_is_in_server/{{guild_id:\\d+}}', self.bot_is_in_server),
+            ('GET', f'{route_prefix}/protected/manage_channel/{{guild_id:\\d+}}/{{user_id:\\d+}}',
+             self.check_channel_permissions),
         ]
         for route_method, route_path, route_coro in routes:
             resource = self.cors.add(self.app.router.add_resource(route_path))
@@ -171,7 +213,7 @@ class RestAPI(Cog):
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, listen_ip, listen_port)
         await self.site.start()
-        self.bot.logger.info(f"DuckHunt JSON API listening on http://{listen_ip}:{listen_port}")
+        self.bot.logger.info(f"COVID-19 Bot JSON API listening on http://{listen_ip}:{listen_port}")
 
 
 setup = RestAPI.setup

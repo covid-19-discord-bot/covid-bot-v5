@@ -1,8 +1,10 @@
 """
 Some example of commands that can be used to interact with the database.
 """
+import secrets
 from typing import Optional
 
+import discord
 from discord.ext import commands
 from discord.utils import escape_markdown, escape_mentions
 
@@ -12,19 +14,6 @@ from utils.models import get_from_db
 
 
 class DatabaseCommands(Cog):
-    @commands.command()
-    async def how_many(self, ctx: MyContext):
-        """
-        Say hi with a customisable hello message. This is used to demonstrate cogs config usage
-        """
-        _ = await ctx.get_translate_function()
-        db_user = await get_from_db(ctx.author, as_user=True)
-        db_user.times_ran_example_command += 1
-        await db_user.save()
-        await ctx.send(_("You ran that command {times_ran_example_command} times already!",
-                         times_ran_example_command=db_user.times_ran_example_command
-                         ))
-
     @commands.group()
     @commands.has_permissions(manage_guild=True)
     async def settings(self, ctx: MyContext):
@@ -68,7 +57,7 @@ class DatabaseCommands(Cog):
 
         _ = await ctx.get_translate_function()
         if db_guild.language:
-            await ctx.send(_("The server language is set to `{language}`.",
+            await ctx.send(_("The server language is now set to `{language}`.",
                              language=escape_mentions(escape_markdown(db_guild.language))
                              ))
 
@@ -81,14 +70,59 @@ class DatabaseCommands(Cog):
     @settings.command()
     async def enable_tips(self, ctx: MyContext, enabled: Optional[bool] = True):
         db_guild = await get_from_db(ctx.guild)
-        db_guild.enable_tips = enabled
-        await db_guild.save()
         _ = await ctx.get_translate_function()
-        if enabled:
-            e = "Enabled"
+        if enabled is None:
+            if db_guild.enable_tips:
+                await ctx.reply(_("Tips are currently enabled for this guild."))
+            else:
+                await ctx.reply(_("Tips are currently disabled for this guild."))
         else:
-            e = "Disabled"
-        await ctx.send(_("{0} tips for this guild.".format(e)))
+            db_guild.enable_tips = enabled
+            await db_guild.save()
+            if enabled:
+                await ctx.reply(_("Enabled tips for this guild."))
+            else:
+                await ctx.reply(_("Disabled tips for this guild."))
+
+    @settings.command()
+    async def api_key(self, ctx: MyContext, action: str):
+        """
+        Manage your channel's API key.
+        Pass one of the following arguments to manage the key.
+        "view": DMs you your API key.
+        "revoke": Revokes the API key. **DOES NOT generate a new one!** Use "new" for that.
+        "new": Revokes the API key, if one exists, generates a new one, and DMs it to you.
+        """
+        db_channel = await get_from_db(ctx.channel)
+        _ = await ctx.get_translate_function()
+        if db_channel.disabled_api:
+            await ctx.reply(_("The API has been disabled for this channel. To restore your permissions, contact "
+                              "0/0#0001 on the official support server."))
+            return
+        if action.lower() in ("view", "see"):
+            await ctx.author.send(db_channel.api_key)
+            await ctx.reply(_("DMed your API key to you."))
+        elif action.lower() in ("revoke", "delete"):
+            db_channel.api_key = "0"*32
+            await ctx.reply(_("Revoked/deleted API key."))
+        elif action.lower() in ("regenerate", "new", "generate"):
+            api_key = secrets.token_urlsafe(32)
+            while api_key != "0"*32:  # the chances of it actually being that is 1 in 2.135987036×10⁹⁶, but if that
+                # happens... that's a first
+                api_key = secrets.token_urlsafe(32)
+            db_channel.api_key = api_key
+            await ctx.author.send(api_key)
+            await ctx.reply(_("DMed your new API key to you."))
+        await db_channel.save()
+
+    @commands.command()
+    @commands.is_owner()
+    async def disable_api(self, ctx: MyContext, channel: discord.TextChannel):
+        _ = await ctx.get_translate_function()
+        db_channel = await get_from_db(channel)
+        db_channel.disabled_api = True
+        await db_channel.save()
+        await ctx.reply(_("Disabled the API for {name}.", name=channel.name))
 
 
 setup = DatabaseCommands.setup
