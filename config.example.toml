@@ -1,0 +1,86 @@
+[bot]
+prefixes = ["covid", "/", "c!"]
+description = """Get live stats on the COVID-19 pandemic!"""
+playing = "with COVID-19 stats"
+commands_are_case_insensitive = true
+
+[database]
+# A postgreSQL database to store information about users, channels, and guilds
+# Please ensure the database exist before loading the database modules
+# Quick Start : https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e
+enable = true
+host = "127.0.0.1"
+port = "5432"
+user = "covid_bot"
+password = "000"
+database = "000"
+
+[permissions.default]
+# Permissions work on a inheritance basis
+# First, default permissions here are applied. They usually deny almost everything but the base functions of the bot.
+# Then, Guild permissions are applied and remplace some default permisions. After that, special member permissions are
+# applied. Finally, Fixed permissions below are applied to prevent giving too much rights (like bot.administrator) in a
+# server or a memeber config. Then, if there are some, user permissions are applied and are allowed to override anything.
+# They are set by the bot admins, in the db.
+# Once the permissions are calculated, they are applied from precise to imprecise (wildcards).
+# For example, suppose the bot is checking for a.b.c, and the user has a.* allowed, a.b.* denied, and a.b.c allowed,
+# the permission is granted by a.b.c since it's the most specific of all.
+# WARNING : Ensure that all permissions names are lowercased.
+# Dont forget that each command have, by default and unless another check exists, a permission going by the form
+# CogName.command_name. As you might see in [permissions.fixed], they are by default evaluted to false. So if you want
+# to make them by-default accessible to anyone, you have to give that permission (or a lower wildcard) here.
+"autoupdatercog.*"      = true
+"covidcog.*"            = true
+"databasecommands.*"    = true
+"futuresimulations.*"   = true
+"historicaldata.*"      = true
+"premiumsettings.*"     = true
+"mapscommands.*"        = true
+"server.ignored"        = false
+"suggestionscommands.*" = true
+"utilscommands.*"       = true
+"permissionscommands.*" = true
+"vaccine.*"             = true
+
+
+[permissions.fixed]
+# We need to deny that one to everyone, because by default there is no permissions granted
+"*" = false
+
+# Bot permissions are special and must not be overridden
+# "Just in case"
+"bot.*" = false
+
+# These need to be overriden "per-user" in the database.
+"bot.bypass_cooldowns" = false
+"bot.ignored"          = false
+"bot.administrator"    = false
+
+
+[auth.discord]
+# Your bot token. You can find it on the Bot page of the Developper portal
+token = "000"
+[auth.statcord]
+# Your Statcord token
+token = "statcord.com-000"
+
+[cogs.cog_reloader]
+# Names of cogs to load. Usually cogs.file_name_without_py
+cogs_to_load = ['cogs.rest_api', 'jishaku', 'cogs.autoupdater', 'cogs.background_loop', 'cogs.covid',
+    'cogs.database_commands', 'cogs.error_handling', 'cogs.future_simulations', 'cogs.graphs', 'cogs.historical_data',
+    'cogs.maps', 'cogs.permissions_commands', 'cogs.premium', 'cogs.support_server_commands', 'cogs.suggestions',
+    'cogs.utils', 'cogs.vaccine', 'cogs.slash_commands']
+# Disable the reload command for the following cogs
+disable_reload_for = ['cogs.cog_reloader']
+
+[cogs.SupportServerCommands]
+# That's the ID of your server where the command will be ran
+support_server_id = 675390855716274216
+# ID of an empty channel that will be used as a status dashboard.
+status_channel_id = 770718902001991691
+
+[cogs.RestAPI]
+global_api_keys = []
+listen_ip = "0.0.0.0"
+listen_port = 15855
+route_prefix = '/v1'

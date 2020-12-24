@@ -22,6 +22,8 @@ class DiscordGuild(Model):
     is_premium = fields.BooleanField(default=False)
     enable_tips = fields.BooleanField(default=True)
     disable_simulations = fields.BooleanField(default=False)
+    used_updaters = fields.SmallIntField(default=0)
+    total_updaters = fields.SmallIntField(default=1)
 
     class Meta:
         table = "guilds"
@@ -64,7 +66,7 @@ class DiscordUser(Model):
     language = fields.CharField(6, default="en")
     is_premium = fields.BooleanField(default=False)
     future_simulation = fields.ForeignKeyField('models.FutureSimulations')
-    autoupdater = fields.ForeignKeyField('models.AutoupdaterData')
+    updater_credits = fields.SmallIntField(default=0)
 
     class Meta:
         table = "users"

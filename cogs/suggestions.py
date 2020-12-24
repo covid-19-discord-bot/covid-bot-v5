@@ -13,6 +13,7 @@ active_suggestions = {}
 class SuggestionsCommands(Cog):
     @commands.command()
     async def suggest(self, ctx: MyContext, *suggestion):
+        _ = await ctx.get_translate_function()
         suggestion = " ".join(suggestion)
         suggestion_embed = discord.Embed(title="Suggestion",
                                          description="By {ctx.author.mention}.\n"
@@ -27,9 +28,9 @@ class SuggestionsCommands(Cog):
             await msg.add_reaction("❌")
             await msg.add_reaction("🛑")
         except discord.HTTPException:
-            await ctx.send("Failed to send suggestion due to a Discord error. Try again.")
+            await ctx.send(_("Failed to send suggestion due to a Discord error. Try again."))
         else:
-            await ctx.send("Sent suggestion sucessfully.")
+            await ctx.send(_("Sent suggestion successfully."))
             active_suggestions[msg.id] = suggestion  # dicts are speed, also a nice way to store the suggestion
 
     @commands.Cog.listener()

@@ -15,7 +15,8 @@ class UtilsCommands(Cog):
         """
         A simple credits screen
         """
-        credits_embed = discord.Embed(color=discord.Color.dark_green(), title="Credits")
+        _ = await ctx.get_translate_function()
+        credits_embed = discord.Embed(color=discord.Color.dark_green(), title=_("Credits"))
         symphonic: discord.User = await self.bot.fetch_user(263128260009787392)
         zeroslashzero: discord.User = await self.bot.fetch_user(661660243033456652)
         eyes: discord.User = await self.bot.fetch_user(138751484517941259)
@@ -24,44 +25,27 @@ class UtilsCommands(Cog):
         zeroslashzero_mention: str = zeroslashzero.mention
         eyes_mention: str = eyes.mention
         stalin_mention: str = stalin.mention
-        credits_embed.set_footer(text="current bot version: v5.0.0-alpha9")
-        credits_embed.add_field(name="v3+ Creator", value=zeroslashzero_mention)
-        credits_embed.add_field(name="Original Creator", value=symphonic_mention)
-        credits_embed.add_field(name="Bot Framework", value=eyes_mention)
-        credits_embed.add_field(name="Moral Support", value=stalin_mention)
-        credits_embed.add_field(name='API Providers', value="https://corona.lmao.ninja", inline=False)
-        credits_embed.add_field(name="discord.py Devs", value="https://github.com/Rapptz/discord.py", inline=False)
+        credits_embed.set_footer(text=_("current bot version: v5.2.0"))
+        credits_embed.add_field(name=_("v3+ Creator"), value=zeroslashzero_mention)
+        credits_embed.add_field(name=_("Original Creator"), value=symphonic_mention)
+        credits_embed.add_field(name=_("Bot Framework"), value=eyes_mention)
+        credits_embed.add_field(name=_("Moral Support"), value=stalin_mention)
+        credits_embed.add_field(name=_("API Providers"), value="https://corona.lmao.ninja", inline=False)
+        credits_embed.add_field(name=_("discord.py Devs"), value="https://github.com/Rapptz/discord.py", inline=False)
         await ctx.send(embed=credits_embed)
 
     @commands.command()
     async def invite(self, ctx: MyContext):
-        invite_embed = discord.Embed(color=discord.Color.purple(), title="Invite Links")
-        oauth_url = discord.utils.oauth_url(client_id=str(self.bot.user.id),
-                                            permissions=discord.Permissions(read_messages=True, send_messages=True,
-                                                                            embed_links=True, manage_messages=True))
-        invite_embed.add_field(name="Bot Invite Link", value=oauth_url)
-        invite_embed.add_field(name="Discord Server Invite Link", value="https://discord.gg/v8qDQDc")
+        _ = await ctx.get_translate_function()
+        invite_embed = discord.Embed(color=discord.Color.purple(), title=_("Invite Links"))
+        oauth_url = "https://covid19.imaskeleton.me/invite"
+        invite_embed.add_field(name=_("Bot Invite Link"), value=oauth_url)
+        invite_embed.add_field(name=_("Discord Server Invite Link"), value="https://discord.gg/v8qDQDc")
         await ctx.send(embed=invite_embed)
 
     @commands.command()
     async def stats(self, ctx: MyContext):
-        await ctx.send("https://statcord.com/bot/{self.bot.user.id}")
-
-    @commands.command(name="is_premium_guild")
-    async def is_premium(self, ctx: MyContext):
-        db_guild = await get_from_db(ctx.guild)
-        premium = db_guild.is_premium
-        msg = "This guild ({ctx.guild.name}, ID `{ctx.guild.id}`) is "
-        if premium:
-            msg += " a "
-        else:
-            msg += " not a "
-        msg += "premium guild. "
-        if premium:
-            msg += "<3 from 0/0#0001!"
-        else:
-            msg += "To get a few perks and 0/0#0001's unconditional love, check out the `/donate` command!"
-        await ctx.send(msg)
+        await ctx.send(f"https://statcord.com/bot/{self.bot.user.id}")
 
     @commands.command()
     async def ping(self, ctx: MyContext):
@@ -74,36 +58,37 @@ class UtilsCommands(Cog):
         try:
             await ctx.channel.trigger_typing()  # tell Discord that the bot is "typing", which is a very simple request
         except discord.NotFound:
-            await ctx.send("I seem to be having issues, apparently I can't find the channel you ran that command in! "
-                           "Please try again.")
+            await ctx.send(_("I seem to be having issues, apparently I can't find the channel you ran that command in! "
+                             "Please try again."))
             return
         t_2 = time.perf_counter()
         time_delta = round((t_2 - t_1) * 1000)  # calculate the time needed to trigger typing
-        await ctx.send(_("Pong. — Time taken: {milliseconds}ms", milliseconds=time_delta))  # send a message telling the
+        await ctx.send(_("Pong. — Time taken: {0}ms", time_delta))  # send a message telling the
         # user the calculated ping time
 
     @commands.is_owner()
     @commands.command(name="async_setup")
     async def async_setup(self, ctx: MyContext):
-        msg = await ctx.send("Calling `self.bot.async_setup()`...")
+        _ = await ctx.get_translate_function()
+        msg = await ctx.send(_("Calling `self.bot.async_setup()`..."))
         await self.bot.async_setup()
-        await msg.edit(content="Bot has been setup!")
+        await msg.edit(content=_("Bot has been setup!"))
 
     @commands.command()
     async def vote(self, ctx: MyContext):
-        vote_embed = discord.Embed(title="Vote Sites",
-                                   description="Voting for the bot gives it more visibility, which means it ends up in "
-                                               "more servers, giving me (the dev) more incentive to add more "
-                                               "features!\n"
-                                               "If you want a specific feature, let me know with the `/suggest` "
-                                               "command!")
+        vote_embed = discord.Embed(title=_("Vote Sites"),
+                                   description=_("Voting for the bot gives it more visibility, which means it ends up in "
+                                                 "more servers, giving me (the dev) more incentive to add more "
+                                                 "features!\n"
+                                                 "If you want a specific feature, let me know with the `/suggest` "
+                                                 "command!"))
         vote_embed.add_field(name="discord.boats",
                              value="https://discord.boats/bot/675390513020403731/vote")
         vote_embed.add_field(name="bots.discordlabs.org",
                              value="https://bots.discordlabs.org/bot/675390513020403731?vote")
         vote_embed.add_field(name="top.gg",
                              value="https://top.gg/bot/675390513020403731/vote")
-        vote_embed.set_footer(text="**DO NOT disable adblockers!**")
+        vote_embed.set_footer(text=_("**DO NOT disable adblockers!**"))
         await ctx.send(embed=vote_embed)
 
     @commands.command()

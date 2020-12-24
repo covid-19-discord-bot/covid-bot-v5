@@ -189,6 +189,7 @@ class Covid19JHUCSSEStats:
     """
     Class for stats on COVID-19 via the https://disease.sh API's JHUCSSE section.
     """
+
     def __init__(self, add_ids: bool = False, *, update_stats: bool = False,
                  logging_level=logging.INFO):
         """
@@ -207,8 +208,11 @@ class Covid19JHUCSSEStats:
         self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
         self.global_historical_stats: dict = {}
         self.historical_stats: dict = {}
+        self.american_states: list = []
         self.american_state_stats: dict = {}
         self.iso_codes = ISOCodeHelper()
+        self.provinces: dict = {}
+        self.countries: dict = {}
         self.logger.setLevel(logging.INFO)
         if update_stats:
             self.update_covid_19_virus_stats()
@@ -255,21 +259,60 @@ class Covid19JHUCSSEStats:
             for country in self.iso_codes.iso_codes:
                 cty_data = {}
                 for i in filter(lambda x: x["country"] == country["country"], data):
-                    # for j in ["cases", "deaths", "recovered"]:
-                    #     i["timeline"][j] = await self._parse_datetime_strings(i["timeline"][j])
                     if i["province"] is None:
                         cty_data["all"] = i
+                        self.countries[i["country"]] = i
                     else:
                         cty_data[i["province"]] = i
+                        self.provinces[i["province"].lower()] = i
                 self.historical_stats[country["iso2"]] = cty_data
+            self.logger.info("Getting US states...")
+            data: list = await get_data(session, "https://disease.sh/v3/covid-19/historical/usacounties?lastdays=all")
+            self.american_states = data
+            for state in data:
+                state_data = await get_data(session, f"https://disease.sh/v3/covid-19/historical/usacounties/{state}?"
+                                                     f"lastdays=all")
+                sd = {"all": {"timeline": {"cases": {}, "deaths": {}}}}
+
+                def check(y):
+                    if y is None or y["county"] is None:
+                        return False
+                    return not y["county"].startswith("out of") or y["county"] == "unassigned"
+
+                for county, i in zip(filter(check, state_data), range(len(state_data))):
+                    if i == 0:
+                        for j in ["cases", "deaths"]:
+                            tc = {}
+                            for k in county["timeline"][j]:
+                                tc[k] = 0
+                            sd["all"]["timeline"][j] = tc
+
+                    for j in ["cases", "deaths"]:
+                        tc = sd["all"]["timeline"][j]
+                        for k in county["timeline"][j]:
+                            tc[k] += county["timeline"][j][k]
+                        sd["all"]["timeline"][j] = tc
+
+                    sd[county["county"]] = county
         self.last_updated_utc = datetime.datetime.utcnow()
         self._has_been_updated = True
         self.data_is_valid = True
         self.logger.info("Done!")
 
-    async def log_data(self):
-        with open("cty_data.txt", "w") as f:
-            pprint(self.historical_stats, stream=f)
+    def try_to_get_name(self, name: str) -> Optional[Tuple[str, Optional[str]]]:
+        name = name.lower()
+        if name in ("global", "world", "ot"):
+            return "world", None
+        possible_country_names = (get_country_name(name, self.iso_codes.iso_codes),
+                                  get_iso2_code(name, self.iso_codes.iso_codes),
+                                  get_iso3_code(name, self.iso_codes.iso_codes))
+        if name in (x.lower() for x in possible_country_names if x is not None):
+            return "country", name
+        elif name in self.provinces:
+            return "province", name
+        elif name in self.american_states:
+            return "state", name
+        return None
 
     @staticmethod
     async def _parse_datetime_strings(data_dict: dict):
@@ -303,11 +346,20 @@ class Covid19JHUCSSEStats:
             iso2_code = country
         return self.historical_stats[iso2_code]
 
-    async def get_province_stats(self, country: str, province: str):
+    async def get_province_stats(self, province: str):
         """"""
-        cty_stats = await self.get_country_stats(country)
-        for i in filter(lambda x: x.lower() == province.lower(), cty_stats):
-            return cty_stats[i]
+        await self._check_stats_are_valid()
+        province = province.lower()
+        if province in self.provinces:
+            return self.provinces[province]
+        raise ProvinceNotFound()
+
+    async def get_state_stats(self, state: str):
+        """"""
+        await self._check_stats_are_valid()
+        state = state.lower()
+        if state in self.american_states:
+            return self.american_state_stats[state]["all"]
         raise ProvinceNotFound()
 
     @staticmethod
@@ -340,7 +392,7 @@ class Covid19JHUCSSEStats:
 
     async def get_province_stats_for_day(self, country: str, province: str, date: datetime.date):
         """"""
-        cty_stats = await self.get_province_stats(country, province)
+        cty_stats = await self.get_province_stats(province)
         return await self._get_stats_for_day(cty_stats, date)
 
     async def get_country_stats_for_dates(self, country: str, dates: List[datetime.date]):
@@ -350,7 +402,7 @@ class Covid19JHUCSSEStats:
 
     async def get_province_stats_for_dates(self, country: str, province: str, dates: List[datetime.date]):
         """"""
-        cty_stats = await self.get_province_stats(country, province)
+        cty_stats = await self.get_province_stats(province)
         return await self._get_stats_for_dates(cty_stats, dates)
 
 
@@ -358,6 +410,7 @@ class Covid19StatsWorldometers:
     """
     Class for stats on COVID-19 via the https://disease.sh API's Worldometers section.
     """
+
     def __init__(self, add_ids: bool = False, *, update_stats: bool = False,
                  logging_level=logging.INFO):
         """
@@ -576,6 +629,7 @@ class VaccineStats:
     """
     Class for stats on COVID-19 via the https://disease.sh API's vaccine section.
     """
+
     def __init__(self, add_ids: bool = False, *, update_stats: bool = False,
                  logging_level=logging.INFO):
         """

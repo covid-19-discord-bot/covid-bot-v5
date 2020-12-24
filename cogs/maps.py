@@ -11,6 +11,10 @@ from utils.maps import map_identifiers
 from utils.async_helpers import wrap_in_async
 
 
+def _(msg, *args, **kwargs):
+    return msg.format(*args, **kwargs)
+
+
 class MapsCommands(Cog):
     @commands.group()
     async def maps(self, ctx: MyContext):
@@ -22,9 +26,11 @@ class MapsCommands(Cog):
         """
         Shows all maps that can be used in maps show <map_name>
         """
-        map_type_embed = discord.Embed(title="Map Types",
-                                       description="Use one of these map types when running `{ctx.prefix}maps "
-                                                   "show <name>`.")
+        _ = await ctx.get_translate_function()
+
+        map_type_embed = discord.Embed(title=_("Map Types"),
+                                       description=_("Use one of these map types when running `{0}maps "
+                                                     "show <name>`.", ctx.prefix))
         for item in map_identifiers:
             map_type_embed.add_field(name=map_identifiers[item][1], value=item)
 
@@ -38,10 +44,10 @@ class MapsCommands(Cog):
         _ = await ctx.get_translate_function()
         map_type = map_type.lower().strip()
         if map_type not in map_identifiers:
-            await ctx.send(_("I don't know what map you're looking for! Run `{ctx.prefix}maps types` to see all the "
-                             "maps I can show you!"))
+            await ctx.send(_("I don't know what map you're looking for! Run `{0}maps types` to see all the "
+                             "maps I can show you!", ctx.prefix))
             return
-        map_embed = discord.Embed(title="Map for {map_identifiers[map_type][1]}")
+        map_embed = discord.Embed(title=_("Map for {0}", map_identifiers[map_type][1]))
         map_buffer = await wrap_in_async(self.bot.maps_api.get_map, map_type, thread_pool=True)
         img_file = discord.File(map_buffer, filename="map.png")
         map_embed.set_image(url="attachment://map.png")
@@ -50,9 +56,9 @@ class MapsCommands(Cog):
     @maps.command(hidden=True)
     @commands.is_owner()
     async def do_update(self, ctx: MyContext):
-        msg = await ctx.send("Updating maps...")
+        msg = await ctx.send(_("Updating maps..."))
         await wrap_in_async(self.bot.maps_api.download_maps, thread_pool=True)
-        await msg.edit(content="Done!")
+        await msg.edit(content=_("Done!"))
 
 
 setup = MapsCommands.setup

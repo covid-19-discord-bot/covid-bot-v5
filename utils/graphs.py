@@ -1,4 +1,7 @@
 # coding=utf-8
+"""
+Utility module to generate graphs nicely.
+"""
 import random
 import time
 import datetime
@@ -39,8 +42,9 @@ def parse_percents(_input: float) -> float:
 
 def generate_line_plot(country_data: dict,
                        country_name: str,
-                       start_time: Optional[datetime.date],
-                       end_time: Optional[datetime.date]):
+                       start_time: Optional[datetime.date] = None,
+                       end_time: Optional[datetime.date] = None,
+                       logarithmic: bool = False):
     """
     Generate a plot detailing COVID-19 cases for a country.
 
@@ -48,12 +52,16 @@ def generate_line_plot(country_data: dict,
                         'deaths'. Each of those keys should contain a dict with keys formatted 'mm/dd/yy' for the count
                         for that day.
     :param country_name: The country name. Set as the title, not used for anything else.
-    :param start_time: Optional: filter to only show datapoints after this date. Note: the system used for calculating
+    :param start_time: Optional: filter to only show data points after this date. Note: the system used for calculating
                        the total number of dates to show isn't very smart and can sometimes make weird values if this is
                        set.
-    :param end_time: Optional: filter to only show datapoints before this date. Same note as for start_time applies.
+    :param end_time: Optional: filter to only show data points before this date. Same note as for start_time applies.
+    :param logarithmic: Optional: defaults to false. If true, a logarithmic graph will be generated instead of a linear
+                        one.
     :return: A ID that can be passed to get_image to get a absolute path to the image.
     """
+    start_time = start_time or datetime.date(1970, 1, 1)
+    end_time = end_time or datetime.date(2075, 1, 1)
     image_path, image_id = get_new_path()
     f = pyplot.figure(image_id, (10.24, 10.24), 100, DISCORD_BG_COLOR, DISCORD_BG_COLOR, linewidth=5)
     for _key in ['cases', 'recovered', 'deaths']:
@@ -77,7 +85,6 @@ def generate_line_plot(country_data: dict,
             color = "black"
         pyplot.plot(a, b, label=_key.capitalize(), color=color)
     time_between_start_and_end = start_time - end_time
-    print(time_between_start_and_end.days)
     if time_between_start_and_end.days < 8:
         delta = 1
     elif time_between_start_and_end.days < 15:
@@ -88,20 +95,20 @@ def generate_line_plot(country_data: dict,
         delta = 7
     else:
         delta = 14
-    print(delta)
+    # noinspection SpellCheckingInspection
     xticks = [i for i in range(len(pyplot.xticks()[0]) + 1) if i % delta == 0]
     pyplot.xticks(xticks, rotation=90)
     pyplot.xlabel("Date")
     pyplot.ylabel("Cases (in thousands)")
     pyplot.legend()
-    pyplot.title(f"COVID-19 Cases in {country_name}")
+    pyplot.title(f"COVID-19 Stats in {country_name}")
+    pyplot.yscale("log" if logarithmic else "linear")
     f.savefig(image_path,
               facecolor=DISCORD_BG_COLOR,
               edgecolor=DISCORD_BG_COLOR,
               transparent=True,
               format="png")
-    f.close()
-    return image_id
+    return image_path
 
 
 def generate_pie_chart(overall_data: dict,
@@ -125,9 +132,8 @@ def generate_pie_chart(overall_data: dict,
     """
     if 'all' not in overall_data:
         raise ValueError("The dict passed into generate_pie_chart() must contain a 'all' key!")
-    if force_include is not None:
-        if ignore_below_pct < 2.25:
-            ignore_below_pct = 2.25
+    if force_include is not None and ignore_below_pct < 2.25:
+        ignore_below_pct = 2.25
     name = []
     data = []
     overall_total = overall_data['all']

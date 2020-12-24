@@ -5,7 +5,6 @@ from typing import Optional
 import concurrent.futures
 import aiohttp
 import discord
-import traceback
 from discord.ext.commands.bot import AutoShardedBot
 from discord.ext import commands
 import statcord

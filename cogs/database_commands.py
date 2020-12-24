@@ -36,9 +36,8 @@ class DatabaseCommands(Cog):
             db_guild.prefix = new_prefix
         await db_guild.save()
         if db_guild.prefix:
-            await ctx.send(_("The server prefix is set to `{prefix}`.",
-                             prefix=escape_mentions(escape_markdown(db_guild.prefix))
-                             ))
+            await ctx.send(_("The server prefix is set to `{0}`.",
+                             escape_mentions(escape_markdown(db_guild.prefix))))
         else:
             await ctx.send(_("There is no specific prefix set for this guild."))
 
@@ -57,13 +56,12 @@ class DatabaseCommands(Cog):
 
         _ = await ctx.get_translate_function()
         if db_guild.language:
-            await ctx.send(_("The server language is now set to `{language}`.",
-                             language=escape_mentions(escape_markdown(db_guild.language))
-                             ))
+            await ctx.send(_("The server language is now set to `{0}`.",
+                             escape_mentions(escape_markdown(db_guild.language))))
 
             # Do not translate
-            await ctx.send("If you wish to go back to the default, english language, use "
-                           "`{ctx.prefix}{ctx.command.qualified_name} en`")
+            await ctx.send(f"If you wish to go back to the default, english language, use "
+                           f"`{ctx.prefix}{ctx.command.qualified_name} en`")
         else:
             await ctx.send(_("There is no specific language set for this guild."))
 
@@ -122,7 +120,7 @@ class DatabaseCommands(Cog):
         db_channel = await get_from_db(channel)
         db_channel.disabled_api = True
         await db_channel.save()
-        await ctx.reply(_("Disabled the API for {name}.", name=channel.name))
+        await ctx.reply(_("Disabled the API for {0}.", channel.name))
 
 
 setup = DatabaseCommands.setup

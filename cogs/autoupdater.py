@@ -18,7 +18,6 @@ from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.human_time import ShortTime, human_timedelta, FutureTime
 
-
 utc_zero = datetime.datetime.utcfromtimestamp(-1)
 
 
@@ -101,6 +100,7 @@ class AutoUpdaterCog(Cog):
         elif info[0] == "country":
             country_list = await self.bot.worldometers_api.get_all_iso_codes()
             iso2_code = covid19api.get_iso2_code(country, country_list)
+            friendly_country_name = covid19api.get_country_name(country, country_list)
         elif info[0] == "continent":
             iso2_code = info[1]
             friendly_country_name = info[1]
@@ -155,7 +155,7 @@ class AutoUpdaterCog(Cog):
         db_channel.autoupdater.do_update_at = time_to_update_at
         await db_channel.autoupdater.save()
         await db_channel.save()
-        await ctx.reply(_("✅ Next update: {htd}", htd=human_timedelta(time_to_update_at)))
+        await ctx.reply(_("✅ Next update: {0}", human_timedelta(time_to_update_at)))
 
     @tasks.loop(minutes=1.0)
     async def push_auto_updates(self):
@@ -191,18 +191,6 @@ class AutoUpdaterCog(Cog):
         for channel_data in channels:
             db_channel = channel_data[0]
             channel: discord.TextChannel = channel_data[1]
-            if not db_channel.autoupdater.already_set:
-                continue
-            perms_for = channel.permissions_for(channel.guild.me)
-            if not perms_for.send_messages and perms_for.embed_links:
-                self.bot.logger.info("Idiots can have fun trying to figure out why this isn't working",
-                                     channel=channel, guild=channel.guild)
-                db_channel.autoupdater.already_set = False  # no perms? heh: have fun
-                await db_channel.autoupdater.save()
-                await db_channel.save()
-                # big brains will figure out it's missing perms
-                # small brains will complain wHy BoT nO wOrK?
-                continue
             if db_channel.autoupdater.delay == -1:
                 await channel.send("The autoupdater delay in this channel is -1 seconds, or default. **I have "
                                    "disabled the updater**, and I recommend you make a new one. The stats on this "
@@ -230,21 +218,25 @@ class AutoUpdaterCog(Cog):
                     continue
                 db_channel.autoupdater.last_updated = now
             country = db_channel.autoupdater.country_name
-            country = "world" if country == "OT" else country
             try:
                 for msg in channel.history(limit=1):
                     ctx = await self.bot.get_context(msg, cls=MyContext)
+                    msg1 = None
+                    break
+                else:
+                    msg1 = await ctx.send("0x00000000")
+                    ctx = await self.bot.get_context(msg1, cls=MyContext)
+                _ = await ctx.get_translate_function()
                 embed = await embeds.advanced_stats_embed(await self.bot.worldometers_api.try_to_get_name(country),
-                                                          ctx)
+                                                          ctx=ctx)
                 if embed is None:
                     await channel.send(_("I'm having a issue with finding the country name here! Here's what I'm "
                                          "showing: {trying}",
                                          trying=await self.bot.worldometers_api.try_to_get_name(country)))
                 await channel.send(embed=embed)
+                if msg1:
+                    await msg1.delete()
             except TypeError:
-                db_channel.autoupdater.already_set = False  # channel is gone
-                await db_channel.autoupdater.save()
-                await db_channel.save()
                 continue
             except (discord.DiscordException, discord.errors.Forbidden) as e:
                 if isinstance(e, discord.Forbidden):

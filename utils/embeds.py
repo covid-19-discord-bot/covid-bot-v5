@@ -9,96 +9,91 @@ from utils.bot_class import MyBot
 from utils.ctx_class import MyContext
 
 
+# designed to be overridden in functions, used as a fallback
+def _(msg, *args, **kwargs):
+    return msg.format(*args, **kwargs)
+
+
 def add_zero_space(embed: discord.Embed, count: int):
     for _ in range(1, count):
         embed.add_field(name="\u200b", value="\u200b")
 
 
-def error_embed(bot: MyBot, reason: Any = None):
-    _error_embed = discord.Embed(title="Error!",
-                                 description="",
-                                 color=discord.Color.red())
-    zeroslashzero = bot.get_user(661660243033456652)
-    _error_embed.add_field(name="An error happened!",
-                           value="Report this to {0} on the official Discord server, available via `/invite`".format(
-                               zeroslashzero.mention))
-    if reason:
-        bot.logger.exception("Exception while creating embed!", exception_instance=reason)
-        if isinstance(reason, BaseException):
-            _error_embed.add_field(name="Add this when you're reporting this message",
-                                   value=f"`{str(reason)}`\n"
-                                         f"```py\n{reason.__traceback__}```")
-        else:
-            _error_embed.add_field(name="Add this when you're reporting this message", value=str(reason))
-    _error_embed.set_thumbnail(url="https://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/sign-error-icon.png")
-    return _error_embed
-
-
-async def basic_stats_embed(country: str, province: str, today: datetime.date, ctx: MyContext
-                            ) -> Optional[discord.Embed]:
-    stats = await ctx.bot.jhucsse_api.get_province_stats_for_day(country, province, today)
+async def basic_stats_embed(country: str, province: str, today: datetime.date, *, ctx: MyContext = None,
+                            bot: MyBot = None) -> Optional[discord.Embed]:
+    if ctx:
+        _ = await ctx.get_translate_function()
+        bot = ctx.bot
+    stats = await bot.jhucsse_api.get_province_stats_for_day(country, province, today)
     if stats is None:
         return None
-    data_points = (("<:infected:775877435320565801> Total Cases", "cases"),
-                   ("<:deaths:775877434687488030> Total Deaths", "deaths"),
-                   ("<:recovered:775877435089748008> Total Recoveries", "recovered"))
-    stats_embed = discord.Embed(title=f"Province Stats for {province.title()} on {today!s}",
-                                description="Why such a small amount of data compared to country stats?\n"
-                                            "Some provinces may report the same amount of data, but these provinces "
-                                            "make up such a small amount of all provinces, meaning it's not worth it "
-                                            "to try to show it for all of them.")
+    data_points = ((_("<:infected:775877435320565801> Total Cases"), "cases"),
+                   (_("<:deaths:775877434687488030> Total Deaths"), "deaths"),
+                   (_("<:recovered:775877435089748008> Total Recoveries"), "recovered"))
+    stats_embed = discord.Embed(title=_("Province Stats for {province} on {today}",
+                                        province=province.title(), today=str(today)),
+                                description=_("Why such a small amount of data compared to country stats?\n"
+                                              "Some provinces may report the same amount of data, but these provinces "
+                                              "make up such a small amount of all provinces, meaning it's not worth it "
+                                              "to try to show it for all of them."))
     for name, value in data_points:
         if stats[value] == 0:
-            stats_embed.add_field(name=name, value=f"{format(stats[value], ',')} (could also have no data)")
+            stats_embed.add_field(name=name, value=_("{0} (could also have no data)", format(stats[value], ',')))
         else:
             stats_embed.add_field(name=name, value=format(stats[value], ','))
-    stats_embed.set_footer(text="Last updated at")
-    stats_embed.timestamp = ctx.bot.jhucsse_api.last_updated_utc
+    stats_embed.set_footer(text=_("Last updated at"))
+    stats_embed.timestamp = bot.jhucsse_api.last_updated_utc
     return stats_embed
 
 
-async def advanced_stats_embed(country: str, ctx: MyContext):
-    data_points = (("<:infected:775877435320565801> Total Cases", "cases"),
-                   ("New Cases", "todayCases"),
-                   ("Cases per 1m People", "casesPerOneMillion"),
+async def advanced_stats_embed(country: str, *, ctx: Optional[MyContext] = None, bot: MyBot = None):
+    if ctx:
+        _ = await ctx.get_translate_function()
+        bot = ctx.bot
+    else:
+        def _(msg, *args, **kwargs):
+            return msg.format(*args, **kwargs)
+    data_points = ((_("<:infected:775877435320565801> Total Cases"), "cases"),
+                   (_("New Cases"), "todayCases"),
+                   (_("Cases per 1m People"), "casesPerOneMillion"),
                    ("zero_space", "zero_space"),
-                   ("<:active:775877437056614491> Active Cases", "active"),
-                   ("Active Case Change", "activeCaseChange"),
-                   ("Active Cases per 1m People", "activePerOneMillion"),
+                   (_("<:active:775877437056614491> Active Cases"), "active"),
+                   (_("Active Case Change"), "activeCaseChange"),
+                   (_("Active Cases per 1m People"), "activePerOneMillion"),
                    ("zero_space", "zero_space"),
-                   ("<:deaths:775877434687488030> Total Deaths", "deaths"),
-                   ("New Deaths", "todayDeaths"),
-                   ("Deaths per 1m People", "deathsPerOneMillion"),
+                   (_("<:deaths:775877434687488030> Total Deaths"), "deaths"),
+                   (_("New Deaths"), "todayDeaths"),
+                   (_("Deaths per 1m People"), "deathsPerOneMillion"),
                    ("zero_space", "zero_space"),
-                   ("<:recovered:775877435089748008> Total Recoveries", "recovered"),
-                   ("New Recoveries", "todayRecovered"),
-                   ("Recovered per 1m People", "recoveredPerOneMillion"),
+                   (_("<:recovered:775877435089748008> Total Recoveries"), "recovered"),
+                   (_("New Recoveries"), "todayRecovered"),
+                   (_("Recovered per 1m People"), "recoveredPerOneMillion"),
                    ("zero_space", "zero_space"),
-                   ("<:tests:775877436075802676> Tests", "tests"),
-                   ("Tests per 1m People", "testsPerOneMillion"),
+                   (_("<:tests:775877436075802676> Tests"), "tests"),
+                   (_("Tests per 1m People"), "testsPerOneMillion"),
                    ("zero_space", "zero_space") * 2,
-                   ("Critical Cases", "critical"),
-                   ("Population", "population"))
+                   (_("Critical Cases"), "critical"),
+                   (_("Population"), "population"))
+    print(*country)
     if country is None:
         return None
     elif country[0] == "world":
-        country_data = await ctx.bot.worldometers_api.get_global_stats()
+        country_data = await bot.worldometers_api.get_global_stats()
         name = "World"
     elif country[0] == "country":
-        country_data = await ctx.bot.worldometers_api.get_country_stats(country[1])
+        country_data = await bot.worldometers_api.get_country_stats(country[1])
         name = country_data["country"]
     elif country[0] == "state":
-        country_data = await ctx.bot.worldometers_api.get_state_stats(country[1])
+        country_data = await bot.worldometers_api.get_state_stats(country[1])
         name = country_data["state"]
     elif country[0] == "continent":
-        country_data = await ctx.bot.worldometers_api.get_continent_stats(country[1])
+        country_data = await bot.worldometers_api.get_continent_stats(country[1])
         name = country_data["continent"]
     else:
         return None
-    _ = await ctx.get_translate_function()
     embed = discord.Embed(title=_("COVID-19 Stats for {name}", name=name),
                           color=discord.Color.dark_red(),
-                          timestamp=ctx.bot.worldometers_api.last_updated_utc)
+                          timestamp=bot.worldometers_api.last_updated_utc)
     embed.set_footer(text=_("Stats last updated at (UTC)"))
     if "countryInfo" in country_data and "flag" in country_data["countryInfo"]:
         embed.set_thumbnail(url=country_data["countryInfo"]["flag"])
@@ -114,7 +109,7 @@ async def advanced_stats_embed(country: str, ctx: MyContext):
                     embed.add_field(name=_(dp[0]),
                                     value=_("no data"))
             except KeyError:
-                ctx.bot.logger.warning(f"Key {dp[1]} is missing from {name}!")
+                bot.logger.warning(f"Key {dp[1]} is missing from {name}!")
                 embed.add_field(name=_(dp[0]),
                                 value=_("no data"))
     if name == "World":

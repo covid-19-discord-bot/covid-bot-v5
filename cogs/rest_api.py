@@ -4,8 +4,9 @@ from datetime import datetime
 
 import aiohttp_cors
 import discord
+import tortoise
 from aiohttp import web
-from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest
+from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest, HTTPInternalServerError
 import datetime
 
 from utils.cog_class import Cog
@@ -48,22 +49,21 @@ class RestAPI(Cog):
 
         api_key = api_key.lower()
 
-        if api_key in self.config()["global_access_keys"]:
+        if api_key in self.config()["global_api_keys"]:
             return True
-
-        if not channel:
-            raise HTTPForbidden(reason="This route requires a GLOBAL api key. Ask the bot owner.")
 
         if channel:
             db_channel = await get_from_db(channel)
             channel_api_key = str(db_channel.api_key)
-            if api_key == "00000000000000000000000000000000":
+            if channel_api_key == "0" * 32:
                 raise HTTPForbidden(reason="No API key has been generated for this channel yet. Run '/settings api_key "
                                            "set' to generate a key.")
-            if channel_api_key != api_key:
+            elif channel_api_key != api_key:
                 raise HTTPForbidden(reason="The API key provided isn't valid for the specified channel.")
             else:
                 return True
+        else:
+            raise HTTPForbidden(reason="This route requires a GLOBAL api key. Ask the bot owner.")
 
     async def channel_info(self, request):
         """
@@ -89,7 +89,8 @@ class RestAPI(Cog):
             autoupdater_data = {
                 'country_name': db_channel.autoupdater.country_name,
                 'delay': db_channel.autoupdater.delay,
-                'last_updated': last_updated.isoformat()
+                'last_updated': last_updated.isoformat(),
+                'force_update': db_channel.autoupdater.force_update,
             }
             channel_data["autoupdater"]["data"] = autoupdater_data
 
@@ -98,14 +99,14 @@ class RestAPI(Cog):
     async def manage_updater(self, request: web.Request):
         channel = self.bot.get_channel(int(request.match_info["channel_id"]))
         await self.authenticate_request(request, channel)
-        db_channel = await get_from_db(channel)
         try:
-            data = json.load(request.content)
+            data = json.loads(await request.content.read())
         except MemoryError:  # if someone wants to try to DoS this by sending large data forms...
-            # they aren't getting anything, since it'll just time out
+            # they aren't getting anything
             return ""
         except json.JSONDecodeError:
             raise HTTPBadRequest(reason="Malformed JSON") from None
+        db_channel = await get_from_db(channel)
         if "autoupdater" not in data:
             raise HTTPBadRequest(reason="No autoupdater data sent")
         ad = data["autoupdater"]
@@ -115,16 +116,16 @@ class RestAPI(Cog):
             db_channel.autoupdater.already_set = True
             if "country_name" in ad:
                 name = await self.bot.worldometers_api.try_to_get_name(ad["country_name"])
-                if name[0] in ("country", "world"):
+                if name[0] in ("country", "world", "continent"):
                     db_channel.autoupdater.country_name = name[1]
                 else:
-                    raise HTTPBadRequest(reason="Country not found")
+                    raise HTTPBadRequest(reason="Country/continent not found")
             if "delay" in ad:
                 try:
                     delay = int(ad["delay"])
                 except ValueError:
                     raise HTTPBadRequest(reason="Delay is not numeric")
-                if 600 <= delay < 31536000:
+                if 600 >= delay > 31536000:
                     raise HTTPBadRequest(reason="Delay outside of constraints: 3153600 > delay >= 600")
                 db_channel.autoupdater.delay = delay
             if "force_update" in ad:
@@ -141,8 +142,11 @@ class RestAPI(Cog):
                 db_channel.autoupdater.do_update_at = do_update_at
         else:
             db_channel.autoupdater.already_set = False
-        await db_channel.autoupdater.save()
-        await db_channel.save()
+        try:
+            await db_channel.autoupdater.save(force_update=True)
+            await db_channel.save(force_update=True)
+        except tortoise.exceptions.IntegrityError:
+            raise HTTPInternalServerError(reason="Database integrity error")
         return web.json_response({"result": "ok"})
 
     async def bot_is_in_server(self, request):
@@ -153,7 +157,7 @@ class RestAPI(Cog):
         """
         await self.authenticate_request(request)
 
-        guild = self.bot.get_guild(int(request.match_info["guild_id"])) or self.bot.fetch_guild(int(
+        guild = self.bot.get_guild(int(request.match_info["guild_id"])) or await self.bot.fetch_guild(int(
             request.match_info["guild_id"]))
 
         if guild:
@@ -171,22 +175,39 @@ class RestAPI(Cog):
         Requires global API key.
         """
         await self.authenticate_request(request)
-        guild: discord.Guild = self.bot.get_guild(request.match_info["guild_id"])
+        guild: discord.Guild = self.bot.get_guild(request.match_info["guild_id"]) or await self.bot.fetch_guild(
+            request.match_info["guild_id"])
         if not guild:
-            guild: discord.Guild = await self.bot.fetch_guild(request.match_info["guild_id"])
-            if not guild:
-                raise HTTPNotFound(reason="No guild with that ID found")
-        member: discord.Member = await guild.get_member(request.match_info["user_id"])
+            raise HTTPNotFound(reason="No guild with that ID found")
+
+        member: discord.Member = guild.get_member(request.match_info["user_id"]) or await guild.fetch_member(
+            request.match_info["user_id"])
         if not member:
-            member: discord.Member = await guild.fetch_member(request.match_info["user_id"])
-            if not member:
-                raise HTTPNotFound(reason="No member with that ID found")
+            raise HTTPNotFound(reason="No member with that ID found")
+
+        channels = guild.channels if len(guild.channels) > 0 else await guild.fetch_channels()
         channels_with_permissions = []
-        for channel in guild.channels:
+        for channel in channels:
+            if not isinstance(channel, discord.TextChannel):
+                continue
             channel: discord.TextChannel
-            if channel.permissions_for(member).manage_messages:
+            if (channel.permissions_for(member).value & 0x10) == 0x10:
                 channels_with_permissions.append({"name": channel.name, "id": channel.id})
         return web.json_response(channels_with_permissions)
+
+    async def add_extra_votes(self, request):
+        await self.authenticate_request(request)
+        try:
+            user: discord.User = self.bot.get_user(request.match_info["user_id"]) or \
+                                 await self.bot.fetch_user(request.match_info["user_id"])
+        except discord.Forbidden:
+            raise HTTPForbidden(reason="Discord raised Forbidden")
+        if not user:
+            raise HTTPNotFound(reason="No user with that ID found")
+        db_user = await get_from_db(user)
+        db_user.updater_credits += 1
+        await db_user.save()
+        return web.json_response({"result": "ok"})
 
     async def run(self):
         await self.bot.wait_until_ready()
@@ -195,9 +216,11 @@ class RestAPI(Cog):
         route_prefix = self.config()['route_prefix']
         routes = [
             ('GET', f'{route_prefix}/channels/{{channel_id:\\d+}}', self.channel_info),
+            ('POST', f'{route_prefix}/channels/{{channel_id:\\d+}}/manage', self.manage_updater),
             ('GET', f'{route_prefix}/protected/bot_is_in_server/{{guild_id:\\d+}}', self.bot_is_in_server),
             ('GET', f'{route_prefix}/protected/manage_channel/{{guild_id:\\d+}}/{{user_id:\\d+}}',
              self.check_channel_permissions),
+            ('POST', f'{route_prefix}/protected/add_votes/{{user_id:\\d+}}/', self.add_extra_votes),
         ]
         for route_method, route_path, route_coro in routes:
             resource = self.cors.add(self.app.router.add_resource(route_path))

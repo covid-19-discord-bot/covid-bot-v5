@@ -40,15 +40,15 @@ class SupportServerCommands(Cog):
 
         await purge_channel_messages(status_channel)
         embed = discord.Embed(colour=discord.Colour.blurple(),
-                              title="{self.bot.user.name}'s status")
+                              title=f"{self.bot.user.name}'s status")
         user_count = 0
         for guild in self.bot.guilds:
             guild: discord.Guild
             user_count += guild.member_count
 
-        embed.add_field(name="Guilds Count", value="{len(self.bot.guilds)}", inline=True)
-        embed.add_field(name="Users Count", value="{user_count}", inline=True)
-        embed.add_field(name="Messages in cache", value="{len(self.bot.cached_messages)}", inline=True)
+        embed.add_field(name="Guilds Count", value=str(len(self.bot.guilds)), inline=True)
+        embed.add_field(name="Users Count", value=str(user_count), inline=True)
+        embed.add_field(name="Messages in cache", value=str(len(self.bot.cached_messages)), inline=True)
 
         ping_f = status_channel.trigger_typing()
         t_1 = time.perf_counter()
@@ -56,16 +56,16 @@ class SupportServerCommands(Cog):
         t_2 = time.perf_counter()
         ping = round(t_2 - t_1)  # calculate the time needed to trigger typing
 
-        embed.add_field(name="Average Latency", value="{round(self.bot.latency, 2)}ms", inline=True)
-        embed.add_field(name="Current ping", value="{ping}ms", inline=True)
-        embed.add_field(name="Shards Count", value="{self.bot.shard_count}", inline=True)
+        embed.add_field(name="Average Latency", value=f"{round(self.bot.latency, 2)}ms", inline=True)
+        embed.add_field(name="Current ping", value=f"{ping}ms", inline=True)
+        embed.add_field(name="Shards Count", value=f"{self.bot.shard_count}", inline=True)
 
         def get_bot_uptime():
             return dates.format_timedelta(self.bot.uptime - datetime.datetime.utcnow(), locale='en')
 
-        embed.add_field(name="Cogs loaded", value="{len(self.bot.cogs)}", inline=True)
-        embed.add_field(name="Commands loaded", value="{len(self.bot.commands)}", inline=True)
-        embed.add_field(name="Uptime", value="{get_bot_uptime()}", inline=True)
+        embed.add_field(name="Cogs loaded", value=f"{len(self.bot.cogs)}", inline=True)
+        embed.add_field(name="Commands loaded", value=f"{len(self.bot.commands)}", inline=True)
+        embed.add_field(name="Uptime", value=f"{get_bot_uptime()}", inline=True)
 
         embed.timestamp = datetime.datetime.utcnow()
 
@@ -73,7 +73,7 @@ class SupportServerCommands(Cog):
         now = pytz.utc.localize(datetime.datetime.utcnow())
 
         delta = dates.format_timedelta(next_it - now, locale='en')
-        embed.set_footer(text="This should update every {delta} - Last update")
+        embed.set_footer(text=f"This should update every {delta} - Last update")
 
         await status_channel.send(embed=embed)
 
@@ -86,8 +86,9 @@ class SupportServerCommands(Cog):
         """
         Check the status of every shard the bot is hosting.
         """
+        _ = await ctx.get_translate_function()
         if self.bot.shard_count == 1:
-            await ctx.send("The bot is not yet sharded.")
+            await ctx.send(_("The bot is not yet sharded."))
             return
 
         latencies = sorted(self.bot.latencies, key=lambda l: l[0])
@@ -96,16 +97,16 @@ class SupportServerCommands(Cog):
         for shard, latency in latencies:
             if shard == ctx.guild.shard_id:
                 message += ""
-            message += "•\t Shard ID {shard}: {round(latency, 2)}ms"
+            message += _("•\t Shard ID {0}: {1}ms", shard, round(latency, 2))
             if shard in self.bot.shards_ready:
-                message += " (ready)"
+                message += _(" (ready)")
             if shard == ctx.guild.shard_id:
-                message += " This is the current shard"
+                message += _(" This is the current shard")
             message += "\n"
 
-        message += "\n```\n\nAvg latency: {self.bot.latency}ms"
+        message += _("\n```\n\nAvg latency: {0}ms", self.bot.latency)
         if self.bot.is_ready():
-            message += " (bot ready)"
+            message += _(" (bot ready)")
 
         await ctx.send(message)
 

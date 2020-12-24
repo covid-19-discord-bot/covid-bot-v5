@@ -14,7 +14,7 @@ from matplotlib import ticker
 from scipy.interpolate import make_interp_spline, BSpline
 
 warnings.filterwarnings('ignore')
-
+print("Getting dataset...")
 # Retrieving Dataset
 
 while True:
@@ -117,6 +117,8 @@ continents = {
     'EU': 'Europe',
     'na': 'Others'
 }
+
+print("Done!")
 
 
 # Defining Function for getting continent code for country.
@@ -289,7 +291,7 @@ def get_mortality_rate(confirmed, deaths, _continent=None, country=None):
 
 def dd(date1, date2):
     return (datetime.strptime(date1, '%m/%d/%y') - datetime.strptime(date2, '%m/%d/%y')).days
-
+print("Generating graphs...")
 
 out = ""  # +"output/"
 
@@ -359,6 +361,8 @@ print("done top_10_countries_recovered.png")
 world_map = folium.Map(location=[10, 0], tiles="cartodbpositron", zoom_start=2, max_zoom=6, min_zoom=2)
 for i in range(0, len(df_confirmed)):
     # noinspection PyTypeChecker
+    if df_confirmed.iloc[i]['Lat'] == "" or df_confirmed.iloc[i]['Long'] == "":
+        continue
     folium.Circle(
         location=[df_confirmed.iloc[i]['Lat'], df_confirmed.iloc[i]['Long']],
         tooltip="<h5 style='text-align:center;font-weight: bold'>" + df_confirmed.iloc[i]['country'] + "</h5>" +
@@ -396,8 +400,12 @@ fig.update_coloraxes(colorscale="hot")
 fig.update(layout_coloraxis_showscale=False)
 fig.write_html("worldmap_progression.html")
 
-case_nums_country = df_confirmed.groupby("country").sum().drop(['Lat', 'Long'], axis=1).apply(
-    lambda _x: _x[_x > 0].count(), axis=0)
+case_nums_country = df_confirmed.groupby("country").sum()
+try:
+    cncd = case_nums_country.drop(["Lat", "Long"], axis=1)
+except KeyError:
+    cncd = case_nums_country
+case_nums_country = cncd.apply(lambda _x: _x[_x > 0].count(), axis=0)
 d = [datetime.strptime(date, '%m/%d/%y').strftime("%d %b") for date in case_nums_country.index]
 
 f = plt.figure(figsize=(15, 8))
@@ -487,8 +495,12 @@ for i, country in enumerate(countries):
 # plt.savefig('All_countries.png')
 
 
-temp = df_deaths.groupby('country').sum().drop(["Lat", "Long"], axis=1).sort_values(df_deaths.columns[-1],
-                                                                                    ascending=False)
+temp = df_deaths.groupby('country').sum()
+try:
+    t1 = temp.drop(["Lat", "Long"], axis=1)
+except KeyError:
+    t1 = temp
+temp = t1.sort_values(df_deaths.columns[-1], ascending=False)
 
 threshold = 10
 f = plt.figure(figsize=(15, 12))
@@ -542,8 +554,12 @@ plt.savefig(out + 'trend_comparison_countries_deaths.png')
 # plt.show()
 
 
-temp = df_confirmed.groupby('continent').sum().drop(["Lat", "Long"], axis=1).sort_values(df_confirmed.columns[-1],
-                                                                                         ascending=False)
+temp = df_confirmed.groupby('continent').sum()
+try:
+    t1 = temp.drop(["Lat", "Long"], axis=1)
+except KeyError:
+    t1 = temp
+temp = t1.sort_values(df_confirmed.columns[-1], ascending=False)
 
 threshold = 50
 f = plt.figure(figsize=(15, 12))
@@ -730,6 +746,7 @@ plt.savefig(out + "world_prediction_curve_confirmed.png")
 data1_y = np.log10(np.asarray(df_deaths.iloc[:, 5:].sum(axis=0)).astype("float32"))
 data1_x = np.arange(1, len(data1_y) + 1)
 
+"""
 model2 = models.load_model("model_deaths_v5.h5")
 # model2.summary()
 
@@ -789,7 +806,7 @@ plt.legend(fontsize=18)
 plt.tick_params(labelsize=13)
 plt.savefig(out + "world_prediction_curve_deaths.png")
 # plt.show()
-
+"""
 
 # Data
 temp_data = np.nan_to_num(df_confirmed.sum()[5:].diff())

@@ -27,6 +27,7 @@ class BackgroundUpdates(Cog):
         await stats_msg.edit(content=_("Sending terminate signal..."))
         self.update_all_stats.cancel()
         await stats_msg.edit(content=_("Task has been killed. Starting now..."))
+        await sleep(10)
         self.update_all_stats.start()
         await stats_msg.edit(content=_("Task has been sent a start signal."))
         await sleep(10)
