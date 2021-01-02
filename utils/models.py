@@ -4,12 +4,20 @@ import typing
 from tortoise import Tortoise, fields
 from tortoise.models import Model
 import datetime
+import enum
 
 if typing.TYPE_CHECKING:
     from utils.ctx_class import MyContext
 
 
 # TODO: https://github.com/long2ice/aerich
+
+
+class AutoupdateTypes(enum.IntEnum):
+    world = 1
+    country = 2
+    continent = 3
+
 
 class DiscordGuild(Model):
     id = fields.IntField(pk=True)
@@ -40,7 +48,7 @@ class DiscordChannel(Model):
     guild = fields.ForeignKeyField('models.DiscordGuild')
     discord_id = fields.BigIntField(index=True)
     name = fields.TextField()
-    autoupdater = fields.ForeignKeyField('models.AutoupdaterData')
+    autoupdater = fields.ManyToManyField('models.AutoupdaterData')
     permissions = fields.JSONField(default={})
     api_key = fields.CharField(32, default="0"*32)
     disabled_api = fields.BooleanField(default=False)
@@ -93,21 +101,25 @@ class DiscordMember(Model):
 
 class AutoupdaterData(Model):
     id = fields.IntField(pk=True)
+    discord_id = fields.BigIntField(null=False)
     already_set = fields.BooleanField(default=False)
-    country_name = fields.TextField(default="i'm a idiot")
+    country_name = fields.TextField(default="i'm a idiot", null=True)
     delay = fields.BigIntField(default=-1)  # Shouldn't run into issues, delay is able to be set to up
     # to 250 billion years and if someone is stupid enough to do that... oy vey. I will have little hope for humanity
     # making it through the rest of this pandemic :P
     last_updated = fields.DatetimeField(auto_now_add=True)
     force_update = fields.BooleanField(default=False)
     do_update_at = fields.DatetimeField(default=datetime.datetime.utcfromtimestamp(-1))
-    channel: fields.ManyToManyRelation[DiscordChannel]
+    type = fields.IntEnumField(AutoupdateTypes)
+    channel: fields.ReverseRelation[DiscordChannel]
 
     class Meta:
         table = "autoupdater_data"
 
     def __repr__(self):
-        return f"<AutoupdaterData country_name={self.country_name} delay={self.delay}>"
+        return f"<AutoupdaterData country_name={self.country_name} delay={self.delay} " \
+               f"last_updated={self.last_updated} force_update={self.force_update} " \
+               f"do_update_at={self.do_update_at} type={self.type}>"
 
 
 class FutureSimulations(Model):
@@ -137,6 +149,7 @@ class FutureSimulations(Model):
 
     # If 2,147,483,647 people die in a single day it's probably gonna be a worldwide nuclear event that spreads COVID or
     # something like that, hopefully that doesn't happen :P
+    # UPDATE: december 30th, 2020: it hasn't happened
     dead_today = fields.BigIntField(default=-1)
 
     # Rate of infected who need to be admitted to hospital
@@ -193,12 +206,9 @@ async def get_from_db(discord_object, as_user=True):
     elif isinstance(discord_object, discord.abc.GuildChannel):
         db_obj = await DiscordChannel.filter(discord_id=discord_object.id).first().prefetch_related("autoupdater")
         if not db_obj:
-            ad_data = AutoupdaterData()
-            await ad_data.save()
             db_obj = DiscordChannel(discord_id=discord_object.id,
                                     name=discord_object.name,
-                                    guild=await get_from_db(discord_object.guild),
-                                    autoupdater=ad_data)
+                                    guild=await get_from_db(discord_object.guild))
             await db_obj.save()
         return db_obj
     elif isinstance(discord_object, discord.Member) and not as_user:
@@ -212,14 +222,11 @@ async def get_from_db(discord_object, as_user=True):
     elif isinstance(discord_object, discord.User) or isinstance(discord_object, discord.Member) and as_user:
         db_obj = await DiscordUser.filter(discord_id=discord_object.id).first().prefetch_related("future_simulation")
         if not db_obj:
-            ad_data = AutoupdaterData()
-            await ad_data.save()
             future_sims = FutureSimulations()
             await future_sims.save()
             db_obj = DiscordUser(discord_id=discord_object.id,
                                  name=discord_object.name,
                                  discriminator=discord_object.discriminator,
-                                 autoupdater=ad_data,
                                  future_simulation=future_sims)
             await db_obj.save()
         return db_obj

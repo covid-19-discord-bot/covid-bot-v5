@@ -6,6 +6,7 @@ from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils import graphs
 from utils.async_helpers import wrap_in_async
+import time
 
 graphs.BASE_IMAGE_PATH = "/home/pi/covid_bot_beta/temp_data/plots"
 
@@ -45,10 +46,17 @@ class GraphsCog(Cog):
             return
         else:
             await msg.edit(content=_("Please wait, this could take a few seconds..."))
-        f = discord.File(await wrap_in_async(graphs.generate_line_plot, data, name[1].title(),
-                                             logarithmic=event.emoji == "📈"), filename="image.png")
-        e = discord.Embed(title=_("Graph for {location}"))
+        st = time.perf_counter_ns()
+        fp = await wrap_in_async(graphs.generate_line_plot, data["timeline"], name[1].title(),
+                                 logarithmic=event.emoji.name == "📈")
+        et = time.perf_counter_ns()
+        f = discord.File(fp, filename="image.png")
+        tt = et - st
+        e = discord.Embed(title=_("Graph for {0}", name[1].title()))
+        e.set_footer(text=_("Took {0} seconds ({1}ns) to generate.", format(round(tt / 1000000000, 1), ","),
+                            format(tt, ",")))
         e.set_image(url="attachment://image.png")
+        await msg.delete()
         await ctx.send(file=f, embed=e)
 
 

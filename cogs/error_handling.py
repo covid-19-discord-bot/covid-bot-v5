@@ -191,7 +191,7 @@ class CommandErrorHandler(Cog):
                     await ctx.author.send(_("I don't have permissions to send messages there! Try again somewhere I do "
                                             "have permissions to send messages!"))
                     return
-                message = _("There was an error running the specified command. This error has been logged.")
+                message = _("There was an error running the specified command‽ This error has been logged.")
                 # we want the original instead of the CommandError one
                 await submit_error_message(exception.original, "unknown thing", ctx, self.bot)
                 ctx.logger.error(

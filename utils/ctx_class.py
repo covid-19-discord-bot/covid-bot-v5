@@ -74,8 +74,8 @@ class MyContext(commands.Context):
     async def get_translate_function(self):
         language_code = await self.get_language_code()
 
-        def _(message, **kwargs):
-            return translate(message, language_code).format(**kwargs)
+        def _(message, *args, **kwargs):
+            return translate(message, language_code).format(*args, **kwargs)
 
         return _
 

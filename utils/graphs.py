@@ -72,7 +72,7 @@ def generate_line_plot(country_data: dict,
                 date = from_time_to_date(time.strptime(key, "%m/%d/%y"))
                 if start_time < date < end_time:
                     a.append(key)
-                    b.append(country_data[_key][key] / 1000)
+                    b.append(country_data[_key][key] if logarithmic else country_data[_key][key] / 1000)
         if _key == "deaths":
             color = "red"
         elif _key == "cases":
