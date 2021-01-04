@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord Support
+    url: https://discord.gg/yPDh5BXmJF
+    about: Go here for general support, like getting the bot set up.
+  - name: Wiki
+    url: https://wiki.covid19.imaskeleton.me
+    about: Go here for docs on new features, and proposing changes to the docs.
