@@ -3,6 +3,7 @@ import asyncio
 import io
 from copy import deepcopy, copy
 from os import unlink
+from typing import Tuple, Optional, Callable
 
 import discord
 from discord.ext import commands
@@ -19,27 +20,12 @@ graph_cache = TTLCache(82800)  # items expire after 23 hours
 
 
 class GraphsCog(Cog):
-    @commands.command()
-    async def graphs(self, ctx: MyContext, *name: str):
-        name = " ".join(name)
-        _ = await ctx.get_translate_function()
-        name = self.bot.jhucsse_api.try_to_get_name(name)
-        if not name:
-            await ctx.reply(_("Couldn't find that name. Try again, or use `{0}list` for help.",
-                              ctx.prefix))
-            return
-        elif name[0] == "world":
-            data = self.bot.jhucsse_api.global_historical_stats
-        elif name[0] == "country":
-            data = await self.bot.jhucsse_api.get_country_stats(name[1])
-        elif name[0] == "province":
-            data = await self.bot.jhucsse_api.get_province_stats(name[1])
-        elif name[0] == "state":
-            data = await self.bot.jhucsse_api.get_state_stats(name[1])["timeline"]
-        elif name[0] == "continent":
-            await ctx.reply(_("Continents are not supported, as historical data is not available."))
-            return
+    @commands.group()
+    async def graphs(self, ctx: MyContext):
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help("graphs")
 
+    async def process_graphs(self, ctx: MyContext, name: Tuple[Optional[str]], data, _: Callable):
         msg: discord.Message = await ctx.send(_("React with 📈 for a logarithmic graph.\n"
                                                 "React with 📉 for a linear graph.\n"
                                                 "This message expires after 30 seconds."))
@@ -82,6 +68,13 @@ class GraphsCog(Cog):
         e.set_image(url="attachment://image.png")
         await msg.delete()
         await ctx.send(file=f, embed=e)
+
+    @graphs.command()
+    async def world(self, ctx: MyContext):
+        _ = await ctx.get_translate_function()
+        name = self.bot.jhucsse_api.try_to_get_name("world")
+        data = self.bot.jhucsse_api.global_historical_stats
+        await self.process_graphs(ctx, name, data, _)
 
     @commands.has_role(686939763927678986)
     @commands.command()
