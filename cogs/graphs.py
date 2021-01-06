@@ -35,7 +35,7 @@ class GraphsCog(Cog):
         elif name[0] == "province":
             data = await self.bot.jhucsse_api.get_province_stats(name[1])
         elif name[0] == "state":
-            data = await self.bot.jhucsse_api.get_state_stats(name[1])
+            data = await self.bot.jhucsse_api.get_state_stats(name[1])["timeline"]
         elif name[0] == "continent":
             await ctx.reply(_("Continents are not supported, as historical data is not available."))
             return
@@ -63,7 +63,7 @@ class GraphsCog(Cog):
         graph_buffer = graph_cache.get(buffer_name)
         if not graph_buffer:
             cache_hit = False
-            fp = await wrap_in_async(graphs.generate_line_plot, data["timeline"],
+            fp = await wrap_in_async(graphs.generate_line_plot, data,
                                      name[1].title() if name[1] else "world",
                                      logarithmic=event.emoji.name == "📈")
             with open(fp, "rb") as f:
@@ -76,7 +76,7 @@ class GraphsCog(Cog):
         et = time.perf_counter_ns()
         f = discord.File(graph_buffer, filename="image.png")
         tt = et - st
-        e = discord.Embed(title=_("Graph for {0}", name[1].title()))
+        e = discord.Embed(title=_("Graph for {0}", name[1].title() if name[1] else 'world'))
         e.set_footer(text=_("Took {0} seconds ({1} nanoseconds) to generate • Cache Status: {2}",
                             format(round(tt / 1000000000, 1), ","), format(tt, ","), "HIT" if cache_hit else "MISS"))
         e.set_image(url="attachment://image.png")
