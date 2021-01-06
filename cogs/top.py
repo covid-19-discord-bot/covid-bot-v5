@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-File designed for you to copy over and over again as a template for new parts of your bot
+Top commands, like /top.
 """
 from discord.ext import commands
 import discord
@@ -9,10 +9,11 @@ from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 
 
-class Template(Cog):
+class TopCommands(Cog):
     @commands.command()
     async def top(self, ctx: MyContext, _type: str):
         """
+        Get top statistics for one of _type! Pie charts can be found in /graphs (soon).
         <_type> can be one of "cases", "recovered", "deaths", "critical" or "tests"
         """
         _ = await ctx.get_translate_function()
@@ -40,4 +41,4 @@ class Template(Cog):
         await ctx.send(embed=top_embed)
 
 
-setup = Template.setup
+setup = TopCommands.setup

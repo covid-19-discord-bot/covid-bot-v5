@@ -13,31 +13,6 @@ from utils import api as covid19api
 from utils import embeds
 
 
-async def list_file(ctx: MyContext, letter: str) -> Optional[str]:
-    iso_codes = await ctx.bot.worldometers_api.get_all_iso_codes()
-    countries = []
-    letter = str(letter).lower()
-    for field in iso_codes:
-        country_name = field["country"].lower()
-        if country_name.startswith(letter):
-            countries.append(field)
-    longest_name = 0
-    if len(countries) != 0:
-        for country in countries:
-            if len(country["country"]) > longest_name:
-                longest_name = len(country["country"])
-
-        msg_str = "{0:<{1}} | ISO2 Code | ISO3 Code".format(country_name, longest_name)
-        msgs = [msg_str, "-" * len(msg_str)]
-        for country in countries:
-            msgs.append("{0:<{1}} | {2}        | {3}      ".format(country["country"],
-                                                                   longest_name,
-                                                                   country["iso2"],
-                                                                   country["iso3"]))
-        return "\n".join(msgs)
-    return None
-
-
 class CovidCog(Cog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
