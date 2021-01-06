@@ -255,18 +255,15 @@ class Covid19JHUCSSEStats:
                 await _handle_client_exceptions(self, e)
                 return
             self.global_historical_stats = data
-            data: list = await get_data(session, "https://disease.sh/v3/covid-19/historical?lastdays=all")
-            for country in self.iso_codes.iso_codes:
-                cty_data = {}
-                all_data = {}
-                for i in filter(lambda x: x["country"] == country["country"], data):
-                    if i["province"] is None:
-                        cty_data["all"] = i
-                        self.countries[i["country"]] = i
-                    else:
-                        cty_data[i["province"]] = i
-                        self.provinces[i["province"].lower()] = i
-                self.historical_stats[country["iso2"]] = cty_data
+            for code in self.iso_codes.iso_codes:
+                try:
+                    data: dict = await get_data(session,
+                                                f"https://disease.sh/v3/covid-19/historical/{code['iso2']}"
+                                                f"?lastdays=all&allowNull=1")
+                except NetworkException as e:
+                    if e.exc.code == 404:
+                        continue
+                self.countries[code["iso2"]] = data
             self.logger.info("Getting US states...")
             data: list = await get_data(session, "https://disease.sh/v3/covid-19/historical/usacounties?lastdays=all")
             self.american_states = data
@@ -340,13 +337,13 @@ class Covid19JHUCSSEStats:
         :return: The stats for the country if found. Provinces are included in the data. If not found, returns None.
         """
         await self._check_stats_are_valid()
-        if country not in self.historical_stats:
+        if country not in self.countries:
             iso2_code = get_iso2_code(country.lower(), self.iso_codes.iso_codes)
-            if iso2_code not in self.historical_stats:
+            if iso2_code not in self.countries:
                 raise CountryNotFound()
         else:
             iso2_code = country
-        return self.historical_stats[iso2_code]
+        return self.countries[iso2_code]
 
     async def get_province_stats(self, province: str):
         """"""
