@@ -157,14 +157,37 @@ class RestAPI(Cog):
         """
         await self.authenticate_request(request)
 
-        guild = self.bot.get_guild(int(request.match_info["guild_id"])) or await self.bot.fetch_guild(int(
-            request.match_info["guild_id"]))
-
-        if guild:
-            resp = {"is_in_server": True}
-        else:
+        try:
+            guild = self.bot.get_guild(int(request.match_info["guild_id"])) or await self.bot.fetch_guild(int(
+                request.match_info["guild_id"]))
+        except discord.Forbidden:
             resp = {"is_in_server": False}
+        else:
+            if guild:
+                resp = {"is_in_server": True}
+            else:
+                resp = {"is_in_server": False}
+
         return web.json_response(resp)
+
+    async def bot_is_in_servers(self, request):
+        """
+        /protected/is_in_servers/<server_ids>
+        IDs should be separated by dashes
+        Returns JSON data, with keys (guild IDs) that are True if the bot is in the server, False if not.
+        Requires global API key.
+        """
+        await self.authenticate_request(request)
+
+        guilds = request.match_info["guild_ids"].split("-")
+        results = []
+        for guild in guilds:
+            try:
+                if self.bot.get_guild(int(guild)):
+                    results.append(int(guild))
+            except discord.Forbidden:
+                pass
+        return web.json_response(results)
 
     async def check_channel_permissions(self, request):
         """
@@ -218,6 +241,7 @@ class RestAPI(Cog):
             ('GET', f'{route_prefix}/channels/{{channel_id:\\d+}}', self.channel_info),
             ('POST', f'{route_prefix}/channels/{{channel_id:\\d+}}/manage', self.manage_updater),
             ('GET', f'{route_prefix}/protected/bot_is_in_server/{{guild_id:\\d+}}', self.bot_is_in_server),
+            ('GET', f'{route_prefix}/protected/bot_is_in_servers/{{guild_ids}}', self.bot_is_in_servers),
             ('GET', f'{route_prefix}/protected/manage_channel/{{guild_id:\\d+}}/{{user_id:\\d+}}',
              self.check_channel_permissions),
             ('POST', f'{route_prefix}/protected/add_votes/{{user_id:\\d+}}/', self.add_extra_votes),

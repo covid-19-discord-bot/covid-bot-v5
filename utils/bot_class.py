@@ -16,6 +16,12 @@ from utils import api as covid19api
 from utils.maps import MapGetter
 from utils.async_helpers import wrap_in_async
 from copy import deepcopy
+try:
+    from blackfire import probe
+except (ImportError, ModuleNotFoundError):
+    blackfire = False
+else:
+    blackfire = True
 
 
 _runtime_error = RuntimeError("The bot hasn't been set up yet! Ensure bot.async_setup is called ASAP!")
@@ -52,6 +58,8 @@ class MyBot(AutoShardedBot):
         self.statcord: Optional[statcord.Client] = None
         self._map_client: Optional[MapGetter] = None
         self.support_server_invite = "https://discord.gg/myJh5hkjpS"
+        self.autoupdater_dump: asyncio.Queue = asyncio.Queue(maxsize=1)
+        self.blackfire: bool = blackfire
         asyncio.ensure_future(self.async_setup())
 
     @property
@@ -131,6 +139,8 @@ class MyBot(AutoShardedBot):
             await self.invoke(ctx)
 
     async def on_command(self, ctx: MyContext):
+        if self.blackfire:
+            probe.add_marker(f"Command {ctx.command} {ctx.invoked_subcommand}")
         self.commands_used[ctx.command.name] += 1
         self.statcord.command_run(ctx)
         ctx.logger.info(f"{ctx.message.clean_content}")

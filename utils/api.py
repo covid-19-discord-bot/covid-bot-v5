@@ -258,6 +258,7 @@ class Covid19JHUCSSEStats:
             data: list = await get_data(session, "https://disease.sh/v3/covid-19/historical?lastdays=all")
             for country in self.iso_codes.iso_codes:
                 cty_data = {}
+                all_data = {}
                 for i in filter(lambda x: x["country"] == country["country"], data):
                     if i["province"] is None:
                         cty_data["all"] = i
@@ -294,6 +295,7 @@ class Covid19JHUCSSEStats:
                         sd["all"]["timeline"][j] = tc
 
                     sd[county["county"]] = county
+                self.american_state_stats[state] = sd
         self.last_updated_utc = datetime.datetime.utcnow()
         self._has_been_updated = True
         self.data_is_valid = True

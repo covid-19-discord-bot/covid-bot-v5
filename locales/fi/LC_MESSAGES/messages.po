@@ -1,0 +1,957 @@
+    msgid ""
+msgstr ""
+"Project-Id-Version: COVID-19 Bot v5.0.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-01-05 13:33-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+"Content-Type: text/plain; charset=UTF-8"
+
+msgid ""
+"You've used too many updaters! You've used {0} of your {1} updaters. Get "
+"more by voting on top.gg."
+msgstr ""
+
+msgid ""
+"❌ Did you really try to set the autoupdater delay to more than a year? Oi. "
+"Anyways, that isn't allowed. Try again with a more reasonable delay."
+msgstr ""
+"❌ Yrititkö todella asettaa automaattisen päivityksen viiveeksi yli vuoden? "
+"Oi. Joka tapauksessa, se ei ole sallittua. Yritä uudelleen kohtuullisemmalla "
+"viiveellä."
+
+msgid ""
+"⚠ You're setting a delay longer than 1 day! Are you sure you want to do "
+"this? To confirm, type `ok` within 15 seconds."
+msgstr ""
+"⚠ Asetat viiveen, joka on pidempi kuin yksi päivä! Haluatko varmasti tehdä "
+"tämän? Vahvista kirjoittamalla `ok` 15 sekunnin kuluessa."
+
+msgid "Action cancelled."
+msgstr ""
+
+msgid "Continuing setup..."
+msgstr "Jatketaan asetusta ..."
+
+msgid ""
+"Hi there! Welcome to the COVID-19 Bot autoupdater interactive setup.\n"
+"Let's get started. Choose one of the following options.\n"
+"1⃣: Updates for the world.\n"
+"2⃣: Updates for a continent.\n"
+"3⃣: Updates for a country."
+msgstr ""
+
+msgid "Timed out."
+msgstr ""
+
+msgid ""
+"Next, what update delay would you like? For example, 12h would do a update "
+"every 12 hours. Keep in mind any delays beyond 1 year will not work."
+msgstr ""
+
+msgid "Invalid time provided. Make sure it's in the correct format!"
+msgstr ""
+
+msgid ""
+"Finally, what country would you like to do a update for? Type the country's "
+"ISO2 code into chat."
+msgstr ""
+
+msgid "Didn't find a country name! Try again."
+msgstr ""
+
+msgid ""
+"I found a {0} instead of a country! You can let this time out and try again."
+msgstr ""
+
+msgid ""
+"Finally, what continent would you like to do a update for? Type the "
+"continent name into chat."
+msgstr ""
+
+msgid "Didn't find a continent name! Try again."
+msgstr ""
+
+msgid ""
+"I found a {0} instead of a continent! You can let this time out and try "
+"again."
+msgstr ""
+
+msgid ""
+"❌ Failed to get a ISO2 code for the country! `/list` will show you a list of "
+"countries and their IDs."
+msgstr ""
+"❌ Maalle ei saatu ISO2-koodia! `/ list` näyttää luettelon maista ja niiden "
+"tunnuksista."
+
+msgid "I found a {0} instead of a country! You can try `{1}` instead."
+msgstr ""
+
+msgid "✅ Posting stats for {0} in this channel every {1}."
+msgstr "✅ Tilastojen lähettäminen kanavalle {0} tälle kanavalle joka {1}."
+
+msgid ""
+"❌ Failed to get a continent name! {0} will show you a list of continents."
+msgstr ""
+
+msgid "❌ I found a {0} instead of a continent! You can try `{1}` instead."
+msgstr ""
+
+msgid "❌ Must pass either {0} or a ID as a argument."
+msgstr ""
+
+msgid "✅ Deleted all autoupdaters in this channel."
+msgstr ""
+
+msgid "❌ No autoupdater with that ID found."
+msgstr ""
+
+msgid "✅ Deleted autoupdater with ID {0}."
+msgstr ""
+
+msgid "List of Updaters"
+msgstr ""
+
+msgid "To disable one of these updaters, run {0}, replacing {1} with the ID."
+msgstr ""
+
+msgid "Country: {0}\n"
+"Delay: {1} seconds"
+msgstr ""
+
+msgid "None 😞"
+msgstr ""
+
+msgid "Add one with the {0} command!"
+msgstr ""
+
+msgid "❌ You don't have a autoupdater set here or the ID you sent is invalid!"
+msgstr ""
+
+msgid "✅ Forcing a update sometime in the next minute."
+msgstr "✅ Päivityksen pakottaminen joskus seuraavassa minuutissa."
+
+msgid "✅ Next update: {0}"
+msgstr ""
+
+msgid ""
+"I'm having a issue with finding the country name here! Here's what I'm "
+"showing: {trying}"
+msgstr "Minulla on ongelma löytää maan nimi täältä! Tässä näytän: {yrittää}"
+
+msgid "Stopping task..."
+msgstr "Lopetetaan tehtävää ..."
+
+msgid "Task has been sent a stop signal. Waiting 10 seconds..."
+msgstr "Tehtävälle on lähetetty pysäytyssignaali. Odotetaan 10 sekuntia ..."
+
+msgid "Sending terminate signal..."
+msgstr "Lähetetään lopetussignaalia ..."
+
+msgid "Task has been killed. Starting now..."
+msgstr "Tehtävä on tapettu. Alkaen nyt..."
+
+msgid "Task has been sent a start signal."
+msgstr "Tehtävälle on lähetetty aloitussignaali."
+
+msgid "Task restarted!"
+msgstr "Tehtävä aloitettu uudelleen!"
+
+msgid "Credits"
+msgstr ""
+
+msgid "current bot version: v5.2.0"
+msgstr ""
+
+msgid "v3+ Creator"
+msgstr ""
+
+msgid "Original Creator"
+msgstr ""
+
+msgid "Bot Framework"
+msgstr ""
+
+msgid "Moral Support"
+msgstr ""
+
+msgid "API Providers"
+msgstr ""
+
+msgid "discord.py Devs"
+msgstr ""
+
+msgid "Invite Links"
+msgstr ""
+
+msgid "Bot Invite Link"
+msgstr ""
+
+msgid "Discord Server Invite Link"
+msgstr ""
+
+msgid ""
+"I seem to be having issues, apparently I can't find the channel you ran that "
+"command in! Please try again."
+msgstr ""
+
+msgid "Pong. — Time taken: {0}ms"
+msgstr ""
+
+msgid "Calling `self.bot.async_setup()`..."
+msgstr ""
+
+msgid "Bot has been setup!"
+msgstr ""
+
+msgid "Vote Sites"
+msgstr ""
+
+msgid ""
+"Voting for the bot gives it more visibility, which means it ends up in more "
+"servers, giving me (the dev) more incentive to add more features!\n"
+"If you want a specific feature, let me know with the `/suggest` command!"
+msgstr ""
+
+msgid "**DO NOT disable adblockers!**"
+msgstr ""
+
+msgid ""
+"A fatal error has happened! The world data seems to have gone missing. "
+"Please let a mod in the bot's support server know."
+msgstr ""
+"Kohtalokas virhe on tapahtunut! Maailmantiedot näyttävät kadonneen. Kerro "
+"moduulille botin tukipalvelimesta."
+
+msgid "Didn't find any continents with that name!"
+msgstr "Ei löytänyt yhtään maanosaa tällä nimellä!"
+
+msgid "Use the `{0}covid world` command instead."
+msgstr ""
+
+msgid ""
+"Didn't find a country with that name, or the country has no cases! Try "
+"searching for the name with `{0}list country`.\n"
+"Hint: if you're looking for North or South Korea, try `{0}covid KP` or "
+"`{0}covid KR` for North and South Korea, respectively!"
+msgstr ""
+
+msgid ""
+"Didn't find a country with that name, or the country has no cases! Try "
+"searching for the name with `{0}list country`."
+msgstr ""
+
+msgid "You've used a incorrect command: try `{0}covid {1}`"
+msgstr ""
+
+msgid "You haven't split the country name and province with a `; `!"
+msgstr ""
+
+msgid ""
+"You've placed too many `; ` in your message! You can use only one to split "
+"the country and province names! For help, run `{0}help covid province`!"
+msgstr ""
+
+msgid ""
+"Couldn't find a country with that ID (`/list` for a list of IDs) or the "
+"country has no cases!"
+msgstr ""
+
+msgid ""
+"Couldn't find a province with that name! If you're looking for US states, "
+"see the `{0}covid states` command."
+msgstr ""
+
+msgid ""
+"Something went wrong, I can't find today's stats! I'm currently trying to "
+"find stats for {0}!"
+msgstr ""
+
+msgid "You need to specify a US state! For a list, run `{0}list states`."
+msgstr ""
+
+msgid "Didn't find a state with that name! For a list, run `{0}list states`."
+msgstr ""
+
+msgid "That isn't a state! Try the `{0}covid {1}` command."
+msgstr ""
+
+msgid ""
+"I can't send the entire country list: it's over Discord's 6,000 character "
+"limit! Try `{0}{1} <letter>` to get only countries starting with `<letter>`."
+msgstr ""
+
+msgid ""
+"Whatever you have requested, it is over 6,000 characters. I can send a text "
+"file, however. React with 📔 any time in the next 15 seconds to be DMed a "
+"text file instead of a embed."
+msgstr ""
+
+msgid "Sent you a DM!"
+msgstr ""
+
+msgid "DMed a list to you!"
+msgstr ""
+
+msgid "List of {0}"
+msgstr ""
+
+msgid "Use `{0}covid {1} <name>` when getting stats for a {1}!"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "List of American States"
+msgstr ""
+
+msgid ""
+"Use the `{0}covid states <name>` command when getting stats for `<name>`!"
+msgstr ""
+
+msgid ""
+"The page number you have selected is not between 1 and {0}. Please try again."
+""
+msgstr ""
+
+msgid "Page {0} of {1}"
+msgstr ""
+
+msgid "To go to the next page, run `{0}{1} {2} {3}`"
+msgstr ""
+
+msgid "Incorrect Top List Type"
+msgstr ""
+
+msgid "Try sorting with one of the following:"
+msgstr ""
+
+msgid "Top List"
+msgstr ""
+
+msgid "Run `{0}help top` for a list of all possible sorts!"
+msgstr ""
+
+msgid "{0}: {1}"
+msgstr ""
+
+msgid "The server prefix is set to `{0}`."
+msgstr ""
+
+msgid "There is no specific prefix set for this guild."
+msgstr "Killalle ei ole määritetty erityistä etuliitettä."
+
+msgid "The server language is now set to `{0}`."
+msgstr ""
+
+msgid "There is no specific language set for this guild."
+msgstr "Killalle ei ole määritetty tiettyä kieltä."
+
+msgid "Tips are currently enabled for this guild."
+msgstr "Vinkit ovat tällä hetkellä käytössä tälle killalle."
+
+msgid "Tips are currently disabled for this guild."
+msgstr "Vinkit ovat tällä hetkellä pois käytöstä tälle killalle."
+
+msgid "Enabled tips for this guild."
+msgstr "Aktivoituja vinkkejä tälle killalle."
+
+msgid "Disabled tips for this guild."
+msgstr "Vammaiset vinkit tälle killalle."
+
+msgid ""
+"The API has been disabled for this channel. To restore your permissions, "
+"contact 0/0#0001 on the official support server."
+msgstr ""
+"Tämän kanavan sovellusliittymä on poistettu käytöstä. Palauta "
+"käyttöoikeutesi ottamalla yhteyttä viralliseen tukipalvelimeen 0/0 # 0001."
+
+msgid "DMed your API key to you."
+msgstr "DMed API-avain sinulle."
+
+msgid "Revoked/deleted API key."
+msgstr "Kumottu / poistettu API-avain."
+
+msgid "DMed your new API key to you."
+msgstr "DMed uuden API-avaimen sinulle."
+
+msgid "Disabled the API for {0}."
+msgstr ""
+
+msgid ""
+"There was an error converting one of your arguments with {0}. The correct "
+"syntax would be `{1}`. The converter returned the following error: {2}"
+msgstr ""
+
+msgid ""
+"This command is missing an argument. The correct syntax would be `{0}`."
+msgstr ""
+
+msgid ""
+"Too many quotes were provided in your message: don't forget to escape your "
+"quotes like this `\\{0}`. The correct syntax for the command is `{1}`."
+msgstr ""
+
+msgid ""
+"A space was expected after a closing quote, but I found {0}. Please check "
+"that you are using the correct syntax: `{1}`."
+msgstr ""
+
+msgid ""
+"A closing quote was expected, but wasn't found. Don't forget to close your "
+"quotes with `{0}` at the end of your argument. Please check that you are "
+"using the correct syntax: `{1}`."
+msgstr ""
+
+msgid ""
+"Too many arguments were passed in this command. Please check that you are "
+"using the correct syntax: `{0}`."
+msgstr ""
+
+msgid ""
+"The way you are invoking this command is confusing me. The correct syntax "
+"would be `{0}`."
+msgstr ""
+
+msgid ""
+"An argument passed was incorrect. `{0}`.Please check that you are using the "
+"correct syntax: `{command_invoke_help}`."
+msgstr ""
+
+msgid "{0} Please check that you are using the correct syntax: `{1}`."
+msgstr ""
+
+msgid "This command can only be used in a private message."
+msgstr "Tätä komentoa voidaan käyttää vain yksityisessä viestissä."
+
+msgid "This command cannot be used in a private message."
+msgstr "Tätä komentoa ei voi käyttää yksityisviestissä."
+
+msgid "Multiple errors were encountered when running your command: {0}"
+msgstr ""
+
+msgid "You need to be the owner of the bot to run that."
+msgstr "Sinun on oltava botin omistaja, jotta voit suorittaa sen."
+
+msgid "You are missing permissions to run this command. {0}"
+msgstr ""
+
+msgid "I am missing permissions to run this command. {0}"
+msgstr ""
+
+msgid "You are missing the following role: {0}"
+msgstr ""
+
+msgid "I am missing the following role: {0}"
+msgstr ""
+
+msgid "You are missing one of the following roles: {0}"
+msgstr ""
+
+msgid "I am missing one of the following roles: {0}"
+msgstr ""
+
+msgid "You need to be in a NSFW channel to run that."
+msgstr "Sinun on oltava NSFW-kanavalla, jotta voit suorittaa sen."
+
+msgid "You need to be in the {0} server (`{1}`)."
+msgstr ""
+
+msgid "You need to be in a server with ID {0}."
+msgstr ""
+
+msgid "You have the `{0}` permission."
+msgstr ""
+
+msgid "You need the `{0}` permission."
+msgstr ""
+
+msgid "You have {0} or more of the following permissions: `{1}`."
+msgstr ""
+
+msgid "You need {0} or more of the following permissions: `{1}`."
+msgstr ""
+
+msgid "The provided command was not found."
+msgstr "Annettua komentoa ei löytynyt."
+
+msgid "That command has been disabled."
+msgstr "Tämä komento on poistettu käytöstä."
+
+msgid ""
+"I don't have permissions to send messages there! Try again somewhere I do "
+"have permissions to send messages!"
+msgstr ""
+"Minulla ei ole oikeuksia lähettää viestejä sinne! Yritä uudelleen jossain "
+"minulla on oikeuksia lähettää viestejä!"
+
+msgid "The bot's still setting up, please wait a few minutes and try again!"
+msgstr ""
+
+msgid ""
+"I can't find your original message, Discord may be having issues! Try again."
+msgstr ""
+
+msgid ""
+"There was an error running the specified command‽ This error has been logged."
+""
+msgstr ""
+"Määritetyn komennon suorittamisessa tapahtui virhe. Tämä virhe on kirjattu."
+
+msgid "You are being ratelimited. Please try again {0}."
+msgstr ""
+
+msgid "globally"
+msgstr ""
+
+msgid "per user"
+msgstr ""
+
+msgid "per guild"
+msgstr ""
+
+msgid "per channel"
+msgstr ""
+
+msgid "per member"
+msgstr ""
+
+msgid "per category"
+msgstr ""
+
+msgid "per role"
+msgstr ""
+
+msgid ""
+"Too many users are using this command. Only {0} users can use it at the same "
+"time {1}."
+msgstr ""
+
+msgid ""
+"Simulations have been disabled in this guild due to a missing permission. "
+"Ask a admin to give me the Manage Messages permission."
+msgstr ""
+"Simulaatiot on poistettu käytöstä tässä kiltassa puuttuvan luvan vuoksi. "
+"Pyydä järjestelmänvalvojaa antamaan minulle Viestien hallinta -oikeus."
+
+msgid ""
+"This should not have happened. A command raised an error that does not comes "
+"from CommandError. Please inform the owner."
+msgstr ""
+"Tämän ei olisi pitänyt tapahtua. Komento herätti virheen, joka ei tule "
+"CommandErrorista. Ilmoita omistajalle."
+
+msgid "\n"
+"For help, join the bot's support server at {invite}"
+msgstr "Jos tarvitset apua, liity botin tukipalvelimeen osoitteessa {kutsu}"
+
+msgid "No message was defined. This error has been logged."
+msgstr ""
+
+msgid "Data for Day {0}"
+msgstr ""
+
+msgid ""
+"**WARNING**\n"
+"This is not a scientific modeling system by any means, this purely exists "
+"for entertainment purposes. For actual advice, refer to your medical "
+"specialist. By agreeing to these terms, you agree not to hold 0/0#0001 "
+"liable for anything stemming from the use of this modeling system. Type `ok` "
+"within 15 seconds to agree to these terms."
+msgstr ""
+
+msgid "Didn't get a response. To try again, do `{0}{1}`."
+msgstr ""
+
+msgid "I'll ping you when this is done, you can go do other stuff."
+msgstr ""
+
+msgid "Please wait, initializing..."
+msgstr ""
+
+msgid ""
+"You haven't set up your simulation! Run `{0}simulate setup` to set your sim "
+"up!"
+msgstr ""
+
+msgid "Submitting your item to be processed..."
+msgstr ""
+
+msgid "Waiting for next run of simulation processor, which will happen {0}."
+msgstr ""
+
+msgid "Simulation failed: ran out of memory: retry with smaller values."
+msgstr ""
+
+msgid ""
+"Simulation failed: had incorrect values passed to it: try with more "
+"reasonable values."
+msgstr ""
+
+msgid ""
+"Simulation failed: process running the simulation has failed: ask a mod in "
+"the bot's support server (find it via {0}) to run {1}."
+msgstr ""
+
+msgid ""
+"Simulation failed: had a unknown error: report ID ({0}) to 0/0#0001 to be "
+"fixed."
+msgstr ""
+
+msgid "Processed simulation!"
+msgstr ""
+
+msgid "Simulation Results"
+msgstr ""
+
+msgid ""
+"Navigate using `next` to view the next day's stats, `prev` to view the "
+"previous day's stats, `first` to jump to the first day (tomorrow), and "
+"`last` to jump to the last day in your simulation. Type a number to jump "
+"straight to that day. Type `exit` to exit the paginator (for example, if you "
+"want to modify sim data)."
+msgstr ""
+
+msgid "Total infections by end of simulation"
+msgstr ""
+
+msgid "Total recoveries by end of simulation"
+msgstr ""
+
+msgid "Total deaths by end of simulation"
+msgstr ""
+
+msgid "Your simulation is ready: it will be available for 15 minutes."
+msgstr ""
+
+msgid "Your simulation has timed out. Request a new one with `{0}{1}`."
+msgstr ""
+
+msgid ""
+"I now require the MANAGE MESSAGES permission. I've disabled this command "
+"until you give me this permission. If you'd prefer not to give me such a "
+"permission, the bot will still function, just with the simulation module "
+"disabled. Thanks in advance!"
+msgstr ""
+
+msgid "Internal bot error. Try again."
+msgstr ""
+
+msgid "Out of bounds."
+msgstr ""
+
+msgid ""
+"You aren't a mod in the bot's support server! You can't run this command. If "
+"simulations are actually broken, ask a mod in the bot's support server (find "
+"it via {0}) to run this command."
+msgstr ""
+
+msgid "This could take up to 60 seconds, please wait..."
+msgstr ""
+
+msgid "Stopping simulation runners..."
+msgstr ""
+
+msgid "Stopping broken process pools..."
+msgstr ""
+
+msgid "Waiting 20 seconds for the final tasks to stop..."
+msgstr ""
+
+msgid "Destroying pools..."
+msgstr ""
+
+msgid "Creating new pools..."
+msgstr ""
+
+msgid "Starting up simulation runners..."
+msgstr ""
+
+msgid "Restarted pool sucessfully!"
+msgstr ""
+
+msgid ""
+"Simulation results are very inaccurate after 157 days. I have set the "
+"simulation length to 157 days."
+msgstr ""
+
+msgid "Set simulation length to {0} days."
+msgstr ""
+
+msgid "Couldn't find that name. Try again, or use `{0}list` for help."
+msgstr ""
+
+msgid ""
+"React with 📈 for a logarithmic graph.\n"
+"React with 📉 for a linear graph.\n"
+"This message expires after 30 seconds."
+msgstr ""
+"Reagoi logaritmisen kuvaajan 📈 kanssa. Reagoi lineaarisen kuvaajan graph "
+"kanssa. Tämä viesti vanhenee 30 sekunnin kuluttua."
+
+msgid "Timed out. Request a new message with `{0}graphs`"
+msgstr ""
+
+msgid "Please wait, this could take a few seconds..."
+msgstr "Odota, tämä voi kestää muutaman sekunnin ..."
+
+msgid "Graph for {0}"
+msgstr ""
+
+msgid "Took {0} seconds ({1}ns) to generate. • Cache Status: {2}"
+msgstr ""
+
+msgid "Map Types"
+msgstr ""
+
+msgid "Use one of these map types when running `{0}maps show <name>`."
+msgstr ""
+
+msgid ""
+"I don't know what map you're looking for! Run `{0}maps types` to see all the "
+"maps I can show you!"
+msgstr ""
+
+msgid "Map for {0}"
+msgstr ""
+
+msgid "Updating maps..."
+msgstr ""
+
+msgid "Done!"
+msgstr ""
+
+msgid "😃 You have that permission."
+msgstr "😃 Sinulla on tuo lupa."
+
+msgid "☹️ You don't have that permission."
+msgstr "☹️ Sinulla ei ole tätä lupaa."
+
+msgid "Details of permissions hierarchy"
+msgstr "Yksityiskohdat käyttöoikeushierarkiasta"
+
+msgid "{0} Default (from {0}{1})"
+msgstr ""
+
+msgid "{0} Guild role {1} (from {0}{2})"
+msgstr ""
+
+msgid "{0} Channel role {1} (from {0}{2})"
+msgstr ""
+
+msgid "{0} Member (from {0}{1})"
+msgstr ""
+
+msgid "{0} Fixed (from {0}{1})"
+msgstr ""
+
+msgid "{0} User (from {0}{1})"
+msgstr ""
+
+msgid "**{0} permissions**"
+msgstr ""
+
+msgid "There are no specific permissions set in this guild."
+msgstr "Tässä killassa ei ole määritetty erityisiä käyttöoikeuksia."
+
+msgid "There are no specific permissions set in this channel."
+msgstr "Tälle kanavalle ei ole määritetty erityisiä käyttöoikeuksia."
+
+msgid "There are no specific permissions for this member."
+msgstr "Tälle jäsenelle ei ole erityisiä käyttöoikeuksia."
+
+msgid "👌 Permission {0} for user {1} has been set to {2} globally."
+msgstr ""
+
+msgid "👌 Permission {0} for member {1} has been set to {2} globally."
+msgstr ""
+
+msgid "❌ Can't set permissions in a channel that is not in this guild."
+msgstr ""
+"❌ Ei voida asettaa käyttöoikeuksia kanavalle, joka ei ole tässä killassa."
+
+msgid "❌ Can't set permissions for a role that does not exist in this guild."
+msgstr ""
+"❌ Ei voida asettaa käyttöoikeuksia roolille, jota ei ole tässä killassa."
+
+msgid ""
+"👌 Permission {0} for role {1} [`{2}`] has been set to {3} in this channel."
+msgstr ""
+
+msgid ""
+"👌 Permission {0} for role {1} [`{2}`] has been set to {3} in this guild."
+msgstr ""
+
+msgid "Failed to send suggestion due to a Discord error. Try again."
+msgstr ""
+
+msgid "Sent suggestion successfully."
+msgstr ""
+
+msgid "The bot is not yet sharded."
+msgstr ""
+
+msgid "•\t Shard ID {0}: {1}ms"
+msgstr ""
+
+msgid " (ready)"
+msgstr ""
+
+msgid " (current shard)"
+msgstr ""
+
+msgid "\n"
+"\n"
+"Avg latency: {0}ms"
+msgstr ""
+
+msgid " (bot ready)"
+msgstr ""
+
+msgid "{0}: {1} candidates\n"
+msgstr ""
+
+msgid "Vaccine Updates"
+msgstr ""
+
+msgid ""
+"(For more details, run `{0}help vaccine`)\n"
+"There are a total of **{1} vaccine candidates**.\n"
+"__**Phases**__\n"
+"{2}"
+msgstr ""
+
+msgid "Last updated at"
+msgstr ""
+
+msgid "Vaccine Candidates"
+msgstr ""
+
+msgid ""
+"To get more details on a vaccine candidate, run `{0}vaccine details <id>`\n"
+"The ID of any given candidate is under the name."
+msgstr ""
+
+msgid "That isn't a valid vaccine ID! View all the IDs in {0}!"
+msgstr ""
+
+msgid "Description is too long! Download the attachment to see it!"
+msgstr ""
+
+msgid "Mechanism"
+msgstr ""
+
+msgid "Sponsors"
+msgstr ""
+
+msgid "Phase"
+msgstr ""
+
+msgid "Institutions"
+msgstr ""
+
+msgid "You must pass a number or {0}."
+msgstr ""
+
+msgid ""
+"You don't have enough credits to transfer. Go vote on top.gg for more!\n"
+"{0}"
+msgstr ""
+
+msgid ""
+"You are going to transfer {0} updater credits to this guild ({1}). This "
+"action is irreversible. Type {2} within 30 seconds to confirm."
+msgstr ""
+
+msgid "Timed out waiting for response."
+msgstr ""
+
+msgid "Transferred {0} credits to {1}."
+msgstr ""
+
+msgid "<:infected:775877435320565801> Total Cases"
+msgstr ""
+
+msgid "<:deaths:775877434687488030> Total Deaths"
+msgstr ""
+
+msgid "<:recovered:775877435089748008> Total Recoveries"
+msgstr ""
+
+msgid "Province Stats for {province} on {today}"
+msgstr ""
+
+msgid ""
+"Why such a small amount of data compared to country stats?\n"
+"Some provinces may report the same amount of data, but these provinces make "
+"up such a small amount of all provinces, meaning it's not worth it to try to "
+"show it for all of them."
+msgstr ""
+
+msgid "{0} (could also have no data)"
+msgstr ""
+
+msgid "New Cases"
+msgstr ""
+
+msgid "Cases per 1m People"
+msgstr ""
+
+msgid "<:active:775877437056614491> Active Cases"
+msgstr ""
+
+msgid "Active Case Change"
+msgstr ""
+
+msgid "Active Cases per 1m People"
+msgstr ""
+
+msgid "New Deaths"
+msgstr ""
+
+msgid "Deaths per 1m People"
+msgstr ""
+
+msgid "New Recoveries"
+msgstr ""
+
+msgid "Recovered per 1m People"
+msgstr ""
+
+msgid "<:tests:775877436075802676> Tests"
+msgstr ""
+
+msgid "Tests per 1m People"
+msgstr ""
+
+msgid "Critical Cases"
+msgstr ""
+
+msgid "Population"
+msgstr ""
+
+msgid "COVID-19 Stats for {name}"
+msgstr "COVID-19 tilastot: {name}"
+
+msgid "Stats last updated at (UTC)"
+msgstr "Tilastot päivitetty viimeksi (UTC)"
+
+msgid "no data"
+msgstr "ei dataa"
+
+msgid "Affected Countries"
+msgstr "Vaikuttavat maat"
+
+msgid "Country List"
+msgstr "Maaluettelo"
+
+msgid ""
+"Use either the country name, or the ISO2/ISO3 code when getting stats with `/"
+"covid <name>`!"
+msgstr ""
+"Käytä joko maan nimeä tai ISO2 / ISO3-koodia, kun haet tilastoja `/ "
+"covid<name> `!"

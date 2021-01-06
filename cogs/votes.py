@@ -13,11 +13,13 @@ class VoteSystemCog(Cog):
     @commands.command()
     async def transfer_votes(self, ctx: MyContext, amount: Optional[str] = "all"):
         _ = await ctx.get_translate_function()
+        amount = amount.lower().strip()
         try:
             amount = int(amount)
         except ValueError:
-            await ctx.reply(_("You must pass a number or {0}.", "`all`"))
-            return
+            if amount != "all":
+                await ctx.reply(_("You must pass a number or {0}.", "`all`"))
+                return
         guild: discord.Guild = ctx.guild
         user: discord.Member = ctx.author
         db_guild = await get_from_db(guild)
@@ -25,8 +27,9 @@ class VoteSystemCog(Cog):
         if amount == "all":
             amount = db_user.updater_credits
         if amount > db_user.updater_credits or amount == 0:
+            vote_url = f"https://top.gg/bot/{self.bot.user.id}/vote"
             await ctx.reply(_("You don't have enough credits to transfer. Go vote on top.gg for more!\n{0}",
-                              f"https://top.gg/bot/{self.bot.user.id}/vote"))
+                              vote_url))
             return
         msg = await ctx.reply(_("You are going to transfer {0} updater credits to this guild ({1}). This action is "
                                 "irreversible. Type {2} within 30 seconds to confirm.", amount, guild.name, "`ok`"))

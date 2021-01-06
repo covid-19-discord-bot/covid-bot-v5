@@ -1,14 +1,12 @@
 # coding=utf-8
-import datetime
 import traceback
-
+import sentry_sdk
 import arrow
-
 from cogs.future_simulations import SimulationsDisabled
 from babel import dates
 from discord.ext import commands
 import discord
-from utils import checks
+from utils import checks, wrap_in_async
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.bot_class import MyBot
@@ -16,7 +14,7 @@ from utils.interaction import escape_everything
 
 
 async def submit_error_message(exc: BaseException, doing: str, ctx: MyContext, bot: MyBot):
-    error_channel = bot.get_channel(771065447561953298)
+    error_channel = bot.get_channel(796093696374079519)
     error_embed = discord.Embed(title=f"Fatal error while working on {doing}!",
                                 description=f"Guild details:\n"
                                             f"    ID: `{ctx.guild.id}`\n"
@@ -59,6 +57,13 @@ class CommandErrorHandler(Cog):
         command_invoke_help = f"{ctx.prefix}{ctx.command.qualified_name} {ctx.command.signature}"
 
         ctx.logger.warning(f"Error during processing: {exception} ({repr(exception)})")
+
+        sentry_sdk.set_context("user", {"repr": repr(ctx.author), "id": ctx.author.id,
+                                        "name": str(ctx.author)})
+        sentry_sdk.set_context("channel", {"repr": repr(ctx.channel), "id": ctx.channel.id})
+        sentry_sdk.set_context("guild", {"repr": repr(ctx.guild), "id": ctx.guild.id})
+        sentry_sdk.set_context("message", {"repr": repr(ctx.message), "id": ctx.message.id})
+        sentry_sdk.set_context("command", {"repr": repr(ctx.command)})
 
         # https://discordpy.readthedocs.io/en/latest/ext/commands/api.html#discord.ext.commands.CommandError
         if isinstance(exception, commands.CommandError):
@@ -191,11 +196,18 @@ class CommandErrorHandler(Cog):
                     await ctx.author.send(_("I don't have permissions to send messages there! Try again somewhere I do "
                                             "have permissions to send messages!"))
                     return
-                message = _("There was an error running the specified command‽ This error has been logged.")
-                # we want the original instead of the CommandError one
-                await submit_error_message(exception.original, "unknown thing", ctx, self.bot)
-                ctx.logger.error(
-                    "".join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
+                elif isinstance(exception.original, RuntimeError) and exception.original.args[0] == \
+                        "The bot hasn't been set up yet! Ensure bot.async_setup is called ASAP!":
+                    message = _("The bot's still setting up, please wait a few minutes and try again!")
+                elif isinstance(exception.original, discord.errors.NotFound):
+                    message = _("I can't find your original message, Discord may be having issues! Try again.")
+                else:
+                    message = _("There was an error running the specified command‽ This error has been logged.")    
+                    # we want the original instead of the CommandError one
+                    await submit_error_message(exception.original, "unknown thing", ctx, self.bot)
+                    sentry_sdk.capture_exception(exception)
+                    # ctx.logger.error("".join(traceback.format_exception(type(exception),
+                    # exception, exception.__traceback__)))
             elif isinstance(exception, commands.errors.CommandOnCooldown):
                 if await self.bot.is_owner(ctx.author) or checks.has_permission("bot.bypass_cooldowns"):
                     await ctx.reinvoke()
@@ -237,6 +249,10 @@ class CommandErrorHandler(Cog):
                            delete_after=delete_error_message_after)
         else:
             await ctx.send("❌ " + _("No message was defined. This error has been logged."))
+
+    @commands.Cog.listener()
+    async def on_error(self, event_method, *args, **kwargs):
+        await self.bot.on_error(event_method, *args, **kwargs)
 
 
 setup = CommandErrorHandler.setup

@@ -222,8 +222,8 @@ class AutoUpdaterCog(Cog):
             iso2_code = covid19api.get_iso2_code(country, country_list)
             friendly_country_name = covid19api.get_country_name(country, country_list)
         else:
-            await ctx.reply(_("I found a {0} instead of a country! You can try `{1}` instead.", info[0],
-                              f"{ctx.prefix}autoupdate {info[0]} {'' if info[0] != 'world' else country}"))
+            cmd_usage = "{0}autoupdate {1} {2}".format(ctx.prefix, info[0], '' if info[0] != 'world' else country)
+            await ctx.reply(_("I found a {0} instead of a country! You can try `{1}` instead.", info[0], cmd_usage))
             return
 
         update_delay = delta_seconds
@@ -281,13 +281,14 @@ class AutoUpdaterCog(Cog):
 
         info = await self.bot.worldometers_api.try_to_get_name(continent)
         if info is None:
-            await ctx.reply(_("❌ Failed to get a continent name! {0} will show you a list of continents.",
-                              f"`{ctx.prefix}list continent`"))
+            cmd_usage = "`{0}list continent`".format(ctx.prefix)
+            await ctx.reply(_("❌ Failed to get a continent name! {0} will show you a list of continents.", cmd_usage))
         elif info[0] == "continent":
             iso2_code = friendly_country_name = continent
         else:
+            cmd_usage = "{0}autoupdate {1} {2}".format(ctx.prefix, info[0], '' if info[0] != 'world' else continent)
             await ctx.reply(_("❌ I found a {0} instead of a continent! You can try `{1}` instead.", info[0],
-                              f"{ctx.prefix}autoupdate {info[0]} {'' if info[0] != 'world' else continent}"))
+                              cmd_usage))
             return
 
         update_delay = delta_seconds
@@ -347,9 +348,10 @@ class AutoUpdaterCog(Cog):
         Lists all autoupdaters in this channel.
         """
         _ = await ctx.get_translate_function()
+        cmd_usage = "{0}autoupdate disable <id>".format(ctx.prefix)
         update_embed = discord.Embed(title=_("List of Updaters"),
                                      description=_("To disable one of these updaters, run {0}, replacing {1} with the "
-                                                   "ID.", f"{ctx.prefix}autoupdate disable <id>", "`<id>`"))
+                                                   "ID.", cmd_usage, "`<id>`"))
         async for updater in AutoupdaterData().filter(discord_id=ctx.channel.id):
             update_embed.add_field(name=updater.id, value=_("Country: {0}\n"
                                                             "Delay: {1} seconds", updater.country_name, updater.delay))
@@ -393,6 +395,13 @@ class AutoUpdaterCog(Cog):
         self.bot.logger.info("Starting autoupdater...")
         db_channels = await AutoupdaterData.filter(already_set=True)
         channels_to_parse = []
+        try:
+            await self.bot.autoupdater_dump.get_nowait()
+        except asyncio.QueueEmpty:
+            dump = False
+        else:
+            dump = True
+            self.bot.logger.info("Got a request to dump the updater data, doing so...")
         for db_channel in db_channels:
             channel: discord.TextChannel = self.bot.get_channel(db_channel.discord_id)
             if channel is None:
@@ -445,13 +454,10 @@ class AutoUpdaterCog(Cog):
                 async for msg in channel.history(limit=1):
                     ctx = await self.bot.get_context(msg, cls=MyContext)
                     msg1 = None
-                    print("found a message")
                     break
                 else:
                     msg1 = await channel.send("\u0000")
                     ctx = await self.bot.get_context(msg1, cls=MyContext)
-                    print("was unable to find a message so made one")
-                print("generating embed")
                 embed = await embeds.advanced_stats_embed(await self.bot.worldometers_api.try_to_get_name(country),
                                                           ctx=ctx)
                 if embed is None:
@@ -459,9 +465,7 @@ class AutoUpdaterCog(Cog):
                     await channel.send(_("I'm having a issue with finding the country name here! Here's what I'm "
                                          "showing: {trying}",
                                          trying=await self.bot.worldometers_api.try_to_get_name(country)))
-                print("sending embed")
                 await channel.send(embed=embed)
-                print("sent embed")
                 if msg1:
                     await msg1.delete()
             except (discord.DiscordException, discord.errors.Forbidden) as e:

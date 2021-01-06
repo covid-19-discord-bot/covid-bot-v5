@@ -206,12 +206,12 @@ class CovidCog(Cog):
             await ctx.reply("Couldn't find any countries starting with those letters!")
 
     @staticmethod
-    async def generate_list_embed(ctnts: list, type: tuple, ctx: MyContext):
+    async def generate_list_embed(continents: list, type: tuple, ctx: MyContext):
         _ = await ctx.get_translate_function()
         emb = discord.Embed(title=_("List of {0}", type[1]),
                             description=_("Use `{0}covid {1} <name>` when getting stats for a {1}!",
                                           ctx.prefix, type[0]))
-        for ctnt in ctnts:
+        for ctnt in continents:
             emb.add_field(name=_("Name"), value=ctnt)
         return emb
 
@@ -220,6 +220,7 @@ class CovidCog(Cog):
         """
         DMs you a list of all continents that can be used in the /covid continent command!
         """
+        _ = await ctx.get_translate_function()
         await ctx.author.send(embed=await self.generate_list_embed(self.bot.worldometers_api.continents,
                                                                    ("continent", "continents"),
                                                                    ctx))

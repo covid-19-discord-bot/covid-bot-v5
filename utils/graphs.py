@@ -6,14 +6,16 @@ import random
 import time
 import datetime
 import os
+from multiprocessing import Lock
 from typing import Optional
-from matplotlib import pyplot
+from matplotlib import pyplot, ticker
 
 DISCORD_BG_COLOR = (0.15625, 0.16796875, 0.1875)
 
 BASE_IMAGE_PATH = "/home/dustin/PycharmProjects/covid_bot_v5/temp_data/plots"
 _IMAGE_IDS = {}
 _NEXT_IMAGE_ID = 0
+_LOCK = Lock()
 
 
 def from_time_to_date(in_time: time.struct_time) -> datetime.date:
@@ -29,11 +31,12 @@ def from_time_to_date(in_time: time.struct_time) -> datetime.date:
 
 
 def get_new_path():
-    image_id = _NEXT_IMAGE_ID
-    image_id += 1
-    image_path = str(os.path.join(BASE_IMAGE_PATH, f"{image_id}.png"))
-    _IMAGE_IDS[image_id] = image_path
-    return image_path, image_id
+    with _LOCK:
+        image_id = _NEXT_IMAGE_ID
+        image_id += 1
+        image_path = str(os.path.join(BASE_IMAGE_PATH, f"{image_id}.png"))
+        _IMAGE_IDS[image_id] = image_path
+        return image_path, image_id
 
 
 def parse_percents(_input: float) -> float:
@@ -61,9 +64,9 @@ def generate_line_plot(country_data: dict,
     :return: A ID that can be passed to get_image to get a absolute path to the image.
     """
     start_time = start_time or datetime.date(1970, 1, 1)
-    end_time = end_time or datetime.date(2075, 1, 1)
+    end_time = end_time or datetime.date(2038, 1, 19)  # https://en.wikipedia.org/wiki/Year_2038_problem
     image_path, image_id = get_new_path()
-    f = pyplot.figure(image_id, (10.24, 10.24), 100, DISCORD_BG_COLOR, DISCORD_BG_COLOR, linewidth=5)
+    f: pyplot.Figure = pyplot.figure(image_id, (10.24, 10.24), 100, DISCORD_BG_COLOR, DISCORD_BG_COLOR, linewidth=5)
     for _key in ['cases', 'recovered', 'deaths']:
         a = []
         b = []
@@ -93,13 +96,28 @@ def generate_line_plot(country_data: dict,
         delta = 4
     elif time_between_start_and_end.days < 50:
         delta = 7
-    else:
+    elif time_between_start_and_end.days < 100:
         delta = 14
+    elif time_between_start_and_end.days < 150:
+        delta = 21
+    elif time_between_start_and_end.days < 200:
+        delta = 28
+    elif time_between_start_and_end.days < 300:
+        delta = 56
+    elif time_between_start_and_end.days < 400:
+        delta = 84
+    else:
+        delta = 112
+    ax = f.add_subplot(111)
     # noinspection SpellCheckingInspection
-    xticks = [i for i in range(len(pyplot.xticks()[0]) + 1) if i % delta == 0]
-    pyplot.xticks(xticks, rotation=90)
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(delta))
+    pyplot.xticks(rotation=90)
     pyplot.xlabel("Date")
-    pyplot.ylabel("Cases (in thousands)")
+    if logarithmic:
+        label = "Cases"
+    else:
+        label = "Cases (in thousands)"
+    pyplot.ylabel(label)
     pyplot.legend()
     pyplot.title(f"COVID-19 Stats in {country_name}")
     pyplot.yscale("log" if logarithmic else "linear")

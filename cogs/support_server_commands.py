@@ -43,7 +43,6 @@ class SupportServerCommands(Cog):
                               title=f"{self.bot.user.name}'s status")
         user_count = 0
         for guild in self.bot.guilds:
-            guild: discord.Guild
             user_count += guild.member_count
 
         embed.add_field(name="Guilds Count", value=str(len(self.bot.guilds)), inline=True)
@@ -56,8 +55,8 @@ class SupportServerCommands(Cog):
         t_2 = time.perf_counter()
         ping = round(t_2 - t_1)  # calculate the time needed to trigger typing
 
-        embed.add_field(name="Average Latency", value=f"{round(self.bot.latency, 2)}ms", inline=True)
-        embed.add_field(name="Current ping", value=f"{ping}ms", inline=True)
+        embed.add_field(name="Average Latency", value=f"{round(self.bot.latency/1000, 2)}ms", inline=True)
+        embed.add_field(name="Current ping", value=f"{round(ping/1000, 2)}ms", inline=True)
         embed.add_field(name="Shards Count", value=f"{self.bot.shard_count}", inline=True)
 
         def get_bot_uptime():
@@ -92,20 +91,20 @@ class SupportServerCommands(Cog):
             return
 
         latencies = sorted(self.bot.latencies, key=lambda l: l[0])
-        message = "```"
+        message = ""
 
         for shard, latency in latencies:
             if shard == ctx.guild.shard_id:
                 message += ""
-            message += _("•\t Shard ID {0}: {1}ms", shard, round(latency, 2))
+            message += _("•\t Shard ID {0}: {1}ms", shard, round(latency/1000, 2))
             if shard in self.bot.shards_ready:
                 message += _(" (ready)")
             if shard == ctx.guild.shard_id:
-                message += _(" This is the current shard")
+                message += _(" (current shard)")
             message += "\n"
 
-        message += _("\n```\n\nAvg latency: {0}ms", self.bot.latency)
-        if self.bot.is_ready():
+        message += _("\n\nAvg latency: {0}ms", round(self.bot.latency/1000, 2))
+        if self.bot.is_ready():  # should always be true
             message += _(" (bot ready)")
 
         await ctx.send(message)
