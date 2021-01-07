@@ -1,6 +1,6 @@
 # coding=utf-8
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import asyncio
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from functools import partial
 
 

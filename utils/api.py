@@ -3,15 +3,12 @@
 # licence: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 import asyncio
-import time
-import logging
-import json
-from pprint import pprint
-
-import aiofiles
-import aiohttp
 import datetime
+import logging
+import time
 from typing import Optional, List, AnyStr, Dict, Tuple
+
+import aiohttp
 
 MAX_UPDATE_TRIES = 5
 SORT_TYPES = ("cases", "recovered", "deaths", "critical", "tests", "population")
@@ -159,7 +156,9 @@ async def _handle_client_exceptions(cls, e):
 
 
 class ISOCodeHelper:
-    def __init__(self):
+    def __init__(self, *, logging_level=logging.INFO):
+        self.logger: logging.Logger = logging.Logger("ISO Code Helper", level=logging_level)
+        self.logger.setLevel(logging_level)
         self.iso_codes = []
         self.logger = logging.Logger(self.__class__.__name__)
         self._has_been_updated = False
@@ -200,11 +199,12 @@ class Covid19JHUCSSEStats:
                              Doing it in the __init__ makes the init time a lot longer, and it's synchronous: for this
                              reason, it defaults to being disabled.
         """
+        self.logger: logging.Logger = logging.Logger("COVID-19 Stats JHUCSSE", level=logging_level)
+        self.logger.setLevel(logging_level)
         self._has_been_updated: bool = False
         self._update_tries: int = 0
         self.data_is_valid: bool = False
         self.add_ids: bool = add_ids
-        self.logger: logging.Logger = logging.Logger("COVID-19 Stats JHUCSSE", level=logging_level)
         self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
         self.global_historical_stats: dict = {}
         self.historical_stats: dict = {}
@@ -213,7 +213,6 @@ class Covid19JHUCSSEStats:
         self.iso_codes = ISOCodeHelper()
         self.provinces: dict = {}
         self.countries: dict = {}
-        self.logger.setLevel(logging.INFO)
         if update_stats:
             self.update_covid_19_virus_stats()
             self.iso_codes.update_data()
@@ -255,6 +254,7 @@ class Covid19JHUCSSEStats:
                 await _handle_client_exceptions(self, e)
                 return
             self.global_historical_stats = data
+            self.logger.info("Getting country stats...")
             for code in self.iso_codes.iso_codes:
                 try:
                     data: dict = await get_data(session,
@@ -264,6 +264,18 @@ class Covid19JHUCSSEStats:
                     if e.exc.code == 404:
                         continue
                 self.countries[code["iso2"]] = data
+            self.logger.info("Getting provincial stats...")
+            data: list = await get_data(session, "https://disease.sh/v3/covid-19/historical?lastdays=all")
+            for country in self.iso_codes.iso_codes:
+                cty_data = {}
+                for i in filter(lambda x: x["country"] == country["country"], data):
+                    if i["province"] is None:
+                        cty_data["all"] = i
+                        self.countries[i["country"]] = i
+                    else:
+                        cty_data[i["province"]] = i
+                        self.provinces[i["province"].lower()] = i
+                self.historical_stats[country["iso2"]] = cty_data
             self.logger.info("Getting US states...")
             data: list = await get_data(session, "https://disease.sh/v3/covid-19/historical/usacounties?lastdays=all")
             self.american_states = data
@@ -420,11 +432,12 @@ class Covid19StatsWorldometers:
                              Doing it in the __init__ makes the init time a lot longer, and it's synchronous: for this
                              reason, it defaults to being disabled.
         """
+        self.logger: logging.Logger = logging.Logger("COVID-19 Stats Worldometers", level=logging_level)
+        self.logger.setLevel(logging_level)
         self._has_been_updated: bool = False
         self._update_tries: int = 0
         self.data_is_valid: bool = False
         self.add_ids: bool = add_ids
-        self.logger: logging.Logger = logging.Logger("COVID-19 Stats Worldometers", level=logging_level)
         self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
         self.global_stats: dict = {}
         self.country_stats: Dict[dict] = {}
@@ -463,8 +476,8 @@ class Covid19StatsWorldometers:
             for country in data:
                 if country['countryInfo']['iso2'] is not None:
                     try:
-                        country["activeCaseChange"] = country["todayCases"] - (country["todayDeaths"] +
-                                                                               country["todayRecovered"])
+                        country["activeCaseChange"] = int(country["todayCases"]) - (country["todayDeaths"] +
+                                                                                    country["todayRecovered"])
                     except TypeError:
                         country["activeCaseChange"] = None
                     self.country_stats[country['countryInfo']['iso2']] = country
@@ -639,11 +652,12 @@ class VaccineStats:
                              Doing it in the __init__ makes the init time a lot longer, and it's synchronous: for this
                              reason, it defaults to being disabled.
         """
+        self.logger: logging.Logger = logging.Logger("COVID-19 Stats for Vaccine", level=logging_level)
+        self.logger.setLevel(logging_level)
         self.has_been_updated: bool = False
         self.update_tries: int = 0
         self.data_is_valid: bool = False
         self.add_ids: bool = add_ids
-        self.logger: logging.Logger = logging.Logger("COVID-19 Stats for Vaccine", level=logging_level)
         self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
         self.source: AnyStr = ""
         self.total_candidates: int = 0

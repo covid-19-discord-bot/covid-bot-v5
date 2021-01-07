@@ -47,9 +47,9 @@ bot.statcord = stcd  # best way i know of to make a global system
 for cog_name in config["cogs"]["cog_reloader"]["cogs_to_load"]:
     try:
         bot.load_extension(cog_name)
-        bot.logger.debug(f"> {cog_name} loaded!")
+        bot.logger.debug(f"{cog_name} loaded!")
     except Exception as e:
-        bot.logger.exception(f'> Failed to load extension {cog_name}\n{type(e).__name__}: {e}')
+        bot.logger.exception(f'Failed to load extension {cog_name}\n{type(e).__name__}: {e}')
 
 try:
     bot.run(config['auth']['discord']['token'])

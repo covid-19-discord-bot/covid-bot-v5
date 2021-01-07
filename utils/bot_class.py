@@ -1,21 +1,24 @@
 import asyncio
 import collections
-import datetime
-from typing import Optional
 import concurrent.futures
+import datetime
+from copy import deepcopy
+from typing import Optional
+
 import aiohttp
 import discord
-from discord.ext.commands.bot import AutoShardedBot
-from discord.ext import commands
 import statcord
+from discord.ext import commands
+from discord.ext.commands.bot import AutoShardedBot
+
+from utils import api as covid19api
 from utils import config as config
+from utils.async_helpers import wrap_in_async
 from utils.ctx_class import MyContext
 from utils.logger import FakeLogger
-from utils.models import get_from_db
-from utils import api as covid19api
 from utils.maps import MapGetter
-from utils.async_helpers import wrap_in_async
-from copy import deepcopy
+from utils.models import get_from_db
+
 try:
     from blackfire import probe
 except (ImportError, ModuleNotFoundError):

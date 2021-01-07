@@ -1,13 +1,14 @@
 # coding=utf-8
-from selenium.common import exceptions
-from selenium import webdriver
-from time import sleep
-from selenium.webdriver.firefox.options import Options
-import os
-import logging
-import io
 import copy
+import io
+import logging
+import os
+from time import sleep
 from typing import Optional
+
+from selenium import webdriver
+from selenium.common import exceptions
+from selenium.webdriver.firefox.options import Options
 
 map_identifiers = {"total_cases_per_million": ["total_covid_cases_per_million.png", "Total COVID-19 Cases Per Million",
                                                "https://ourworldindata.org/coronavirus-data-explorer?tab=map"

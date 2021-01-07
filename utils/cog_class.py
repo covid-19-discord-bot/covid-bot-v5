@@ -1,4 +1,3 @@
-import toml
 from discord.ext import commands
 
 from utils.bot_class import MyBot

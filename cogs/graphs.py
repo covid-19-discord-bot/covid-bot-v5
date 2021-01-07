@@ -22,37 +22,44 @@ graph_cache = TTLCache(82800)  # items expire after 23 hours
 
 class GraphsCog(Cog):
     @commands.group()
+    @commands.cooldown(1, 10, type=commands.BucketType.user)
+    @commands.max_concurrency(10, commands.BucketType.default)  # 10 is a good balance between CPU and
+    # concurrency/frustration
     async def graphs(self, ctx: MyContext):
         if ctx.invoked_subcommand is None:
             await ctx.send_help("graphs")
 
-    async def process_graphs(self, ctx: MyContext, name: Tuple[Optional[str]], data, _: Callable):
-        msg: discord.Message = await ctx.send(_("React with 📈 for a logarithmic graph.\n"
-                                                "React with 📉 for a linear graph.\n"
-                                                "This message expires after 30 seconds."))
+    async def process_graphs(self, ctx: MyContext, name: Tuple[Optional[str]], data, _: Callable,
+                             log: Optional[bool] = None):
+        if log is None:
+            msg: discord.Message = await ctx.reply(_("React with 📈 for a logarithmic graph.\n"
+                                                     "React with 📉 for a linear graph.\n"
+                                                     "This message expires after 10 seconds."))
 
-        def predicate(r: discord.RawReactionActionEvent):
-            return r.message_id == msg.id and r.user_id == ctx.author.id and (
-                    r.emoji.name == "📈" or r.emoji.name == "📉")
+            def predicate(r: discord.RawReactionActionEvent):
+                return r.message_id == msg.id and r.user_id == ctx.author.id and (
+                        r.emoji.name == "📈" or r.emoji.name == "📉")
 
-        await msg.add_reaction("📈")
-        await msg.add_reaction("📉")
-        try:
-            event: discord.RawReactionActionEvent = await self.bot.wait_for("raw_reaction_add",
-                                                                            check=predicate, timeout=30)
-        except asyncio.TimeoutError:
-            await msg.edit(content=_("Timed out. Request a new message with `{0}graphs`", ctx.prefix))
-            return
-        else:
+            await msg.add_reaction("📈")
+            await msg.add_reaction("📉")
+            try:
+                event: discord.RawReactionActionEvent = await self.bot.wait_for("raw_reaction_add",
+                                                                                check=predicate, timeout=10)
+            except asyncio.TimeoutError:
+                await msg.edit(content=_("Timed out. Request a new message with `{0}graphs`", ctx.prefix))
+                return
+            log = event.emoji.name == '📈'
             await msg.edit(content=_("Please wait, this could take a few seconds..."))
-            buffer_name = f"{name[1].title() if name[1] else 'world'}_{'log' if event.emoji.name == '📈' else 'lin'}"
+        else:
+            msg = await ctx.reply(_("Please wait, this could take a few seconds..."))
+        buffer_name = f"{name[1].title() if name[1] else 'world'}_{'log' if log else 'lin'}"
         st = time.perf_counter_ns()
         graph_buffer = graph_cache.get(buffer_name)
         if not graph_buffer:
             cache_hit = False
             fp = await wrap_in_async(graphs.generate_line_plot, data,
                                      name[1].title() if name[1] else "world",
-                                     logarithmic=event.emoji.name == "📈")
+                                     logarithmic=log)
             with open(fp, "rb") as f:
                 graph_buffer = io.BytesIO(f.read())
             unlink(fp)
@@ -67,15 +74,58 @@ class GraphsCog(Cog):
         e.set_footer(text=_("Took {0} seconds ({1} nanoseconds) to generate • Cache Status: {2}",
                             format(round(tt / 1000000000, 1), ","), format(tt, ","), "HIT" if cache_hit else "MISS"))
         e.set_image(url="attachment://image.png")
-        await msg.delete()
         await ctx.send(file=f, embed=e)
+        if msg:
+            await msg.delete()
 
     @graphs.command()
-    async def world(self, ctx: MyContext):
+    async def world(self, ctx: MyContext, log: Optional[bool] = None):
         _ = await ctx.get_translate_function()
         name = self.bot.jhucsse_api.try_to_get_name("world")
         data = self.bot.jhucsse_api.global_historical_stats
-        await self.process_graphs(ctx, name, data, _)
+        await self.process_graphs(ctx, name, data, _, log)
+
+    @graphs.command()
+    async def country(self, ctx: MyContext, name: str, log: Optional[bool] = None):
+        _ = await ctx.get_translate_function()
+        name = self.bot.jhucsse_api.try_to_get_name(name)
+        if name is None:
+            cmd_usage = f"`{ctx.prefix}list`"
+            await ctx.reply(_("That isn't a valid name! Check out {0} for a list of all names I can get data for!",
+                              cmd_usage))
+        elif name[0] != "country":
+            await ctx.reply(_("I found a {0} instead of a country!", name[0]))
+        else:
+            data = await self.bot.jhucsse_api.get_country_stats(name[1])
+            await self.process_graphs(ctx, name, data["timeline"], _, log)
+
+    @graphs.command()
+    async def province(self, ctx: MyContext, name: str, log: Optional[bool] = None):
+        _ = await ctx.get_translate_function()
+        name = self.bot.jhucsse_api.try_to_get_name(name)
+        if name is None:
+            cmd_usage = f"`{ctx.prefix}list`"
+            await ctx.reply(_("That isn't a valid name! Check out {0} for a list of all names I can get data for!",
+                              cmd_usage))
+        elif name[0] != "province":
+            await ctx.reply(_("I found a {0} instead of a country!", name[0]))
+        else:
+            data = await self.bot.jhucsse_api.get_province_stats(name[1])
+            await self.process_graphs(ctx, name, data["timeline"], _, log)
+
+    @graphs.command()
+    async def state(self, ctx: MyContext, name: str, log: Optional[bool] = None):
+        _ = await ctx.get_translate_function()
+        name = self.bot.jhucsse_api.try_to_get_name(name)
+        if name is None:
+            cmd_usage = f"`{ctx.prefix}list`"
+            await ctx.reply(_("That isn't a valid name! Check out {0} for a list of all names I can get data for!",
+                              cmd_usage))
+        elif name[0] != "state":
+            await ctx.reply(_("I found a {0} instead of a country!", name[0]))
+        else:
+            data = await self.bot.jhucsse_api.get_state_stats(name[1])
+            await self.process_graphs(ctx, name, data["timeline"], _, log)
 
     @commands.has_role(686939763927678986)
     @commands.command()

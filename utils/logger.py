@@ -149,7 +149,7 @@ def init_logger() -> logging.Logger:
     base_logger.addHandler(steam_handler)
 
     discord_logger = logging.getLogger('discord')
-    discord_logger.setLevel(logging.WARNING)
+    discord_logger.setLevel(logging.INFO)
 
     discord_formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
 
