@@ -2,12 +2,13 @@
 """
 Export data from v5.2.x and import it into v5.3.0
 """
-import discord
+import json
+
 from discord.ext import commands
-from utils.models import *
+
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-import json
+from utils.models import *
 
 
 class Template(Cog):

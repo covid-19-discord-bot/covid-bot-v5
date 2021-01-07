@@ -2,13 +2,13 @@
 """
 File designed for you to copy over and over again as a template for new parts of your bot
 """
-from discord.ext import commands
-from discord.ext import tasks
 import discord
+from discord.ext import commands
+
+from utils.async_helpers import wrap_in_async
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.maps import map_identifiers
-from utils.async_helpers import wrap_in_async
 
 
 def _(msg, *args, **kwargs):

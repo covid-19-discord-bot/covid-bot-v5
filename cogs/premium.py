@@ -1,4 +1,6 @@
 # coding=utf-8
+from typing import Optional, Union
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import BucketType
@@ -6,7 +8,6 @@ from discord.ext.commands import BucketType
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.models import get_from_db
-from typing import Optional, Union
 
 
 class PremiumSettings(Cog):

@@ -2,8 +2,9 @@
 """
 Top commands, like /top.
 """
-from discord.ext import commands
 import discord
+from discord.ext import commands
+
 import utils.api as covid19api
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext

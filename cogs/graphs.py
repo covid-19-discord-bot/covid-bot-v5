@@ -1,18 +1,19 @@
 # coding=utf-8
 import asyncio
 import io
+import time
 from copy import deepcopy, copy
 from os import unlink
 from typing import Tuple, Optional, Callable
 
 import discord
 from discord.ext import commands
+
+from utils import graphs
+from utils.async_helpers import wrap_in_async
+from utils.caching import TTLCache
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-from utils import graphs
-from utils.caching import TTLCache
-from utils.async_helpers import wrap_in_async
-import time
 
 graphs.BASE_IMAGE_PATH = "/home/pi/covid_bot_beta/temp_data/plots"
 

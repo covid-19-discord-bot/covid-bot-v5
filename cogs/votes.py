@@ -4,9 +4,10 @@ from typing import Optional
 
 import discord
 from discord.ext import commands
-from utils.models import get_from_db
+
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
+from utils.models import get_from_db
 
 
 class VoteSystemCog(Cog):

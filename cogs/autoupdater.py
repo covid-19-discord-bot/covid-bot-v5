@@ -7,20 +7,18 @@
 # Error/No: ❌
 
 import asyncio
-import time
+import datetime
+from typing import Optional, List, Union
 
 import discord
-import datetime
+from discord.ext import tasks, commands
 
-from tortoise import QuerySet
 import utils.api as covid19api
 import utils.embeds as embeds
-from discord.ext import tasks, commands
-from typing import Optional, List, Union
-from utils.models import get_from_db, DiscordChannel, AutoupdaterData, DiscordGuild, AutoupdateTypes
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.human_time import ShortTime, human_timedelta, FutureTime
+from utils.models import get_from_db, DiscordChannel, AutoupdaterData, DiscordGuild, AutoupdateTypes
 
 utc_zero = datetime.datetime.utcfromtimestamp(-1)
 

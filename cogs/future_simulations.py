@@ -1,18 +1,19 @@
 # coding=utf-8
-import comodels
 import asyncio
 import concurrent.futures
 import datetime
-import discord
+from functools import partial
+from typing import Optional
+
 import arrow
-from numpy import ndarray
+import comodels
+import discord
 from discord.ext import commands, tasks
+from numpy import ndarray
+
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.models import get_from_db, DiscordUser
-from utils.human_time import human_timedelta
-from typing import Optional
-from functools import partial
 
 basic_queue = asyncio.Queue()
 premium_queue = asyncio.Queue()

@@ -1,8 +1,9 @@
 # coding=utf-8
 import discord
 from discord.ext import commands
-from utils.cog_class import Cog
+
 from utils import embeds
+from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 
 slash_commands = {

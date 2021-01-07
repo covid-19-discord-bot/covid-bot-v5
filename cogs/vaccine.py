@@ -1,12 +1,13 @@
 # coding=utf-8
+import io
+from math import ceil
 from typing import Optional
 
 import discord
 from discord.ext import commands
+
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-import io
-from math import ceil
 
 
 class Vaccine(Cog):

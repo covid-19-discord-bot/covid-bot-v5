@@ -2,14 +2,16 @@
 """
 File designed for you to copy over and over again as a template for new parts of your bot
 """
+import asyncio
 from math import ceil
 from typing import Optional
+
+import discord
 from discord.ext import commands
+
+from utils import embeds
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-import discord
-from utils import embeds
-import asyncio
 
 
 async def list_file(ctx: MyContext, letter: str) -> Optional[str]:

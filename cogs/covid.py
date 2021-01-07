@@ -1,31 +1,19 @@
 # coding=utf-8
-import asyncio
-from math import ceil
-from typing import Optional
-
-import discord
-from discord.ext import commands, tasks
 import datetime
 
-from utils.cog_class import Cog
-from utils.ctx_class import MyContext
+from discord.ext import commands, tasks
+
 from utils import api as covid19api
 from utils import embeds
+from utils.cog_class import Cog
+from utils.ctx_class import MyContext
 
 
 class CovidCog(Cog):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._commands_set_up = False
-
     @commands.group()
     async def covid(self, ctx: MyContext):
         if ctx.invoked_subcommand is None:
             await ctx.send_help("covid")
-        if not self._commands_set_up:
-            slash_cmd = self.covid.to_slash_command()
-            slash_cmd["description"] = "COVID-19 statistics!"
-            await self.bot.create_slash_command(slash_cmd)
 
     @covid.command(aliases=["global"])
     async def world(self, ctx: MyContext):

@@ -1,4 +1,5 @@
 # coding=utf-8
+import datetime
 import json
 from datetime import datetime
 
@@ -7,7 +8,6 @@ import discord
 import tortoise
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest, HTTPInternalServerError
-import datetime
 
 from utils.cog_class import Cog
 from utils.models import get_from_db

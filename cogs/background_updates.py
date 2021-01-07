@@ -2,12 +2,14 @@
 """
 File designed for you to copy over and over again as a template for new parts of your bot
 """
-from discord.ext import tasks
-from discord.ext import commands
-from utils.ctx_class import MyContext
-from utils.cog_class import Cog
-from utils.bot_class import MyBot
 from asyncio import sleep
+
+from discord.ext import commands
+from discord.ext import tasks
+
+from utils.bot_class import MyBot
+from utils.cog_class import Cog
+from utils.ctx_class import MyContext
 
 
 class BackgroundUpdates(Cog):
