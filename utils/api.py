@@ -3,12 +3,15 @@
 # licence: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 import asyncio
-import datetime
-import logging
 import time
-from typing import Optional, List, AnyStr, Dict, Tuple
+import logging
+import json
+from pprint import pprint
 
+import aiofiles
 import aiohttp
+import datetime
+from typing import Optional, List, AnyStr, Dict, Tuple
 
 MAX_UPDATE_TRIES = 5
 SORT_TYPES = ("cases", "recovered", "deaths", "critical", "tests", "population")
@@ -401,7 +404,7 @@ class Covid19JHUCSSEStats:
         cty_stats = await self.get_country_stats(country)
         return await self._get_stats_for_day(cty_stats, date)
 
-    async def get_province_stats_for_day(self, country: str, province: str, date: datetime.date):
+    async def get_province_stats_for_day(self, province: str, date: datetime.date):
         """"""
         cty_stats = await self.get_province_stats(province)
         return await self._get_stats_for_day(cty_stats, date)
@@ -411,7 +414,7 @@ class Covid19JHUCSSEStats:
         cty_stats = await self.get_country_stats(country)
         return await self._get_stats_for_dates(cty_stats, dates)
 
-    async def get_province_stats_for_dates(self, country: str, province: str, dates: List[datetime.date]):
+    async def get_province_stats_for_dates(self, province: str, dates: List[datetime.date]):
         """"""
         cty_stats = await self.get_province_stats(province)
         return await self._get_stats_for_dates(cty_stats, dates)

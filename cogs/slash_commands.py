@@ -1,8 +1,9 @@
 # coding=utf-8
+from datetime import date
 import discord
 from discord.ext import commands
-
-from utils import embeds
+from cogs.error_handling import submit_error_message
+from utils import embeds, api
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 
@@ -106,33 +107,66 @@ class SlashCommands(Cog):
         ctx.command.name = data.name
         self.bot.statcord.command_run(ctx)
         """
-        if data.name == "covid":
-            for option in data.options:
-                if option.name == "world":
-                    await data.send(embeds=[await embeds.advanced_stats_embed(("world", None),
-                                                                              bot=self.bot)],
-                                    type=discord.InteractionResponseType.channel_message_with_source)
-                elif option.name == "continent":
-                    continent_name = [i for i in option.options if i.name == "continent_name"][0]
-                    try:
-                        await data.send(embeds=[await embeds.advanced_stats_embed(("continent", continent_name.value),
+        try:
+            if data.name == "covid":
+                for option in data.options:
+                    if option.name == "world":
+                        await data.send(embeds=[await embeds.advanced_stats_embed(("world", None),
                                                                                   bot=self.bot)],
                                         type=discord.InteractionResponseType.channel_message_with_source)
-                    except TypeError:
-                        await data.send("Not a valid continent name!",
-                                        type=discord.InteractionResponseType.channel_message_with_source)
-                elif option.name == "country":
-                    continent_name = [i for i in option.options if i.name == "country_name"][0]
-                    try:
-                        await data.send(embeds=[await embeds.advanced_stats_embed(("country", continent_name.value),
-                                                                                  bot=self.bot)],
-                                        type=discord.InteractionResponseType.channel_message_with_source)
-                    except TypeError:
-                        await data.send("Not a valid country name!",
-                                        type=discord.InteractionResponseType.channel_message_with_source)
-                elif option.name == "province":
-                    await data.send("not implemented",
-                                    type=discord.InteractionResponseType.channel_message_with_source)
+                    elif option.name == "continent":
+                        continent_name = [i for i in option.options if i.name == "continent_name"][0]
+                        try:
+                            await data.send(
+                                embeds=[await embeds.advanced_stats_embed(("continent", continent_name.value),
+                                                                          bot=self.bot)],
+                                type=discord.InteractionResponseType.channel_message_with_source)
+                        except TypeError:
+                            await data.send("Not a valid continent name!",
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                    elif option.name == "country":
+                        country_name = [i for i in option.options if i.name == "country_name"][0]
+                        try:
+                            await data.send(embeds=[await embeds.advanced_stats_embed(("country", country_name.value),
+                                                                                      bot=self.bot)],
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                        except TypeError:
+                            await data.send("Not a valid country name!",
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                    elif option.name == "province":
+                        country_name = [i for i in option.options if i.name == "province_name"][0]
+                        today = date.today()
+                        try:
+                            emb = await embeds.basic_stats_embed(("province", country_name.value), today=today,
+                                                                 bot=self.bot)
+                            if emb is None:
+                                await data.send(f"I can't find stats for today! I'm currently trying to find stats for"
+                                                f"{today!s}.",
+                                                type=discord.InteractionResponseType.channel_message_with_source)
+                        except api.BaseAPIException:
+                            await data.send("Not a valid province name!",
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                        else:
+                            await data.send(embeds=[emb],
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                    elif option.name == "state":
+                        state_name = [i for i in option.options if i.name == "state_name"][0]
+                        try:
+                            await data.send(embeds=[await embeds.advanced_stats_embed(("state", state_name.value),
+                                                                                      bot=self.bot)],
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                        except TypeError:
+                            await data.send("Not a valid country name!",
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+        except Exception as e:
+            if isinstance(e, RuntimeError) and e.args[0] == \
+                    "The bot hasn't been set up yet! Ensure bot.async_setup is called ASAP!":
+                message = "The bot's still setting up, please wait a few minutes and try again!"
+            else:
+                await submit_error_message(e, "running slash command", self.bot, None)
+                message = "There was an error running the specified command‽ This error has been logged."
+            # be sure to make the command not appear if a error happened!
+            await data.send(message, type=discord.InteractionResponseType.channel_message)
 
 
 setup = SlashCommands.setup

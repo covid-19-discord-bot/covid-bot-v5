@@ -14,25 +14,37 @@ from utils.ctx_class import MyContext
 from utils.interaction import escape_everything
 
 
-async def submit_error_message(exc: BaseException, doing: str, ctx: MyContext, bot: MyBot):
+async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: Optional[MyContext] = None):
+    if bot is None:
+        return  # unknown bug!
     error_channel = bot.get_channel(796093696374079519)
+    if ctx:
+        desc = f"Guild details:\n" \
+               f"ID: `{ctx.guild.id}`\n" \
+               f"Name: `{ctx.guild.name}`\n\n" \
+               f"Channel details:\n" \
+               f"ID: `{ctx.channel.id}`\n" \
+               f"Name: `{ctx.channel.name}`\n\n" \
+               f"Invoking message details:\n" \
+               f"ID: `{ctx.message.id}`\n\n" \
+               f"Author details:\n" \
+               f"ID: `{ctx.author.id}`\n" \
+               f"Name: `{str(ctx.author)}`"  # Quick way to get name#disc
+        sentry_sdk.set_context("user", {"repr": repr(ctx.author), "id": ctx.author.id,
+                                        "name": str(ctx.author)})
+        sentry_sdk.set_context("channel", {"repr": repr(ctx.channel), "id": ctx.channel.id})
+        sentry_sdk.set_context("guild", {"repr": repr(ctx.guild), "id": ctx.guild.id})
+        sentry_sdk.set_context("message", {"repr": repr(ctx.message), "id": ctx.message.id})
+        sentry_sdk.set_context("command", {"repr": repr(ctx.command)})
+    else:
+        desc = "No context was passed, possibly a slash command?"
     error_embed = discord.Embed(title=f"Fatal error while working on {doing}!",
-                                description=f"Guild details:\n"
-                                            f"    ID: `{ctx.guild.id}`\n"
-                                            f"    Name: `{ctx.guild.name}`\n\n"
-                                            f"Channel details:\n"
-                                            f"    ID: `{ctx.channel.id}`\n"
-                                            f"    Name: `{ctx.channel.name}`\n\n"
-                                            f"Invoking message details:\n"
-                                            f"    ID: `{ctx.message.id}`\n\n"
-                                            f"Author details:\n"
-                                            f"    ID: `{ctx.author.id}`\n"
-                                            f"    Name: `{str(ctx.author)}`"  # Quick way to get name#disc
-                                )
+                                description=desc)
     tb = f"```py\n{''.join(traceback.format_tb(exc.__traceback__))}\n```"
     error_embed.add_field(name="Exception Name", value=str(exc.__class__))
     error_embed.add_field(name="Exception Reason", value=str(exc), inline=False)
     error_embed.add_field(name="Exception Traceback", value=tb if len(tb) < 1024 else "Too long!")
+    sentry_sdk.capture_exception(exc)
     await error_channel.send(embed=error_embed)
 
 
@@ -58,13 +70,6 @@ class CommandErrorHandler(Cog):
         command_invoke_help = f"{ctx.prefix}{ctx.command.qualified_name} {ctx.command.signature}"
 
         ctx.logger.warning(f"Error during processing: {exception} ({repr(exception)})")
-
-        sentry_sdk.set_context("user", {"repr": repr(ctx.author), "id": ctx.author.id,
-                                        "name": str(ctx.author)})
-        sentry_sdk.set_context("channel", {"repr": repr(ctx.channel), "id": ctx.channel.id})
-        sentry_sdk.set_context("guild", {"repr": repr(ctx.guild), "id": ctx.guild.id})
-        sentry_sdk.set_context("message", {"repr": repr(ctx.message), "id": ctx.message.id})
-        sentry_sdk.set_context("command", {"repr": repr(ctx.command)})
 
         # https://discordpy.readthedocs.io/en/latest/ext/commands/api.html#discord.ext.commands.CommandError
         if isinstance(exception, commands.CommandError):
@@ -205,8 +210,7 @@ class CommandErrorHandler(Cog):
                 else:
                     message = _("There was an error running the specified command‽ This error has been logged.")    
                     # we want the original instead of the CommandError one
-                    await submit_error_message(exception.original, "unknown thing", ctx, self.bot)
-                    sentry_sdk.capture_exception(exception)
+                    await submit_error_message(exception.original, "unknown thing", self.bot, ctx)
                     # ctx.logger.error("".join(traceback.format_exception(type(exception),
                     # exception, exception.__traceback__)))
             elif isinstance(exception, commands.errors.CommandOnCooldown):
@@ -238,7 +242,7 @@ class CommandErrorHandler(Cog):
                 message = "{str(exception)} ({type(exception).__name__})"
                 ctx.logger.error(
                     "".join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
-                await submit_error_message(exception, "unknown thing", ctx, ctx.bot)
+                await submit_error_message(exception, "unknown thing", ctx.bot, ctx)
         else:
             message = _("This should not have happened. A command raised an error that does not comes from "
                         "CommandError. Please inform the owner.")

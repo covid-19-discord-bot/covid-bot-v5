@@ -2,13 +2,12 @@
 """
 Utility module to generate graphs nicely.
 """
-import datetime
-import os
 import random
 import time
+import datetime
+import os
 from multiprocessing import Lock
 from typing import Optional
-
 from matplotlib import pyplot, ticker
 
 DISCORD_BG_COLOR = (0.15625, 0.16796875, 0.1875)

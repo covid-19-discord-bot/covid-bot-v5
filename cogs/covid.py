@@ -71,27 +71,16 @@ class CovidCog(Cog):
             await ctx.reply(embed=stats_embed)
 
     @covid.command()
-    async def province(self, ctx: MyContext, *args):
+    async def province(self, ctx: MyContext, province: str):
         """
         COVID-19 stats for any province.
         """
         _ = await ctx.get_translate_function()
-        args = " ".join(args)
-        if len(args.split(";")) < 2:
-            await ctx.send(_("You haven't split the country name and province with a `; `!"))
-            return
-        elif len(args.split(";")) > 2:
-            await ctx.send(_("You've placed too many `; ` in your message! You can use only one to split the country "
-                             "and province names! For help, run `{0}help covid province`!", ctx.prefix))
-            return
-        else:
-            country, province = args.split(";")
-            country = country.strip()
-            province = province.strip()
+        province = await self.bot.worldometers_api.try_to_get_name(province)
         today = datetime.date.today()
         today = today - datetime.timedelta(days=1)
         try:
-            embed = await embeds.basic_stats_embed(country, province, today, ctx=ctx)
+            embed = await embeds.basic_stats_embed(province, today, ctx=ctx)
         except covid19api.CountryNotFound:
             await ctx.reply(_("Couldn't find a country with that ID (`/list` for a list of IDs) or the country has no "
                               "cases!"))

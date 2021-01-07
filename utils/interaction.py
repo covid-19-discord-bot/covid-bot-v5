@@ -1,8 +1,9 @@
 import asyncio
-import random
-import typing
 
 import discord
+import typing
+from typing import List
+import random
 
 if typing.TYPE_CHECKING:
     from utils.bot_class import MyBot

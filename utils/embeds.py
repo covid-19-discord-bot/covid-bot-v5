@@ -1,7 +1,7 @@
 # coding=utf-8
 # noinspection PyUnresolvedReferences
 import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import discord
 
@@ -19,19 +19,19 @@ def add_zero_space(embed: discord.Embed, count: int):
         embed.add_field(name="\u200b", value="\u200b")
 
 
-async def basic_stats_embed(country: str, province: str, today: datetime.date, *, ctx: MyContext = None,
+async def basic_stats_embed(location: tuple, today: datetime.date, *, ctx: MyContext = None,
                             bot: MyBot = None) -> Optional[discord.Embed]:
     if ctx:
         _ = await ctx.get_translate_function()
         bot = ctx.bot
-    stats = await bot.jhucsse_api.get_province_stats_for_day(country, province, today)
+    stats = await bot.jhucsse_api.get_province_stats_for_day(location[1], today)
     if stats is None:
         return None
     data_points = ((_("<:infected:775877435320565801> Total Cases"), "cases"),
                    (_("<:deaths:775877434687488030> Total Deaths"), "deaths"),
                    (_("<:recovered:775877435089748008> Total Recoveries"), "recovered"))
     stats_embed = discord.Embed(title=_("Province Stats for {province} on {today}",
-                                        province=province.title(), today=str(today)),
+                                        province=location[1].title(), today=str(today)),
                                 description=_("Why such a small amount of data compared to country stats?\n"
                                               "Some provinces may report the same amount of data, but these provinces "
                                               "make up such a small amount of all provinces, meaning it's not worth it "

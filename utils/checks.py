@@ -1,6 +1,5 @@
-from typing import List
-
 from discord.ext import commands
+from typing import List
 
 from utils.models import get_ctx_permissions
 from utils.permissions import has_permission as permissions_has_permissions
