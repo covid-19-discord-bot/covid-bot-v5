@@ -76,7 +76,15 @@ class CovidCog(Cog):
         COVID-19 stats for any province.
         """
         _ = await ctx.get_translate_function()
-        province = await self.bot.worldometers_api.try_to_get_name(province)
+        province = await self.bot.jhucsse_api.try_to_get_name(province)
+        if province is None:
+            await ctx.reply(_("Didn't find any provinces with that name!"))
+            return
+        elif province[0] != "province":
+            cmd_usage = f"`{ctx.prefix}covid {province[0]}`"
+            await ctx.reply(_("I found a {0} instead of a province! Use the {1} command instead.",
+                              province[0], cmd_usage))
+            return
         today = datetime.date.today()
         today = today - datetime.timedelta(days=1)
         try:

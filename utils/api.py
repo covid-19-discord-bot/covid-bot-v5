@@ -313,7 +313,7 @@ class Covid19JHUCSSEStats:
         self.data_is_valid = True
         self.logger.info("Done!")
 
-    def try_to_get_name(self, name: str) -> Optional[Tuple[str, Optional[str]]]:
+    async def try_to_get_name(self, name: str) -> Optional[Tuple[str, Optional[str]]]:
         name = name.lower()
         if name in ("global", "world", "ot"):
             return "world", None
@@ -439,6 +439,7 @@ class Covid19StatsWorldometers:
         """
         self.logger: logging.Logger = logging.Logger("COVID-19 Stats Worldometers", level=logging_level)
         self.logger.setLevel(logging_level)
+        self._flag = asyncio.Event()
         self._has_been_updated: bool = False
         self._update_tries: int = 0
         self.data_is_valid: bool = False
@@ -505,6 +506,7 @@ class Covid19StatsWorldometers:
         self.last_updated_utc = datetime.datetime.utcnow()
         self._has_been_updated = True
         self.data_is_valid = True
+        self._flag.set()
         self.logger.info("Done!")
 
     async def try_to_get_name(self, test_name: str) -> Optional[Tuple[str, Optional[str]]]:
@@ -532,6 +534,8 @@ class Covid19StatsWorldometers:
         :return: always None
         """
         if not self._has_been_updated:
+            raise NoDataAvailable()
+        elif not self._flag.is_set():
             raise NoDataAvailable()
 
     async def get_all_iso_codes(self) -> list:

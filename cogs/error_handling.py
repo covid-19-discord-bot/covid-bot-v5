@@ -1,12 +1,15 @@
 # coding=utf-8
+import datetime
 import traceback
 from typing import Optional
 
 import arrow
 import discord
 import sentry_sdk
+from babel import dates
 from discord.ext import commands
 
+import utils
 from cogs.future_simulations import SimulationsDisabled
 from utils import checks
 from utils.bot_class import MyBot
@@ -208,6 +211,9 @@ class CommandErrorHandler(Cog):
                     message = _("The bot's still setting up, please wait a few minutes and try again!")
                 elif isinstance(exception.original, discord.errors.NotFound):
                     message = _("I can't find your original message, Discord may be having issues! Try again.")
+                elif isinstance(exception.original, utils.api.NoDataAvailable):
+                    message = _("No data is available at the moment. Wait a few moments. **Spamming this command will "
+                                "result in a temporary ban!**")
                 else:
                     message = _("There was an error running the specified command‽ This error has been logged.")    
                     # we want the original instead of the CommandError one
@@ -215,17 +221,15 @@ class CommandErrorHandler(Cog):
                     # ctx.logger.error("".join(traceback.format_exception(type(exception),
                     # exception, exception.__traceback__)))
             elif isinstance(exception, commands.errors.CommandOnCooldown):
-                if await self.bot.is_owner(ctx.author) or checks.has_permission("bot.bypass_cooldowns"):
+                if await self.bot.is_owner(ctx.author):
                     await ctx.reinvoke()
                     return
                 else:
-                    t = arrow.utcnow()
-                    t.shift(seconds=min(round(exception.retry_after, 1), 1))
-                    locale = await ctx.get_language_code()
+                    delta = datetime.timedelta(seconds=exception.retry_after)
                     # NOTE : This message uses a formatted, direction date in some_time. Formatted, it'll give something
                     # like: "This command is overused. Please try again *in 4 seconds*"
                     message = _("You are being ratelimited. Please try again {0}.",
-                                t.humanize(locale=locale))
+                                dates.format_timedelta(delta, add_direction=True, locale=await ctx.get_language_code()))
             elif isinstance(exception, commands.errors.MaxConcurrencyReached):
                 bucket_types = {commands.BucketType.default: _("globally"),
                                 commands.BucketType.user: _("per user"),
@@ -250,15 +254,12 @@ class CommandErrorHandler(Cog):
             ctx.logger.error("".join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
 
         if message:
-            await ctx.send("❌ " + message + _("\nFor help, join the bot's support server at "
-                                              "{invite}", invite=self.bot.support_server_invite),
+            await ctx.send("❌ " + message + _("\nFor help, join the bot's support server at {0}\n"
+                                              "Check <https://discordstatus.com/> for more details on Discord issues.",
+                                              self.bot.support_server_invite),
                            delete_after=delete_error_message_after)
         else:
             await ctx.send("❌ " + _("No message was defined. This error has been logged."))
-
-    @commands.Cog.listener()
-    async def on_error(self, event_method, *args, **kwargs):
-        await self.bot.on_error(event_method, *args, **kwargs)
 
 
 setup = CommandErrorHandler.setup

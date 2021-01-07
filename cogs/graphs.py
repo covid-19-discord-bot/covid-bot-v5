@@ -22,10 +22,14 @@ graph_cache = TTLCache(82800)  # items expire after 23 hours
 
 class GraphsCog(Cog):
     @commands.group()
-    @commands.cooldown(1, 10, type=commands.BucketType.user)
+    @commands.cooldown(1, 10, type=commands.BucketType.member)
     @commands.max_concurrency(10, commands.BucketType.default)  # 10 is a good balance between CPU and
     # concurrency/frustration
     async def graphs(self, ctx: MyContext):
+        """
+        Fancy, dark mode graphs for any province or state or country, and the world!
+        If a name contains spaces, it must be wrapped in quotes.
+        """
         if ctx.invoked_subcommand is None:
             await ctx.send_help("graphs")
 
@@ -80,15 +84,26 @@ class GraphsCog(Cog):
 
     @graphs.command()
     async def world(self, ctx: MyContext, log: Optional[bool] = None):
+        """
+        Graphs for the world.
+        Pass True as the second argument to skip the reaction menu and go straight to graph creation, and generate a
+        logarithmic graph. If the 2nd argument is False, it will instead generate a linear graph.
+        """
         _ = await ctx.get_translate_function()
-        name = self.bot.jhucsse_api.try_to_get_name("world")
+        name = await self.bot.jhucsse_api.try_to_get_name("world")
         data = self.bot.jhucsse_api.global_historical_stats
         await self.process_graphs(ctx, name, data, _, log)
 
     @graphs.command()
     async def country(self, ctx: MyContext, name: str, log: Optional[bool] = None):
+        """
+        Graphs for any given country.
+        If the country name contains a space, wrap it in quotes.
+        Pass True as the second argument to skip the reaction menu and go straight to graph creation, and generate a
+        logarithmic graph. If the 2nd argument is False, it will instead generate a linear graph.
+        """
         _ = await ctx.get_translate_function()
-        name = self.bot.jhucsse_api.try_to_get_name(name)
+        name = await self.bot.jhucsse_api.try_to_get_name(name)
         if name is None:
             cmd_usage = f"`{ctx.prefix}list`"
             await ctx.reply(_("That isn't a valid name! Check out {0} for a list of all names I can get data for!",
@@ -101,31 +116,52 @@ class GraphsCog(Cog):
 
     @graphs.command()
     async def province(self, ctx: MyContext, name: str, log: Optional[bool] = None):
+        """
+        Graphs for any given province. US states are not supported here, see the states subcommand.
+        If the province name contains a space, wrap it in quotes.
+        Pass True as the second argument to skip the reaction menu and go straight to graph creation, and generate a
+        logarithmic graph. If the 2nd argument is False, it will instead generate a linear graph.
+        """
         _ = await ctx.get_translate_function()
-        name = self.bot.jhucsse_api.try_to_get_name(name)
+        name = await self.bot.jhucsse_api.try_to_get_name(name)
         if name is None:
             cmd_usage = f"`{ctx.prefix}list`"
             await ctx.reply(_("That isn't a valid name! Check out {0} for a list of all names I can get data for!",
                               cmd_usage))
         elif name[0] != "province":
-            await ctx.reply(_("I found a {0} instead of a country!", name[0]))
+            cmd_usage = f"`{ctx.prefix}graphs {name[0]}`"
+            await ctx.reply(_("I found a {0} instead of a province! Try {1} instead.", name[0], cmd_usage))
         else:
             data = await self.bot.jhucsse_api.get_province_stats(name[1])
             await self.process_graphs(ctx, name, data["timeline"], _, log)
 
     @graphs.command()
     async def state(self, ctx: MyContext, name: str, log: Optional[bool] = None):
+        """
+        Graphs for any given US state.
+        If the state name contains a space, wrap it in quotes.
+        Pass True as the second argument to skip the reaction menu and go straight to graph creation, and generate a
+        logarithmic graph. If the 2nd argument is False, it will instead generate a linear graph.
+        """
         _ = await ctx.get_translate_function()
-        name = self.bot.jhucsse_api.try_to_get_name(name)
+        name = await self.bot.jhucsse_api.try_to_get_name(name)
         if name is None:
             cmd_usage = f"`{ctx.prefix}list`"
             await ctx.reply(_("That isn't a valid name! Check out {0} for a list of all names I can get data for!",
                               cmd_usage))
         elif name[0] != "state":
-            await ctx.reply(_("I found a {0} instead of a country!", name[0]))
+            cmd_usage = f"`{ctx.prefix}graphs {name[0]}`"
+            await ctx.reply(_("I found a {0} instead of a state! Try {1} instead.", name[0], cmd_usage))
         else:
             data = await self.bot.jhucsse_api.get_state_stats(name[1])
             await self.process_graphs(ctx, name, data["timeline"], _, log)
+
+    @graphs.command()
+    async def continent(self, ctx: MyContext):
+        """
+        Will not send anything. Only exists to let users know graphs are not available for continents.
+        """
+        await ctx.reply("Graphs are not supported with continents as the data is simply not available!")
 
     @commands.has_role(686939763927678986)
     @commands.command()

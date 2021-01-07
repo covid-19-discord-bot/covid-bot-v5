@@ -136,19 +136,36 @@ class SlashCommands(Cog):
                                             type=discord.InteractionResponseType.channel_message_with_source)
                     elif option.name == "province":
                         country_name = [i for i in option.options if i.name == "province_name"][0]
+                        province = await self.bot.jhucsse_api.try_to_get_name(country_name.value)
+                        if province is None:
+                            await data.send("Didn't find any provinces with that name!",
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                            return
+                        elif province[0] != "province":
+                            await data.send("I found a {0} instead of a province!".format(province[0]),
+                                            type=discord.InteractionResponseType.channel_message_with_source)
+                            return
                         today = datetime.date.today()
                         today = today - datetime.timedelta(days=1)
                         try:
-                            await data.send(embeds=[await embeds.basic_stats_embed(("province", country_name.value),
-                                                                                   today=today, bot=self.bot)],
+                            embed = await embeds.basic_stats_embed(province, today, bot=self.bot)
+                        except api.CountryNotFound:
+                            await data.send("Couldn't find a country with that ID (`/list` for a list of IDs) or the "
+                                            "country has no cases!",
                                             type=discord.InteractionResponseType.channel_message_with_source)
-                        except api.BaseAPIException:
-                            await data.send("Not a valid province name!",
+                            return
+                        except api.ProvinceNotFound:
+                            await data.send("Couldn't find a province with that name!",
                                             type=discord.InteractionResponseType.channel_message_with_source)
-                        except AttributeError:
-                            await data.send(f"I can't find stats for today! I'm currently trying to find stats for "
-                                            f"{today!s}.",
-                                            type=discord.InteractionResponseType.channel_message_with_source)
+                            return
+                        else:
+                            if embed is None:
+                                await data.send("Something went wrong, I can't find today's stats! I'm currently "
+                                                "trying to find stats for {0}!".format(str(today)),
+                                                type=discord.InteractionResponseType.channel_message_with_source)
+                            else:
+                                await data.send(embed=embed,
+                                                type=discord.InteractionResponseType.channel_message_with_source)
                     elif option.name == "state":
                         state_name = [i for i in option.options if i.name == "state_name"][0]
                         try:
