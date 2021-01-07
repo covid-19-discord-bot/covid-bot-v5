@@ -1,5 +1,6 @@
 # coding=utf-8
 import traceback
+from typing import Optional
 
 import arrow
 import discord

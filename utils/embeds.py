@@ -24,6 +24,12 @@ async def basic_stats_embed(location: tuple, today: datetime.date, *, ctx: MyCon
     if ctx:
         _ = await ctx.get_translate_function()
         bot = ctx.bot
+    else:
+        if not bot:
+            raise ValueError("bot must be passed if ctx is not!")
+
+        def _(msg, *args, **kwargs):
+            return msg.format(*args, **kwargs)
     stats = await bot.jhucsse_api.get_province_stats_for_day(location[1], today)
     if stats is None:
         return None

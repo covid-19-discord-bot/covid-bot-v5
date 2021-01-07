@@ -365,6 +365,8 @@ class Covid19JHUCSSEStats:
         await self._check_stats_are_valid()
         province = province.lower()
         if province in self.provinces:
+            with open("data.json", "w") as f:
+                print(self.provinces[province], file=f)
             return self.provinces[province]
         raise ProvinceNotFound()
 

@@ -97,15 +97,11 @@ class CovidCog(Cog):
                 await ctx.reply(embed=embed)
 
     @covid.command()
-    async def states(self, ctx: MyContext, *state):
+    async def states(self, ctx: MyContext, state: str):
         """
         COVID-19 stats for any US state.
         """
         _ = await ctx.get_translate_function()
-        if len(state) == 0:
-            await ctx.reply(_("You need to specify a US state! For a list, run `{0}list states`.", ctx.prefix))
-            return
-        state = " ".join(state)
         state_test = await self.bot.worldometers_api.try_to_get_name(state)
         if state_test is None:
             await ctx.reply(_("Didn't find a state with that name! For a list, run `{0}list states`.", ctx.prefix))

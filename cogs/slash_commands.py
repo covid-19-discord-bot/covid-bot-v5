@@ -1,4 +1,5 @@
 # coding=utf-8
+import datetime
 from datetime import date
 import discord
 from discord.ext import commands
@@ -135,19 +136,18 @@ class SlashCommands(Cog):
                                             type=discord.InteractionResponseType.channel_message_with_source)
                     elif option.name == "province":
                         country_name = [i for i in option.options if i.name == "province_name"][0]
-                        today = date.today()
+                        today = datetime.date.today()
+                        today = today - datetime.timedelta(days=1)
                         try:
-                            emb = await embeds.basic_stats_embed(("province", country_name.value), today=today,
-                                                                 bot=self.bot)
-                            if emb is None:
-                                await data.send(f"I can't find stats for today! I'm currently trying to find stats for"
-                                                f"{today!s}.",
-                                                type=discord.InteractionResponseType.channel_message_with_source)
+                            await data.send(embeds=[await embeds.basic_stats_embed(("province", country_name.value),
+                                                                                   today=today, bot=self.bot)],
+                                            type=discord.InteractionResponseType.channel_message_with_source)
                         except api.BaseAPIException:
                             await data.send("Not a valid province name!",
                                             type=discord.InteractionResponseType.channel_message_with_source)
-                        else:
-                            await data.send(embeds=[emb],
+                        except AttributeError:
+                            await data.send(f"I can't find stats for today! I'm currently trying to find stats for "
+                                            f"{today!s}.",
                                             type=discord.InteractionResponseType.channel_message_with_source)
                     elif option.name == "state":
                         state_name = [i for i in option.options if i.name == "state_name"][0]
@@ -166,7 +166,7 @@ class SlashCommands(Cog):
                 await submit_error_message(e, "running slash command", self.bot, None)
                 message = "There was an error running the specified command‽ This error has been logged."
             # be sure to make the command not appear if a error happened!
-            await data.send(message, type=discord.InteractionResponseType.channel_message)
+            await data.send(message, type=discord.InteractionResponseType.channel_message_with_source)
 
 
 setup = SlashCommands.setup
