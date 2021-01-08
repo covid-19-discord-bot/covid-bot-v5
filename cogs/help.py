@@ -53,7 +53,7 @@ class BoatHelp(HelpCommand):
         _ = await self.context.get_translate_function()
         embed = discord.Embed(title=group.qualified_name)
         for command in group.walk_commands():
-            if isinstance(command, Command) and not command.hidden:
+            if isinstance(command, Command) and not command.hidden and command.parent == group:
                 embed.add_field(name=self.get_command_signature(command), value=command.short_doc)
             elif isinstance(command, Group) and not command.hidden:
                 embed.add_field(name=command.qualified_name, value=command.help)
