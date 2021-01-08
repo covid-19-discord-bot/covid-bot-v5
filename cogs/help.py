@@ -39,7 +39,8 @@ class BoatHelp(HelpCommand):
 
     async def send_cog_help(self, cog: Cog):
         _ = await self.context.get_translate_function()
-        embed = discord.Embed(title=cog.qualified_name)
+        embed = discord.Embed(title=cog.qualified_name,
+                              description=cog.description)
         for command in cog.walk_commands():
             if isinstance(command, Command) and not command.hidden:
                 embed.add_field(name=self.get_command_signature(command), value=command.help)
@@ -51,7 +52,8 @@ class BoatHelp(HelpCommand):
 
     async def send_group_help(self, group: Group):
         _ = await self.context.get_translate_function()
-        embed = discord.Embed(title=group.qualified_name)
+        embed = discord.Embed(title=group.qualified_name,
+                              description=group.description)
         for command in group.walk_commands():
             if isinstance(command, Command) and not command.hidden and command.parent == group:
                 embed.add_field(name=self.get_command_signature(command), value=command.short_doc)
@@ -64,8 +66,7 @@ class BoatHelp(HelpCommand):
     async def send_command_help(self, command):
         _ = await self.context.get_translate_function()
         embed = discord.Embed(title=self.get_command_signature(command))
-        if command.help:
-            embed.add_field(name=_("Help"), value=command.help)
+        embed.add_field(name=_("Help"), value=command.help)
         alias = command.aliases
         if alias:
             embed.add_field(name=_("Aliases"), value=", ".join(alias), inline=False)
