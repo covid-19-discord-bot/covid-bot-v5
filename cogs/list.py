@@ -14,6 +14,7 @@ from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 
 
+# could've probably found a lib, but too late /shrug
 async def list_file(ctx: MyContext, letter: str) -> Optional[str]:
     iso_codes = await ctx.bot.worldometers_api.get_all_iso_codes()
     countries = []
@@ -40,15 +41,28 @@ async def list_file(ctx: MyContext, letter: str) -> Optional[str]:
 
 
 class ListCommands(Cog):
+    @staticmethod
+    async def generate_list_embed(continents: list, _type: tuple, ctx: MyContext):
+        _ = await ctx.get_translate_function()
+        emb = discord.Embed(title=_("List of {0}", _type[1]),
+                            description=_("Use `{0}covid {1} <name>` when getting stats for a {1}!",
+                                          ctx.prefix, _type[0]))
+        for continent in continents:
+            emb.add_field(name=_("Name"), value=continent)
+        return emb
+
     @commands.group(name="list")
     async def _list(self, ctx: MyContext):
+        """
+        A handy list if you're lost.
+        """
         if ctx.invoked_subcommand is None:
             await ctx.send_help("list")
 
     @_list.command(name="countries", aliases=["country"])
     async def _countries(self, ctx: MyContext, *first_letter):
         """
-        List countries that can be used in /covid country.
+        DMs you a list of countries that can be used in /covid country.
         """
         _ = await ctx.get_translate_function()
         if len(first_letter) == 0:
@@ -82,16 +96,6 @@ class ListCommands(Cog):
                 await ctx.reply(_("DMed a list to you!"))
         else:
             await ctx.reply("Couldn't find any countries starting with those letters!")
-
-    @staticmethod
-    async def generate_list_embed(continents: list, _type: tuple, ctx: MyContext):
-        _ = await ctx.get_translate_function()
-        emb = discord.Embed(title=_("List of {0}", _type[1]),
-                            description=_("Use `{0}covid {1} <name>` when getting stats for a {1}!",
-                                          ctx.prefix, _type[0]))
-        for continent in continents:
-            emb.add_field(name=_("Name"), value=continent)
-        return emb
 
     @_list.command(name="continents", aliases=["continent"])
     async def _continents(self, ctx: MyContext):

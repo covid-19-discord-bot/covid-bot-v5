@@ -42,8 +42,8 @@ class AutoUpdaterCog(Cog):
             new_seq.append(seq[int(round(i * split_size)):int(round((i + 1) * split_size))])
         return new_seq
 
-    async def do_inital_checks(self, ctx: MyContext, db_guild: DiscordGuild, db_channel: DiscordChannel,
-                               delta_seconds: int, _):
+    async def do_initial_checks(self, ctx: MyContext, db_guild: DiscordGuild, db_channel: DiscordChannel,
+                                delta_seconds: int, _):
         await db_channel.fetch_related("autoupdater")
 
         if len(db_channel.autoupdater) + 1 > db_guild.total_updaters:
@@ -74,9 +74,9 @@ class AutoUpdaterCog(Cog):
                 await db_guild.save()
         return True
 
-    async def get_updater(self, _id: Union[str, int], ctx: MyContext, *,
-                          allow_all: bool = False,
-                          ) -> Optional[Union[List[AutoupdaterData], AutoupdaterData]]:
+    @staticmethod
+    async def get_updater(_id: Union[str, int], ctx: MyContext, *, allow_all: bool = False) -> \
+            Optional[Union[List[AutoupdaterData], AutoupdaterData]]:
         _id = _id.lower().strip()
         try:
             _id = int(_id)
@@ -99,10 +99,8 @@ class AutoUpdaterCog(Cog):
     @commands.has_permissions(manage_messages=True)
     async def autoupdate(self, ctx: MyContext):
         """
-        /autoupdate <country> <delay> updates stats for <country> (if not set, defaults to world),
-        every <delay> time units
-        1d updates daily, while 4m updates every 4 minutes
-        Only Premium members/guilds can set the delay to less than 10 minutes.
+        Invoking this command without subcommands starts interactive setup.
+        Subcommands can be found with `/help autoupdate`.
         """
         if ctx.invoked_subcommand is None:
             _ = await ctx.get_translate_function()
@@ -200,6 +198,11 @@ class AutoUpdaterCog(Cog):
 
     @autoupdate.command(name="country")
     async def _country(self, ctx: MyContext, delay: ShortTime, country: str):
+        """
+        Enable autoupdaters for a continent. For a list of countries, run /list .
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
+        """
         _ = await ctx.get_translate_function()
 
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
@@ -208,7 +211,7 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_inital_checks(ctx, db_guild, db_channel, delta_seconds, _):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _):
             return
 
         info = await self.bot.worldometers_api.try_to_get_name(country)
@@ -239,8 +242,8 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="world")
     async def _world(self, ctx: MyContext, delay: ShortTime):
         """
-        Autoupdater for the world.
-        The only argument should be a time delta, like 12h for 12 hours or 30m for 30 minutes.
+        Enable autoupdaters for the world.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
         """
         _ = await ctx.get_translate_function()
 
@@ -250,7 +253,7 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_inital_checks(ctx, db_guild, db_channel, delta_seconds, _):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _):
             return
 
         update_delay = delta_seconds
@@ -266,6 +269,11 @@ class AutoUpdaterCog(Cog):
 
     @autoupdate.command(name="continent")
     async def _continent(self, ctx: MyContext, delay: ShortTime, continent: str):
+        """
+        Enable autoupdaters for a continent. For a list of all continents, run /list continents.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
+        """
         _ = await ctx.get_translate_function()
 
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
@@ -274,7 +282,7 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_inital_checks(ctx, db_guild, db_channel, delta_seconds, _):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _):
             return
 
         info = await self.bot.worldometers_api.try_to_get_name(continent)
@@ -360,6 +368,9 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="force_update")
     @commands.cooldown(1, 150, type=commands.BucketType.channel)
     async def force_updates(self, ctx: MyContext, _id: int):
+        """
+        Forces a update in this channel. A ID must be passed.
+        """
         _ = await ctx.get_translate_function()
         db_channel = await get_from_db(ctx.channel)
         updater = await self.get_updater(str(_id), ctx)
@@ -375,6 +386,10 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="update_at")
     @commands.cooldown(1, 600, type=commands.BucketType.channel)
     async def update_at(self, ctx: MyContext, _id: int, at: FutureTime):
+        """
+        Can force a update at a specific time.
+        Useful for when you want to make your updates run when your country releases data.
+        """
         time_to_update_at: datetime.datetime = at.dt
         _ = await ctx.get_translate_function()
         db_channel = await get_from_db(ctx.channel)
@@ -389,17 +404,9 @@ class AutoUpdaterCog(Cog):
 
     @tasks.loop(minutes=1.0)
     async def push_auto_updates(self):
-        """"""
         self.bot.logger.info("Starting autoupdater...")
         db_channels = await AutoupdaterData.filter(already_set=True)
         channels_to_parse = []
-        try:
-            await self.bot.autoupdater_dump.get_nowait()
-        except asyncio.QueueEmpty:
-            dump = False
-        else:
-            dump = True
-            self.bot.logger.info("Got a request to dump the updater data, doing so...")
         for db_channel in db_channels:
             channel: discord.TextChannel = self.bot.get_channel(db_channel.discord_id)
             if channel is None:
@@ -422,10 +429,6 @@ class AutoUpdaterCog(Cog):
     @push_auto_updates.before_loop
     async def before_updates_pushed(self):
         await self.bot.wait_until_ready()
-
-    def cog_unload(self):
-        super().cog_unload()
-        self.push_auto_updates.cancel()
 
     async def run_updates_in_channels(self, channels: List[list]):
         """"""

@@ -19,6 +19,7 @@ class DatabaseCommands(Cog):
     async def settings(self, ctx: MyContext):
         """
         Commands to view and edit settings
+        You must have the manage guild permission.
         """
         if not ctx.invoked_subcommand:
             await ctx.send_help(ctx.command)
@@ -29,6 +30,7 @@ class DatabaseCommands(Cog):
         Change/view the server prefix.
 
         Note that some prefixes are global and can't be edited.
+        Those include `covid` and `c!`.
         """
         _ = await ctx.get_translate_function()
         db_guild = await get_from_db(ctx.guild)
@@ -66,23 +68,6 @@ class DatabaseCommands(Cog):
             await ctx.send(_("There is no specific language set for this guild."))
 
     @settings.command()
-    async def enable_tips(self, ctx: MyContext, enabled: Optional[bool] = True):
-        db_guild = await get_from_db(ctx.guild)
-        _ = await ctx.get_translate_function()
-        if enabled is None:
-            if db_guild.enable_tips:
-                await ctx.reply(_("Tips are currently enabled for this guild."))
-            else:
-                await ctx.reply(_("Tips are currently disabled for this guild."))
-        else:
-            db_guild.enable_tips = enabled
-            await db_guild.save()
-            if enabled:
-                await ctx.reply(_("Enabled tips for this guild."))
-            else:
-                await ctx.reply(_("Disabled tips for this guild."))
-
-    @settings.command()
     async def api_key(self, ctx: MyContext, action: str):
         """
         Manage your channel's API key.
@@ -113,7 +98,7 @@ class DatabaseCommands(Cog):
             await ctx.reply(_("DMed your new API key to you."))
         await db_channel.save()
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def disable_api(self, ctx: MyContext, channel: discord.TextChannel):
         _ = await ctx.get_translate_function()

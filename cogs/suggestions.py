@@ -1,4 +1,5 @@
 # coding=utf-8
+import asyncio
 from typing import Optional
 
 import discord
@@ -13,7 +14,24 @@ active_suggestions = {}
 class SuggestionsCommands(Cog):
     @commands.command()
     async def suggest(self, ctx: MyContext, *suggestion):
+        """
+        Suggest something new to be added to the bot!
+        Be sure to react to your message to send it.
+        """
         _ = await ctx.get_translate_function()
+
+        msg = await ctx.reply(_("React to this message with 📥 within 10 seconds to send your reaction."))
+        await msg.add_reaction("📥")
+        def reaction_event(payload: discord.RawReactionActionEvent):
+            return payload.message_id == msg.id and payload.user_id == ctx.author.id and \
+                   ctx.channel.id == ctx.channel.id and payload.emoji.name == "📥"
+        try:
+            await self.bot.wait_for("raw_reaction_add", check=reaction_event, timeout=10)
+        except asyncio.TimeoutError:
+            await msg.clear_reaction("📥")
+            await msg.edit(content="Timed out. Resend your suggestion.")
+            return
+
         suggestion = " ".join(suggestion)
         suggestion_embed = discord.Embed(title="Suggestion",
                                          description="By {ctx.author.mention}.\n"
@@ -22,7 +40,7 @@ class SuggestionsCommands(Cog):
                                                      "0/0 can deny a suggestion by reacting with 🛑.\n")
         suggestion_embed.add_field(name="Suggestion", value=suggestion)
         try:
-            suggestion_channel = self.bot.get_channel(681498131699073139)
+            suggestion_channel = self.bot.get_channel(796428867715596358)
             msg: discord.Message = await suggestion_channel.send(embed=suggestion_embed)
             await msg.add_reaction("✅")
             await msg.add_reaction("❌")
@@ -35,13 +53,13 @@ class SuggestionsCommands(Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        if payload.emoji.name == "🛑" and payload.channel_id == 681498131699073139:
+        if payload.emoji.name == "🛑" and payload.channel_id == 796428867715596358:
             if payload.user_id in self.bot.owner_ids and payload.message_id in active_suggestions:
                 denied_suggestion = discord.Embed(title="Denied Suggestion!",
                                                   description="This suggestion was denied by 0/0#0001."). \
                     add_field(name="Suggestion", value=active_suggestions[payload.message_id])
-                chnl: discord.TextChannel = self.bot.get_channel(payload.channel_id)
-                msg: discord.Message = await chnl.fetch_message(payload.message_id)
+                channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)
+                msg: discord.Message = await channel.fetch_message(payload.message_id)
                 await msg.edit(embed=denied_suggestion)
                 await msg.clear_reactions()
             else:

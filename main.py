@@ -6,7 +6,7 @@ import statcord
 from utils.config import load_config
 from utils.bot_class import MyBot
 from utils.models import init_db_connection
-from pretty_help import PrettyHelp
+from cogs.help import BoatHelp
 import sentry_sdk
 try:
     from blackfire import probe
@@ -35,9 +35,9 @@ if config['database']['enable']:
 
 basic_intents = discord.Intents(guilds=True, messages=True, reactions=True)
 bot = MyBot(description=config["bot"]["description"], intents=basic_intents,
-            member_cache_flags=discord.MemberCacheFlags.from_intents(basic_intents),
-            help_command=PrettyHelp())
+            member_cache_flags=discord.MemberCacheFlags.from_intents(basic_intents))
 
+bot.help_command = BoatHelp()
 bot.blackfire = blackfire
 
 stcd = statcord.Client(bot, config["auth"]["statcord"]["token"])

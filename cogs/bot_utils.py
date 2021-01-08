@@ -15,7 +15,7 @@ class UtilsCommands(Cog):
     @commands.command(name="credits", aliases=["info"])
     async def credits(self, ctx: MyContext):
         """
-        A simple credits screen
+        Credits. Thanks to all these people!
         """
         _ = await ctx.get_translate_function()
         credits_embed = discord.Embed(color=discord.Color.dark_green(), title=_("Credits"))
@@ -38,6 +38,9 @@ class UtilsCommands(Cog):
 
     @commands.command()
     async def invite(self, ctx: MyContext):
+        """
+        Invite the bot and get support!
+        """
         _ = await ctx.get_translate_function()
         invite_embed = discord.Embed(color=discord.Color.purple(), title=_("Invite Links"))
         oauth_url = "https://covid19.imaskeleton.me/invite"
@@ -47,6 +50,9 @@ class UtilsCommands(Cog):
 
     @commands.command()
     async def stats(self, ctx: MyContext):
+        """
+        Get bot stats, like server + member count.
+        """
         await ctx.send(f"https://statcord.com/bot/{self.bot.user.id}")
 
     @commands.command()
@@ -68,8 +74,8 @@ class UtilsCommands(Cog):
         await ctx.send(_("Pong. — Time taken: {0}ms", time_delta))  # send a message telling the
         # user the calculated ping time
 
+    @commands.command(name="async_setup", hidden=True)
     @commands.is_owner()
-    @commands.command(name="async_setup")
     async def async_setup(self, ctx: MyContext):
         _ = await ctx.get_translate_function()
         msg = await ctx.send(_("Calling `self.bot.async_setup()`..."))
@@ -78,6 +84,10 @@ class UtilsCommands(Cog):
 
     @commands.command()
     async def vote(self, ctx: MyContext):
+        """
+        Help out the bot and get some stuff in return for voting!
+        """
+        _ = await ctx.get_translate_function()
         vote_embed = discord.Embed(title=_("Vote Sites"),
                                    description=_("Voting for the bot gives it more visibility, which means it ends up in "
                                                  "more servers, giving me (the dev) more incentive to add more "
@@ -93,7 +103,7 @@ class UtilsCommands(Cog):
         vote_embed.set_footer(text=_("**DO NOT disable adblockers!**"))
         await ctx.send(embed=vote_embed)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def migrate_to_db(self, ctx: MyContext):
         msg = await ctx.send("Loading old database...")

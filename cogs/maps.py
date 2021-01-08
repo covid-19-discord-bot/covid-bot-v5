@@ -18,13 +18,17 @@ def _(msg, *args, **kwargs):
 class MapsCommands(Cog):
     @commands.group()
     async def maps(self, ctx: MyContext):
+        """
+        Fancy, very high quality maps from Our World In Data!
+        The maps are 3400 by 2400 pixels.
+        """
         if ctx.invoked_subcommand is None:
             await ctx.send_help("maps")
 
-    @maps.command()
+    @maps.command(aliases=["list", "list_types"])
     async def types(self, ctx: MyContext):
         """
-        Shows all maps that can be used in maps show <map_name>
+        Shows all maps that can be used in `maps show <map_name>`
         """
         _ = await ctx.get_translate_function()
 
@@ -39,7 +43,7 @@ class MapsCommands(Cog):
     @maps.command()
     async def show(self, ctx: MyContext, map_type: str):
         """
-        Show off the maps!
+        Show off the maps! See `maps types` to get a list of all maps that can be shown.
         """
         _ = await ctx.get_translate_function()
         map_type = map_type.lower().strip()

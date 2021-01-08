@@ -7,6 +7,7 @@ from asyncio import sleep
 from discord.ext import commands
 from discord.ext import tasks
 
+from utils import wrap_in_async
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
@@ -35,6 +36,9 @@ class BackgroundUpdates(Cog):
         await sleep(10)
         await stats_msg.edit(content=_("Task restarted!"))
 
+    def cog_unload(self):
+        self.update_all_stats.stop()
+
     @tasks.loop(minutes=10)
     async def update_all_stats(self):
         await self.bot.wait_until_ready()
@@ -44,6 +48,8 @@ class BackgroundUpdates(Cog):
         await self.bot.worldometers_api.update_covid_19_virus_stats()
         await self.bot.jhucsse_api.update_covid_19_virus_stats()
         await self.bot.vaccine_api.update_covid_19_vaccine_stats()
+        # selenium hates being run in another process
+        await wrap_in_async(self.bot.maps_api.download_maps, thread_pool=True)
         self.index += 1
 
 

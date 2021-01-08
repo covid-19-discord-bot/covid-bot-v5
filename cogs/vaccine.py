@@ -13,8 +13,11 @@ from utils.ctx_class import MyContext
 class Vaccine(Cog):
     @commands.group()
     async def vaccine(self, ctx: MyContext):
-        _ = await ctx.get_translate_function()
+        """
+        See COVID-19 vaccine stats. For help on subcommands, run help vaccine
+        """
         if ctx.invoked_subcommand is None:
+            _ = await ctx.get_translate_function()
             vaccine_phases = ""
             for phase in self.bot.vaccine_api.phases:
                 vaccine_phases += _("{0}: {1} candidates\n", phase['phase'], phase['candidates'])
@@ -61,6 +64,9 @@ class Vaccine(Cog):
 
     @vaccine.command()
     async def details(self, ctx: MyContext, _id: int):
+        """
+        Get details on a specific vaccine candidate from vaccine list
+        """
         _ = await ctx.get_translate_function()
         try:
             vaccine = self.bot.vaccine_api.candidates[_id]
@@ -79,12 +85,12 @@ class Vaccine(Cog):
         vaccine_embed.add_field(name=_("Mechanism"), value=vaccine["mechanism"])
         sponsor_str = ""
         for sponsor, i in zip(vaccine["sponsors"], range(1, len(vaccine["sponsors"])+1)):
-            sponsor_str += "#{i}: {sponsor}\n"
+            sponsor_str += f"#{i}: {sponsor}\n"
         vaccine_embed.add_field(name=_("Sponsors"), value=sponsor_str)
         vaccine_embed.add_field(name=_("Phase"), value=vaccine["trialPhase"])
         institutions_str = ""
         for institution, i in zip(vaccine["institutions"], range(1, len(vaccine["institutions"])+1)):
-            institutions_str += "#{i}: {institution}\n"
+            institutions_str += f"#{i}: {institution}\n"
         vaccine_embed.add_field(name=_("Institutions"), value=institutions_str)
         vaccine_embed.set_footer(text=_("Last updated at"))
         vaccine_embed.timestamp = self.bot.vaccine_api.last_updated_utc

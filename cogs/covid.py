@@ -12,6 +12,9 @@ from utils.ctx_class import MyContext
 class CovidCog(Cog):
     @commands.group()
     async def covid(self, ctx: MyContext):
+        """
+        COVID-19 stats for almost anything!
+        """
         if ctx.invoked_subcommand is None:
             await ctx.send_help("covid")
 
@@ -29,9 +32,10 @@ class CovidCog(Cog):
             await ctx.reply(embed=emb)
 
     @covid.command()
-    async def continent(self, ctx: MyContext, continent_name: str):
+    async def continent(self, ctx: MyContext, *, continent_name: str):
         """
         COVID-19 stats for any continent.
+        If the continent name has spaces, it does NOT need to be wrapped in quotes.
         """
         real_name = await self.bot.worldometers_api.try_to_get_name(continent_name)
         if real_name is None or real_name[0] != "continent":
@@ -42,12 +46,13 @@ class CovidCog(Cog):
             await ctx.reply(embed=emb)
 
     @covid.command()
-    async def country(self, ctx: MyContext, *args):
+    async def country(self, ctx: MyContext, *, country_name: str):
         """
         COVID-19 stats for any country.
+        If the country name has spaces, it does NOT need to be wrapped in quotes.
         """
         _ = await ctx.get_translate_function()
-        country = " ".join(args).lower().strip()
+        country = country_name.lower().strip()
         if country == "global":
             country = "world"
         if country == "world" or country in ("", " "):
@@ -71,9 +76,10 @@ class CovidCog(Cog):
             await ctx.reply(embed=stats_embed)
 
     @covid.command()
-    async def province(self, ctx: MyContext, province: str):
+    async def province(self, ctx: MyContext, *, province: str):
         """
         COVID-19 stats for any province.
+        If the province name has spaces, it does NOT need to be wrapped in quotes.
         """
         _ = await ctx.get_translate_function()
         province = await self.bot.jhucsse_api.try_to_get_name(province)
@@ -105,9 +111,10 @@ class CovidCog(Cog):
                 await ctx.reply(embed=embed)
 
     @covid.command()
-    async def states(self, ctx: MyContext, state: str):
+    async def states(self, ctx: MyContext, *, state: str):
         """
         COVID-19 stats for any US state.
+        If the state name has spaces, it does NOT need to be wrapped in quotes.
         """
         _ = await ctx.get_translate_function()
         state_test = await self.bot.worldometers_api.try_to_get_name(state)
@@ -141,7 +148,7 @@ class CovidCog(Cog):
             await ctx.send("Encountered error while updating. This error has been logged.")
             raise
         else:
-            await ctx.send("Updated sucessfully!")
+            await ctx.send("Updated successfully!")
 
 
 setup = CovidCog.setup
