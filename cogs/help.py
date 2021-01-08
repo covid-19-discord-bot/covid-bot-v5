@@ -85,7 +85,7 @@ class BoatHelp(HelpCommand):
 
     async def send_error_message(self, error):
         _ = await self.context.get_translate_function()
-        embed = discord.Embed(title=_("Error"), value=error)
+        embed = discord.Embed(title=_("Error"), description=error)
         channel = self.get_destination()
         await channel.send(embed=embed)
 
