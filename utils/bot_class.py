@@ -53,6 +53,7 @@ class MyBot(AutoShardedBot):
         self._worldometers_api = covid19api.Covid19StatsWorldometers()
         self._vaccine_api = covid19api.VaccineStats()
         self._jhucsse_api = covid19api.Covid19JHUCSSEStats()
+        self._owid_api = covid19api.OWIDData()
         self._client_session: Optional[aiohttp.ClientSession] = None
         self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
         self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
@@ -91,6 +92,13 @@ class MyBot(AutoShardedBot):
     def jhucsse_api(self):
         if self._jhucsse_api.data_is_valid:
             return self._jhucsse_api
+        else:
+            raise _runtime_error
+
+    @property
+    def owid_api(self):
+        if self._owid_api.data_is_valid:
+            return self.jhucsse_api
         else:
             raise _runtime_error
 
