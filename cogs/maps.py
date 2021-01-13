@@ -52,7 +52,11 @@ class MapsCommands(Cog):
                              "maps I can show you!", ctx.prefix))
             return
         map_embed = discord.Embed(title=_("Map for {0}", map_identifiers[map_type][1]))
-        map_buffer = await wrap_in_async(self.bot.maps_api.get_map, map_type, thread_pool=True)
+        try:
+            map_buffer = await wrap_in_async(self.bot.maps_api.get_map, map_type, thread_pool=True)
+        except KeyError:
+            await ctx.reply(_("The bot's still setting up, please wait up to 10 minutes."))
+            return
         img_file = discord.File(map_buffer, filename="map.png")
         map_embed.set_image(url="attachment://map.png")
         await ctx.send(embed=map_embed, file=img_file)

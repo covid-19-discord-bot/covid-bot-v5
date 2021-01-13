@@ -39,7 +39,7 @@ class BackgroundUpdates(Cog):
     def cog_unload(self):
         self.update_all_stats.stop()
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=30)
     async def update_all_stats(self):
         await self.bot.wait_until_ready()
         self.bot.logger.info("Starting autoupdates...")
@@ -48,6 +48,7 @@ class BackgroundUpdates(Cog):
         await self.bot.worldometers_api.update_covid_19_virus_stats()
         await self.bot.jhucsse_api.update_covid_19_virus_stats()
         await self.bot.vaccine_api.update_covid_19_vaccine_stats()
+        await sleep(120)  # wait 120 seconds...
         # selenium hates being run in another process
         await wrap_in_async(self.bot.maps_api.download_maps, thread_pool=True)
         self.index += 1

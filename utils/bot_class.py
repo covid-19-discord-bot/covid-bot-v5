@@ -1,7 +1,9 @@
 import asyncio
 import collections
 import datetime
-from typing import Optional
+from multiprocessing.context import Process
+from multiprocessing.queues import Queue
+from typing import Optional, List
 import concurrent.futures
 import aiohttp
 import discord
@@ -60,6 +62,8 @@ class MyBot(AutoShardedBot):
         self.support_server_invite = "https://discord.gg/myJh5hkjpS"
         self.autoupdater_dump: asyncio.Queue = asyncio.Queue(maxsize=1)
         self.blackfire: bool = blackfire
+        self.sync_queue: Optional[Queue] = None
+        self.task_processors: Optional[List[Process]] = None
         asyncio.ensure_future(self.async_setup())
 
     @property

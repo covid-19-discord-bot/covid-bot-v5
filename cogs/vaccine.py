@@ -10,7 +10,7 @@ from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 
 
-class Vaccine(Cog):
+class VaccineCog(Cog):
     @commands.group()
     async def vaccine(self, ctx: MyContext):
         """
@@ -100,4 +100,4 @@ class Vaccine(Cog):
             await ctx.send(embed=vaccine_embed)
 
 
-setup = Vaccine.setup
+setup = VaccineCog.setup

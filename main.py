@@ -26,14 +26,17 @@ if blackfire:
 
 sentry_sdk.init(
     config["auth"]["sentry"]["sentry_url"],
-    traces_sample_rate=1.0,
-
+    traces_sample_rate=1.0
 )
 
 if config['database']['enable']:
     asyncio.ensure_future(init_db_connection(config['database']))
 
-basic_intents = discord.Intents(guilds=True, messages=True, reactions=True)
+basic_intents = discord.Intents.none()
+basic_intents.guilds = True
+basic_intents.webhooks = True
+basic_intents.messages = True
+basic_intents.reactions = True
 bot = MyBot(description=config["bot"]["description"], intents=basic_intents,
             member_cache_flags=discord.MemberCacheFlags.from_intents(basic_intents))
 

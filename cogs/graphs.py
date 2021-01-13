@@ -63,7 +63,7 @@ class GraphsCog(Cog):
             cache_hit = False
             fp = await wrap_in_async(graphs.generate_line_plot, data,
                                      name[1].title() if name[1] else "world",
-                                     logarithmic=log)
+                                     logarithmic=log, thread_pool=True)
             with open(fp, "rb") as f:
                 graph_buffer = io.BytesIO(f.read())
             unlink(fp)

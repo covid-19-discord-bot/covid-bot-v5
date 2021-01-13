@@ -222,7 +222,10 @@ class CommandErrorHandler(Cog):
                     # exception, exception.__traceback__)))
             elif isinstance(exception, commands.errors.CommandOnCooldown):
                 if await self.bot.is_owner(ctx.author):
-                    await ctx.reinvoke()
+                    try:
+                        await ctx.reinvoke()
+                    except Exception as e:
+                        await self.on_command_error(ctx, e)
                     return
                 else:
                     delta = datetime.timedelta(seconds=exception.retry_after)

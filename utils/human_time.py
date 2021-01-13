@@ -16,6 +16,7 @@ import datetime
 import parsedatetime as pdt
 from dateutil.relativedelta import relativedelta
 from .formats import plural, human_join
+import dateparser
 from discord.ext import commands
 import re
 
@@ -184,6 +185,16 @@ class UserFriendlyTime(commands.Converter):
             import traceback
             traceback.print_exc()
             raise
+
+
+class DateParserTime(commands.Converter):
+    async def convert(self, ctx, argument):
+        parsed = dateparser.parse(argument)
+        if parsed:
+            return parsed
+        else:
+            raise commands.BadArgument("invalid time: the time must be a parsable time, like 'two days ago', or "
+                                       "'in one year'")
 
 
 def human_timedelta(dt: datetime.datetime, *,
