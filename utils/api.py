@@ -708,5 +708,74 @@ class VaccineStats:
             self.logger.info("Parsed and loaded vaccine data into memory sucessfully!")
 
 
+class OWIDData:
+    def __init__(self, add_ids: bool = False, *, update_stats: bool = False,
+                 logging_level=logging.INFO):
+        """
+        Class to get data about COVID-19 from OWID
+
+        :param add_ids: Add a unique ID to every country, starting from 1.
+        :param update_stats: Whether to update stats on class initalization or wait for a explicit call to do so.
+                             Doing it in the __init__ makes the init time a lot longer, and it's synchronous: for this
+                             reason, it defaults to being disabled.
+        """
+        self.logger: logging.Logger = logging.Logger("COVID-19 OWID Data", level=logging_level)
+        self.logger.setLevel(logging_level)
+        self._has_been_updated: bool = False
+        self._update_tries: int = 0
+        self.data_is_valid: bool = False
+        self.add_ids: bool = add_ids
+        self.iso_codes: ISOCodeHelper = ISOCodeHelper()
+        self.last_updated_utc: datetime.datetime = datetime.datetime.utcfromtimestamp(-1)
+        self.data: dict = {}
+        if update_stats:
+            self.update_covid_19_owid_data()
+
+    async def update_covid_19_owid_data(self, *, session: aiohttp.ClientSession = None):
+        session = session or aiohttp.ClientSession()
+        self.logger.info("Getting OWID data...")
+        async with session as session:
+            try:
+                data = await get_data(session, "https://covid.ourworldindata.org/data/owid-covid-data.json")
+            except NetworkException as e:
+                self._update_tries += 1
+                await _handle_client_exceptions(self, e)
+                return
+            else:
+                self.data = data
+        self.logger.info("Got OWID data!")  # no parsing needed (or really possible)
+
+    async def get_country_stats(self, country: str):
+        country = country.upper()  # all of OWID's ISO codes are uppercase
+        if country not in self.data:
+            iso_code = get_iso3_code(country, self.iso_codes.iso_codes)  # OWID works with ISO3 codes, not ISO2
+            if iso_code not in self.data:  # TODO: special case handling
+                return None
+        else:
+            iso_code = country
+        return self.data[iso_code]
+
+    async def get_world_stats(self):
+        return self.data["OWID_WRL"]  # it's just there
+
+    @staticmethod
+    async def _get_stats_for_day(stats, date: datetime.date):
+        month = f"0{date.month}" if len(str(date.month)) == 1 else date.month
+        day = f"0{date.day}" if len(str(date.month)) == 1 else date.day
+        date_str = f"{date.year}-{month}-{day}"
+        for i in filter(lambda x: x["date"] == date_str, stats["data"]):
+            return i
+        return None
+
+    async def get_country_stats_for_day(self, country: str, date: datetime.date):
+        stats = await self.get_country_stats(country)
+        if not stats:
+            return None
+        return self._get_stats_for_day(stats, date)
+
+    async def get_world_stats_for_day(self, date: datetime.date):
+        return self._get_stats_for_day(await self.get_world_stats(), date)
+
+
 if __name__ == '__main__':
     asyncio.run(VaccineStats(update_stats=False).update_covid_19_vaccine_stats())
