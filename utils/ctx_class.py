@@ -27,9 +27,9 @@ class MyContext(commands.Context):
 
     async def reply(self, *args, **kwargs):
         try:
-            await super().reply(*args, **kwargs)
+            return await super().reply(*args, **kwargs)
         except discord.HTTPException:
-            await super().send(*args, **kwargs)
+            return await super().send(*args, **kwargs)
 
     async def send(self, content=None, *, delete_on_invoke_removed=True, file=None, files=None, **kwargs) -> Message:
         # Case for a too-big message
