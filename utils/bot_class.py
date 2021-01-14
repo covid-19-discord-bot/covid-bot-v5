@@ -98,7 +98,7 @@ class MyBot(AutoShardedBot):
     @property
     def owid_api(self):
         if self._owid_api.data_is_valid:
-            return self.jhucsse_api
+            return self._owid_api
         else:
             raise _runtime_error
 

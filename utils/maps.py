@@ -48,7 +48,7 @@ class MapGetter:
         self.save_resources = save_resources
 
         self.logger = logging.Logger("Maps System")
-        self.logger.info("Initalizing map system...")
+        self.logger.info("Initializing map system...")
 
         options = Options()
         options.headless = True
@@ -66,7 +66,7 @@ class MapGetter:
         self.set_up = False
         self._local_init_call = False  # unused if self.save_resources is false
         self.maps = {}
-        self.logger.info("Initalized map system.")
+        self.logger.info("Initialized map system.")
 
     def _check_if_set_up(self):
         if not self.set_up:
@@ -100,7 +100,7 @@ class MapGetter:
             self.logger.info(f"Getting graph {each_graph}...")
             ff.get(map_identifiers[each_graph][2])
 
-            sleep(15)  # it takes a little while to load the page
+            sleep(30)  # it takes a little while to load the page
 
             try:
                 share_button = ff.find_element_by_css_selector("li.tab:nth-child(5)")
@@ -111,11 +111,11 @@ class MapGetter:
                 # noinspection PyStatementEffect
                 share_button.location_once_scrolled_into_view
                 share_button.click()
-            sleep(5)
+            sleep(30)
 
             try:
                 download = ff.find_element_by_css_selector(".img-downloads > a:nth-child(1) > div:nth-child(1) > "
-                                                           "aside:nth-child(2) > h2:nth-child(1)")
+                                                           "img:nth-child(1)")
             except exceptions.NoSuchElementException:
                 self.logger.error("No download link!")
                 continue
@@ -139,5 +139,7 @@ class MapGetter:
     def get_map(self, map_name: str) -> Optional[io.BytesIO]:
         self._check_if_set_up()
         if map_name not in map_identifiers:
+            return None
+        elif map_name not in self.maps:
             return None
         return copy.deepcopy(self.maps[map_name])  # we know it's already a io.BytesIO object
