@@ -20,14 +20,28 @@ class SupportServerCommands(Cog):
         super().__init__(bot, *args, **kwargs)
         self.index = 0
         self.background_loop.start()
+        self.update_status.start()
 
     def cog_unload(self):
         self.background_loop.cancel()
+        self.update_status.cancel()
 
     async def cog_check(self, ctx):
         ret = await super().cog_check(ctx)
         ret = ret and ctx.guild.id == self.config()["support_server_id"]
         return ret
+
+    @tasks.loop(seconds=75)
+    async def update_status(self):
+        self.bot.logger.info("Updating status...")
+        for shard in self.bot.latencies:
+            await self.bot.change_presence(
+                activity=discord.Game(f"Shard {shard[0]} | "
+                                      f"{round(shard[1] * 1000, 2)}ms latency | "
+                                      f"{len(self.bot.guilds)} servers | "
+                                      f"Mention for help"),
+                shard_id=shard[0])
+        self.bot.logger.info("Updated status!")
 
     @tasks.loop(minutes=15)
     async def background_loop(self):
