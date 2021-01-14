@@ -146,8 +146,13 @@ class MyBot(AutoShardedBot):
             await message.channel.send("I don't support DMs due to Discord limitations!")
             return
 
-        ctx = await self.get_context(message, cls=MyContext)
-        if ctx.prefix is not None:
+        ctx: MyContext = await self.get_context(message, cls=MyContext)
+        if self.user.mentioned_in(message) and ctx.prefix is None:
+            _ = await ctx.get_translate_function()
+            await ctx.send(_("Hi there! I'm a bot for giving live stats on the COVID-19 pandemic. My default prefix is "
+                             "`/`. This can be changed with `/settings prefix <new prefix>`, replacing <new prefix> "
+                             "with the prefix you want. For a list of my commands, run `/help`."))
+        elif ctx.prefix is not None:
             await self.invoke(ctx)
 
     async def on_command(self, ctx: MyContext):
