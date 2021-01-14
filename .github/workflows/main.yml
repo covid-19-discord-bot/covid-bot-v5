@@ -20,7 +20,7 @@ jobs:
       - name: clone bot + reboot
         uses: garygrossgarten/github-action-ssh@release
         with:
-          command: cd /home/pi/covid_bot_beta/ && git pull && sudo systemctl restart covid_bot_beta.service
+          command: cd /home/pi/covid_bot_beta/ && git pull && sudo systemctl restart covid_bot.service
           host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
