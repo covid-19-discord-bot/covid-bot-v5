@@ -22,5 +22,6 @@ jobs:
         with:
           command: cd /home/pi/covid_bot_beta/ && git pull && sudo systemctl restart covid_bot_beta.service
           host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           privateKey: ${{ secrets.PRIVATE_KEY}}
