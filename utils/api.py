@@ -54,7 +54,6 @@ def get_iso2_code(_input: str, _list: list) -> [str, None]:
     :param _list: Country list to get the ISO2 code from.
     :return: ISO2 code if found, otherwise None.
     """
-    print(_input)
     _input = str(_input).lower().strip()
     try:
         for country in _list:
@@ -77,7 +76,6 @@ def get_iso3_code(_input: str, _list: list) -> [str, None]:
     :return: ISO3 code if found, otherwise None.
     """
     _input = get_iso2_code(_input, _list)
-    print(_input)
     if not _input:
         return
     try:
