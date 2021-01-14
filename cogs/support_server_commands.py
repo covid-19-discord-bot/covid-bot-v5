@@ -4,7 +4,7 @@ Some example of commands that can be used only in the bot support server.
 
 import datetime
 import time
-
+import random
 import discord
 import pytz
 from babel import dates
@@ -13,6 +13,9 @@ from discord.ext import commands, tasks
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.interaction import purge_channel_messages
+
+
+statuses = [discord.Status.online, discord.Status.idle, discord.Status.dnd]
 
 
 class SupportServerCommands(Cog):
@@ -40,6 +43,7 @@ class SupportServerCommands(Cog):
                                       f"{round(shard[1] * 1000, 2)}ms latency | "
                                       f"{len(self.bot.guilds)} servers | "
                                       f"Mention for help"),
+                status=random.choice(statuses),
                 shard_id=shard[0])
         self.bot.logger.info("Updated status!")
 
