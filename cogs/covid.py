@@ -120,7 +120,7 @@ class CovidCog(Cog):
         state_test = await self.bot.worldometers_api.try_to_get_name(state)
         if state_test is None:
             await ctx.reply(_("Didn't find a state with that name! For a list, run `{0}list states`.", ctx.prefix))
-        if state_test[0] != "state":
+        elif state_test[0] != "state":
             await ctx.reply(_("That isn't a state! Try the `{0}covid {1}` command.", ctx.prefix, state_test[0]))
         else:
             await ctx.reply(embed=await embeds.advanced_stats_embed(state_test, ctx=ctx))
