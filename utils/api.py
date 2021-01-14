@@ -54,12 +54,14 @@ def get_iso2_code(_input: str, _list: list) -> [str, None]:
     :param _list: Country list to get the ISO2 code from.
     :return: ISO2 code if found, otherwise None.
     """
-    _input = str(_input).lower()
+    print(_input)
+    _input = str(_input).lower().strip()
     try:
         for country in _list:
             country_codes = (str(country['country']).lower(),
                              str(country['iso2']).lower(),
                              str(country['iso3']).lower())
+            print(country_codes)
             if _input in country_codes:
                 return country['iso2']
     except IndexError:
@@ -75,11 +77,12 @@ def get_iso3_code(_input: str, _list: list) -> [str, None]:
     :return: ISO3 code if found, otherwise None.
     """
     _input = get_iso2_code(_input, _list)
+    print(_input)
     if not _input:
         return
     try:
         for country in _list:
-            if _input == str(country["iso2"]):
+            if _input.lower() == str(country["iso2"]).lower():
                 return country["iso3"]
     except IndexError:
         raise NoCountryDataFields()
@@ -733,6 +736,9 @@ class OWIDData:
 
     async def update_covid_19_owid_data(self, *, session: aiohttp.ClientSession = None):
         session = session or aiohttp.ClientSession()
+        self.logger.info("Updating ISO codes...")
+        await self.iso_codes.update_data()
+        self.logger.info("Done!")
         self.logger.info("Getting OWID data...")
         async with session as session:
             try:
@@ -743,6 +749,7 @@ class OWIDData:
                 return
             else:
                 self.data = data
+        self.data_is_valid = True
         self.logger.info("Got OWID data!")  # no parsing needed (or really possible)
 
     async def get_country_stats(self, country: str):
