@@ -57,6 +57,7 @@ class GraphsCog(Cog):
         else:
             msg = await ctx.reply(_("Please wait, this could take a few seconds..."))
         buffer_name = f"{name[1].title() if name[1] else 'world'}_{'log' if log else 'lin'}"
+        data = deepcopy(data)
         st = time.perf_counter_ns()
         graph_buffer = graph_cache.get(buffer_name)
         if not graph_buffer:
