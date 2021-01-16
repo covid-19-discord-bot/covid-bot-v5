@@ -126,6 +126,7 @@ def generate_line_plot(country_data: dict,
               edgecolor=DISCORD_BG_COLOR,
               transparent=True,
               format="png")
+    pyplot.close(f)
     return image_path
 
 
