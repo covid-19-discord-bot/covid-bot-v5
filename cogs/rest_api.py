@@ -10,7 +10,7 @@ from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest, HTTPInternalServerError
 
 from utils.cog_class import Cog
-from utils.models import get_from_db
+from utils.models import get_from_db, DiscordUser
 
 
 class RestAPI(Cog):
@@ -64,6 +64,21 @@ class RestAPI(Cog):
                 return True
         else:
             raise HTTPForbidden(reason="This route requires a GLOBAL api key. Ask the bot owner.")
+
+    async def add_votes(self, request: web.Response):
+        await self.authenticate_request(request)
+        data = json.loads(request.text)
+        user = await self.bot.fetch_user(data["user"])
+        if user is not None:
+            db_user: DiscordUser = await get_from_db(user)
+        else:
+            return
+        if data["isWeekend"]:
+            votes = 2
+        else:
+            votes = 1
+        db_user.updater_credits += votes
+        await db_user.save()
 
     async def channel_info(self, request):
         """
@@ -245,6 +260,7 @@ class RestAPI(Cog):
             ('GET', f'{route_prefix}/protected/manage_channel/{{guild_id:\\d+}}/{{user_id:\\d+}}',
              self.check_channel_permissions),
             ('POST', f'{route_prefix}/protected/add_votes/{{user_id:\\d+}}/', self.add_extra_votes),
+            ('POST', f'{route_prefix}/votes/', self.add_votes),
         ]
         for route_method, route_path, route_coro in routes:
             resource = self.cors.add(self.app.router.add_resource(route_path))
