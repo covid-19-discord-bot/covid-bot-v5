@@ -15,8 +15,6 @@ from utils.caching import TTLCache
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 
-graphs.BASE_IMAGE_PATH = "/home/pi/covid_bot_beta/temp_data/plots"
-
 graph_cache = TTLCache(82800)  # items expire after 23 hours
 
 

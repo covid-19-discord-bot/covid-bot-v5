@@ -9,6 +9,7 @@ import os
 from multiprocessing import Lock
 from typing import Optional
 from matplotlib import pyplot, ticker
+from io import BytesIO
 
 DISCORD_BG_COLOR = (0.15625, 0.16796875, 0.1875)
 
@@ -47,7 +48,7 @@ def generate_line_plot(country_data: dict,
                        country_name: str,
                        start_time: Optional[datetime.date] = None,
                        end_time: Optional[datetime.date] = None,
-                       logarithmic: bool = False):
+                       logarithmic: bool = False) -> BytesIO:
     """
     Generate a plot detailing COVID-19 cases for a country.
 
@@ -65,7 +66,6 @@ def generate_line_plot(country_data: dict,
     """
     start_time = start_time or datetime.date(1970, 1, 1)
     end_time = end_time or datetime.date(2038, 1, 19)  # https://en.wikipedia.org/wiki/Year_2038_problem
-    image_path, image_id = get_new_path()
     f: pyplot.Figure = pyplot.figure(image_id, (10.24, 10.24), 100, DISCORD_BG_COLOR, DISCORD_BG_COLOR, linewidth=5)
     for _key in ['cases', 'recovered', 'deaths']:
         a = []
@@ -121,13 +121,16 @@ def generate_line_plot(country_data: dict,
     pyplot.legend()
     pyplot.title(f"COVID-19 Stats in {country_name}")
     pyplot.yscale("log" if logarithmic else "linear")
-    f.savefig(image_path,
+    buf = BytesIO()
+    f.savefig(buf,
               facecolor=DISCORD_BG_COLOR,
               edgecolor=DISCORD_BG_COLOR,
               transparent=True,
               format="png")
     pyplot.close(f)
-    return image_path
+    del f
+    buf.seek(0)
+    return buf
 
 
 def generate_pie_chart(overall_data: dict,
