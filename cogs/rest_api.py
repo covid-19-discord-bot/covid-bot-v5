@@ -36,6 +36,7 @@ class RestAPI(Cog):
         self.cors = aiohttp_cors.setup(self.app)
         self.runner = web.AppRunner(self.app, access_log=self.bot.logger.logger)
         self.site = None
+        self.bot.reload_config()
         bot.loop.create_task(self.run())
 
     def cog_unload(self):
