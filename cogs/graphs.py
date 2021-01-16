@@ -59,12 +59,8 @@ class GraphsCog(Cog):
         graph_buffer = graph_cache.get(buffer_name)
         if not graph_buffer:
             cache_hit = False
-            fp = await wrap_in_async(graphs.generate_line_plot, data,
-                                     name[1].title() if name[1] else "world",
-                                     logarithmic=log, thread_pool=True)
-            with open(fp, "rb") as f:
-                graph_buffer = io.BytesIO(f.read())
-            unlink(fp)
+            graph_buffer = await wrap_in_async(graphs.generate_line_plot, data, name[1].title() if name[1] else "world",
+                                               logarithmic=log, thread_pool=True)
             graph_cache[buffer_name] = deepcopy(graph_buffer)
         else:
             graph_buffer = copy(graph_buffer)

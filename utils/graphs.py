@@ -66,7 +66,8 @@ def generate_line_plot(country_data: dict,
     """
     start_time = start_time or datetime.date(1970, 1, 1)
     end_time = end_time or datetime.date(2038, 1, 19)  # https://en.wikipedia.org/wiki/Year_2038_problem
-    f: pyplot.Figure = pyplot.figure(figsize=(10.24, 10.24), dpi=100, facecolor=DISCORD_BG_COLOR, edgecolor=DISCORD_BG_COLOR, linewidth=5)
+    f: pyplot.Figure = pyplot.figure(figsize=(10.24, 10.24), dpi=100, facecolor=DISCORD_BG_COLOR,
+                                     edgecolor=DISCORD_BG_COLOR, linewidth=5)
     for _key in ['cases', 'recovered', 'deaths']:
         a = []
         b = []
