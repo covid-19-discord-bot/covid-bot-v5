@@ -2,6 +2,7 @@
 Some example of commands that can be used to interact with the database.
 """
 import secrets
+import uuid
 from typing import Optional
 
 import discord
@@ -83,19 +84,18 @@ class DatabaseCommands(Cog):
                               "0/0#0001 on the official support server."))
             return
         if action.lower() in ("view", "see"):
-            await ctx.author.send(db_channel.api_key)
+            await ctx.author.send(str(db_channel.api_key))
             await ctx.reply(_("DMed your API key to you."))
         elif action.lower() in ("revoke", "delete"):
-            db_channel.api_key = "0"*32
+            db_channel.api_key = None
             await ctx.reply(_("Revoked/deleted API key."))
         elif action.lower() in ("regenerate", "new", "generate"):
-            api_key = secrets.token_urlsafe(32)
-            while api_key != "0"*32:  # the chances of it actually being that is 1 in 2.135987036×10⁹⁶, but if that
-                # happens... that's a first
-                api_key = secrets.token_urlsafe(32)
+            api_key = uuid.uuid4()
             db_channel.api_key = api_key
             await ctx.author.send(api_key)
             await ctx.reply(_("DMed your new API key to you."))
+        else:
+            await ctx.reply(_("Invalid action. It must be one of {0}.", f"`{'` `'.join(['view', 'revoke', 'new'])}`"))
         await db_channel.save()
 
     @commands.command(hidden=True)
