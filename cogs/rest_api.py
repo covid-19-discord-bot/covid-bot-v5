@@ -68,7 +68,7 @@ class RestAPI(Cog):
 
     async def add_votes(self, request: web.Response):
         await self.authenticate_request(request)
-        data = await request.json()
+        data = json.loads(request.body)
         self.bot.logger.info(f"Vote Request: {data}")
         user = await self.bot.fetch_user(data["user"])
         if user is not None:
