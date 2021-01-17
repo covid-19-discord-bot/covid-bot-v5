@@ -8,6 +8,7 @@ import discord
 import tortoise
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest, HTTPInternalServerError
+from aiohttp.web_response import Response
 
 from utils.cog_class import Cog
 from utils.models import get_from_db, DiscordUser
@@ -81,6 +82,7 @@ class RestAPI(Cog):
             votes = 1
         db_user.updater_credits += votes
         await db_user.save()
+        return web.json_response({"result": "ok"})
 
     async def channel_info(self, request):
         """
