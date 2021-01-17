@@ -1,6 +1,7 @@
 # coding=utf-8
 import datetime
 import json
+import uuid
 from datetime import datetime
 
 import aiohttp_cors
@@ -8,7 +9,6 @@ import discord
 import tortoise
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest, HTTPInternalServerError
-from aiohttp.web_response import Response
 
 from utils.cog_class import Cog
 from utils.models import get_from_db, DiscordUser
@@ -57,7 +57,7 @@ class RestAPI(Cog):
         if channel:
             db_channel = await get_from_db(channel)
             channel_api_key = str(db_channel.api_key)
-            if channel_api_key == "0" * 32:
+            if channel_api_key is None:
                 raise HTTPForbidden(reason="No API key has been generated for this channel yet. Run '/settings api_key "
                                            "set' to generate a key.")
             elif channel_api_key != api_key:
@@ -82,6 +82,11 @@ class RestAPI(Cog):
             votes = 1
         db_user.updater_credits += votes
         await db_user.save()
+        try:
+            await user.send("Thank you for voting! You got {0} credit{1}".
+                            format(votes, "s (+1 for weekend bonus)." if data["isWeekend"] else "."))
+        except discord.DiscordException:
+            pass  # we don't care about any discord exceptions
         return web.json_response({"result": "ok"})
 
     async def channel_info(self, request):
