@@ -1,7 +1,9 @@
 # coding=utf-8
+"""
+All credit to Eyesofcreeper#0001, i just changed it up a little
+"""
 import datetime
 import json
-import uuid
 from datetime import datetime
 
 import aiohttp_cors
@@ -263,7 +265,7 @@ class RestAPI(Cog):
         route_prefix = self.config()['route_prefix']
         routes = [
             ('GET', f'{route_prefix}/channels/{{channel_id:\\d+}}', self.channel_info),
-            ('POST', f'{route_prefix}/channels/{{channel_id:\\d+}}/manage', self.manage_updater),
+            ('POST', f'{route_prefix}/channels/{{channel_id:\\d+}}', self.manage_updater),
             ('GET', f'{route_prefix}/protected/bot_is_in_server/{{guild_id:\\d+}}', self.bot_is_in_server),
             ('GET', f'{route_prefix}/protected/bot_is_in_servers/{{guild_ids}}', self.bot_is_in_servers),
             ('GET', f'{route_prefix}/protected/manage_channel/{{guild_id:\\d+}}/{{user_id:\\d+}}',
@@ -280,7 +282,8 @@ class RestAPI(Cog):
                         allow_headers=("X-Requested-With", "Content-Type", "Authorization",),
                         max_age=3600,
                     )
-                })
+                }
+            )
 
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, listen_ip, listen_port)
