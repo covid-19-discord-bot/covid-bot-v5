@@ -16,7 +16,8 @@ class BoatHelp(HelpCommand):
         super().__init__(**kwargs)
         self.command_attrs = {
             "cooldown": Cooldown(3, 5.0, BucketType.user),
-            "name": "help"
+            "name": "help",
+            "aliases": ["h"]
         }
 
     def get_command_signature(self, command):
@@ -29,7 +30,7 @@ class BoatHelp(HelpCommand):
             embed.description = self.context.bot.description
         for cog, commands in mapping.items():
             filtered = await self.filter_commands(commands, sort=True)
-            command_signatures = [self.get_command_signature(c) + " - " + c.help for c in filtered]
+            command_signatures = [f"{self.get_command_signature(c)} - {c.short_doc}" for c in filtered]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
