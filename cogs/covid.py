@@ -19,16 +19,29 @@ class CovidCog(Cog):
             await ctx.send_help("covid")
 
     @covid.command(aliases=["global"])
-    async def world(self, ctx: MyContext):
+    async def world(self, ctx: MyContext, old_version: bool = False):
         """
         COVID-19 statistics for the world.
+        Pass True as the second argument to get the old version of these stat embeds.
         """
-        e = await embeds.owid_embed("world", bot=self.bot)
-        if not e:
-            await ctx.send("no data")
-            return
-        for e1 in e:
-            await ctx.send(embed=e1)
+        if old_version:
+            emb = await embeds.advanced_stats_embed(await self.bot.worldometers_api.try_to_get_name("world"), ctx=ctx)
+            if emb is None:
+                _ = await ctx.get_translate_function()
+                await ctx.reply(_("A fatal error has happened! The world data seems to have gone missing. Please let a "
+                                  "mod in the bot's support server know."))
+            else:
+                await ctx.reply(embed=emb)
+        else:
+            e = await embeds.owid_embed("world", ctx=ctx)
+            if not e:
+                _ = await ctx.get_translate_function()
+                await ctx.reply(
+                    _("A fatal error has happened! The world data seems to have gone missing. Please let a "
+                      "mod in the bot's support server know."))
+                return
+            for e1 in e:
+                await ctx.send(embed=e1)
 
     @covid.command()
     async def continent(self, ctx: MyContext, *, continent_name: str):
@@ -45,34 +58,55 @@ class CovidCog(Cog):
             await ctx.reply(embed=emb)
 
     @covid.command()
-    async def country(self, ctx: MyContext, *, country_name: str):
+    async def country(self, ctx: MyContext, country_name: str, old_version: bool = True):
         """
         COVID-19 stats for any country.
-        If the country name has spaces, it does NOT need to be wrapped in quotes.
+        If the country name has spaces, it NEEDS to be wrapped in quotes.
         """
         _ = await ctx.get_translate_function()
-        country = country_name.lower().strip()
-        if country == "global":
-            country = "world"
-        if country == "world" or country in ("", " "):
-            await ctx.reply(_("Use the `{0}covid world` command instead.", ctx.prefix))
-        country_test = await self.bot.worldometers_api.try_to_get_name(country)
-        if country_test is None:
-            if "korea" in country:
-                msg = _("Didn't find a country with that name, or the country has no cases! Try searching for the name "
+        if old_version:
+            country = country_name.lower().strip()
+            if country == "global":
+                country = "world"
+            if country == "world" or country in ("", " "):
+                await ctx.reply(_("Use the `{0}covid world` command instead.", ctx.prefix))
+            country_test = await self.bot.worldometers_api.try_to_get_name(country)
+            if country_test is None:
+                if "korea" in country:
+                    msg = _(
+                        "Didn't find a country with that name, or the country has no cases! Try searching for the name "
                         "with `{0}list country`.\n"
                         "Hint: if you're looking for North or South Korea, try "
                         "`{0}covid KP` or `{0}covid KR` for North and South Korea, "
                         "respectively!", ctx.prefix)
-            else:
-                msg = _("Didn't find a country with that name, or the country has no cases! Try searching for the name "
+                else:
+                    msg = _(
+                        "Didn't find a country with that name, or the country has no cases! Try searching for the name "
                         "with `{0}list country`.", ctx.prefix)
-            await ctx.reply(msg)
-        elif country_test[0] != "country":
-            await ctx.reply(_("You've used a incorrect command: try `{0}covid {1}`", ctx.prefix, country_test[0]))
+                await ctx.reply(msg)
+            elif country_test[0] != "country":
+                await ctx.reply(_("You've used a incorrect command: try `{0}covid {1}`", ctx.prefix, country_test[0]))
+            else:
+                stats_embed = await embeds.advanced_stats_embed(country_test, ctx=ctx)
+                await ctx.reply(embed=stats_embed)
         else:
-            stats_embed = await embeds.advanced_stats_embed(country_test, ctx=ctx)
-            await ctx.reply(embed=stats_embed)
+            e = await embeds.owid_embed(country_name, ctx=ctx)
+            if not e:
+                if "korea" in country_name:
+                    msg = _(
+                        "Didn't find a country with that name, or the country has no cases! Try searching for the name "
+                        "with `{0}list country`.\n"
+                        "Hint: if you're looking for North or South Korea, try "
+                        "`{0}covid KP` or `{0}covid KR` for North and South Korea, "
+                        "respectively!", ctx.prefix)
+                else:
+                    msg = _(
+                        "Didn't find a country with that name, or the country has no cases! Try searching for the name "
+                        "with `{0}list country`.", ctx.prefix)
+                await ctx.reply(msg)
+                return
+            for e1 in e:
+                await ctx.send(embed=e1)
 
     @covid.command()
     async def province(self, ctx: MyContext, *, province: str):
