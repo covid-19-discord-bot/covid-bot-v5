@@ -123,6 +123,7 @@ class MyBot(AutoShardedBot):
             await self._worldometers_api.update_covid_19_virus_stats()
             await self._vaccine_api.update_covid_19_vaccine_stats()
             await self._jhucsse_api.update_covid_19_virus_stats()
+            await self.owid_api.update_covid_19_owid_data()
         except RuntimeError as e:
             self.logger.exception("Fatal RuntimeError while running inital update!", exception_instance=e)
         except Exception as e:

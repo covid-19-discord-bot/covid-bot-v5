@@ -177,6 +177,7 @@ class CovidCog(Cog):
             await self.bot._worldometers_api.update_covid_19_virus_stats()
             await self.bot._jhucsse_api.update_covid_19_virus_stats()
             await self.bot._vaccine_api.update_covid_19_vaccine_stats()
+            await self.bot._owid_api.update_covid_19_owid_data()
         except Exception:
             await ctx.send("Encountered error while updating. This error has been logged.")
             raise
