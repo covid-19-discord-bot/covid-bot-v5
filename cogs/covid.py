@@ -23,13 +23,12 @@ class CovidCog(Cog):
         """
         COVID-19 statistics for the world.
         """
-        emb = await embeds.advanced_stats_embed(await self.bot.worldometers_api.try_to_get_name("world"), ctx=ctx)
-        if emb is None:
-            _ = await ctx.get_translate_function()
-            await ctx.reply(_("A fatal error has happened! The world data seems to have gone missing. Please let a "
-                              "mod in the bot's support server know."))
-        else:
-            await ctx.reply(embed=emb)
+        e = await embeds.owid_embed("world", bot=self.bot)
+        if not e:
+            await ctx.send("no data")
+            return
+        for e1 in e:
+            await ctx.send(embed=e1)
 
     @covid.command()
     async def continent(self, ctx: MyContext, *, continent_name: str):

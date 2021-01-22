@@ -58,7 +58,6 @@ class MyBot(AutoShardedBot):
         self._client_session: Optional[aiohttp.ClientSession] = None
         self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
         self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
-        self.stats = BotStats()
         self.statcord: Optional[statcord.Client] = None
         self._map_client: Optional[MapGetter] = None
         self.support_server_invite = "https://discord.gg/myJh5hkjpS"
