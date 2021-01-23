@@ -1,0 +1,3 @@
+[submodule "covid-machine-learning"]
+	path = covid-machine-learning
+	url = https://github.com/covid-19-discord-bot/covid-machine-learning
