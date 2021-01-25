@@ -132,6 +132,9 @@ class FutureSimulations(Model):
     # Has this model been set up yet?
     is_set_up = fields.BooleanField(default=False)
 
+    # What country is this model for? Defaults to world.
+    country_name = fields.CharField(max_length=3, default="WRL")
+
     # Simulate 4 weeks by default: 32,767 days is about 89 years and 10 months: plenty of time
     time_to_simulate = fields.SmallIntField(default=28)
 
