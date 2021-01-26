@@ -8,10 +8,6 @@ from functools import partial
 
 
 class AsyncModelGenerator(ModelGenerator):
-    async def async_load_data(self):
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(ProcessPoolExecutor(1), self.load_data)
-
     async def async_predict_model(self, country_name: str = "world", key: str = "total_cases", days: int = 28, *,
                                   just_last: bool = False) -> Union[numpy.ndarray, int]:
         loop = asyncio.get_event_loop()

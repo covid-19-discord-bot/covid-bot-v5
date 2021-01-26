@@ -16,28 +16,15 @@ if __name__ == "__main__":
 
 class ModelGenerator:
     def __init__(self):
-        self.data = {}
-        self.load_data()
+        pass
 
-    def load_data(self):
-        for x in listdir("../data_sources"):
-            if x == "all_data.csv":  # ignore the all_data file
-                continue
-            with open(f"../data_sources/{x}") as f:
-                str_io = StringIO(f.read())
-                self.data[x[0:3]] = str_io
-
+    # noinspection PyMethodMayBeStatic
     def predict_model(self, country_name: str = "world", key: str = "total_cases", days: int = 28, *,
                       just_last: bool = False):
         if country_name.lower() in ("world", "global", "ot"):
             country_name = "WRL"
-        if country_name.upper() not in self.data:
-            return None  # data isn't loaded
-        str_buffer: StringIO = self.data[country_name.upper()]
-        df = pd.read_csv(str_buffer)
-        str_buffer.seek(0)  # reset buffer
 
-        return predict_model(df, key, days, just_last=just_last)
+        return predict_model(country_name, key, days, just_last=just_last)
 
 
 if __name__ == "__main__":

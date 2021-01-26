@@ -25,11 +25,13 @@ if __name__ == "__main__":
 logger = logging.getLogger("ml_models-predict")
 
 
-def predict_model(model_data: Optional[pd.DataFrame] = None, key: str = "total_cases", days: int = 28, *,
+def predict_model(model_name: str = "WRL", key: str = "total_cases", days: int = 28, *,
                   just_last: bool = False, directory: str = "../data_sources"):
     # load data
-    if model_data is None:
-        model_data = pd.read_csv(f"{directory}/WRL_data.csv")
+    try:
+        model_data = pd.read_csv(f"{directory}/{model_name}_data.csv")
+    except FileNotFoundError:  # sure we could check the file exists but i'm lazy
+        return None
     data = model_data[["index", key]]
     data = data.dropna()  # drop all rows with NaN values
     if len(data) == 0:
