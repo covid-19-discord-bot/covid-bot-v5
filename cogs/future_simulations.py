@@ -3,7 +3,7 @@
 File designed for you to copy over and over again as a template for new parts of your bot
 """
 import asyncio
-
+import time
 import discord
 from discord.ext import commands
 from covid_machine_learning.ml_models.async_generators import AsyncModelGenerator
@@ -28,8 +28,8 @@ class FutureSimulationsCog(Cog):
         _ = await ctx.get_translate_function()
         db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
         db_user.future_simulation.is_set_up = True
+        await db_user.future_simulation.save()
         await db_user.save()
-
         cmd_usage = f"{ctx.prefix}simulate settings"
         await ctx.reply(_("Set up your simulation to default values. Edit them with the {0} commands.", cmd_usage))
 
@@ -48,6 +48,7 @@ class FutureSimulationsCog(Cog):
 
         db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
         db_user.future_simulation.country_name = country_name
+        await db_user.future_simulation.save()
         await db_user.save()
         await ctx.reply(_("Country name for simulation set to {0}.", country_name))
 
@@ -60,6 +61,7 @@ class FutureSimulationsCog(Cog):
 
         db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
         db_user.future_simulation.time_to_simulate = delay
+        await db_user.future_simulation.save()
         await db_user.save()
         await ctx.reply(_("Simulation time set to {0} days.", delay))
 
