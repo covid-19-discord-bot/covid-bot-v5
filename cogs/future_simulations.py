@@ -127,7 +127,7 @@ class FutureSimulationsCog(Cog):
         e.add_field(name=_("Total Cases"), value=format(ret_data["total_cases"], ","))
         e.add_field(name=_("Total Deaths"), value=format(ret_data["total_deaths"], ","))
         await msg.edit(embed=e, content=_("Took {0} seconds ({1}ns) to run.",
-                                          format(round(tt/1000000000), ","), format(round(tt, ","))))
+                                          format(round(tt/1000000000, 2), ","), format(tt, ",")))
 
 
 setup = FutureSimulationsCog.setup
