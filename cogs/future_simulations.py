@@ -31,7 +31,7 @@ class FutureSimulationsCog(Cog):
         await db_user.save()
 
         cmd_usage = f"{ctx.prefix}simulate settings"
-        await ctx.reply("Set up your simulation to default values. Edit them with the {0} commands.", cmd_usage)
+        await ctx.reply(_("Set up your simulation to default values. Edit them with the {0} commands.", cmd_usage))
 
     @simulate.group()
     async def settings(self, ctx: MyContext):
