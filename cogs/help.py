@@ -7,8 +7,9 @@ from typing import Union
 
 import discord
 from discord.ext.commands import HelpCommand, Cooldown, BucketType, Command, Group, Context
-from utils import MyBot, MyContext
+from utils.bot_class import MyBot
 from utils.cog_class import Cog
+from utils.ctx_class import MyContext
 
 
 class BoatHelp(HelpCommand):
