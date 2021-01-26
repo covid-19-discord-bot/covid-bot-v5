@@ -96,7 +96,7 @@ class FutureSimulationsCog(Cog):
             await terms_of_service.delete()
             try:
                 await m1.delete()
-            except discord.Forbidden:
+            except (discord.Forbidden, discord.NotFound):
                 pass
 
         msg = await ctx.reply(_("Please wait, initializing..."))
