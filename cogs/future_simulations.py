@@ -99,8 +99,7 @@ class FutureSimulationsCog(Cog):
 
         msg = await ctx.reply(_("Please wait, initializing..."))
         db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
-        model_data: FutureSimulations = db_user.future_simulation
-        if not model_data.is_set_up:
+        if not db_user.future_simulation.is_set_up:
             cmd_usage = f"`{ctx.prefix}simulate setup`"
             await ctx.send(_("You haven't set up your simulation! Run {0} to set your simulation up!",
                              cmd_usage))
@@ -108,16 +107,16 @@ class FutureSimulationsCog(Cog):
         await msg.edit(content=_("Running simulation..."))
         ret_data = {}
         for i in ["total_cases", "total_deaths"]:
-            j = await self.ml_model_gen.async_predict_model(model_data.country_name, i,
-                                                            model_data.time_to_simulate,
+            j = await self.ml_model_gen.async_predict_model(db_user.future_simulation.country_name, i,
+                                                            db_user.future_simulation.time_to_simulate,
                                                             just_last=True)
             if j is None:
                 await msg.edit(content=_("Invalid country name! Try again, making sure the ISO3 code you passed is "
-                                         "correct! For the world, the code is {0}!", "`WRL`"))
+                                         "correct! For the world, the code is {0}.", "`WRL`"))
                 return
             ret_data[i] = j
 
-        e = discord.Embed(title=_("Results after {0} days", model_data.time_to_simulate),
+        e = discord.Embed(title=_("Results after {0} days", db_user.future_simulation.time_to_simulate),
                           description=_("More features will be available later: join the support server for updates "
                                         "when new features are released!"))
         e.add_field(name=_("Total Cases"), value=str(ret_data["total_cases"]))
