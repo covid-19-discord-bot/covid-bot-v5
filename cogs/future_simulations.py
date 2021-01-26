@@ -124,8 +124,8 @@ class FutureSimulationsCog(Cog):
         e = discord.Embed(title=_("Results after {0} days", db_user.future_simulation.time_to_simulate),
                           description=_("More features will be available later: join the support server for updates "
                                         "when new features are released!"))
-        e.add_field(name=_("Total Cases"), value=str(ret_data["total_cases"]))
-        e.add_field(name=_("Total Deaths"), value=str(ret_data["total_deaths"]))
+        e.add_field(name=_("Total Cases"), value=format(ret_data["total_cases"], ","))
+        e.add_field(name=_("Total Deaths"), value=format(ret_data["total_deaths"], ","))
         await msg.edit(embed=e, content=_("Took {0} seconds ({1}ns) to run.",
                                           format(round(tt/1000000000), ","), format(round(tt, ","))))
 
