@@ -54,13 +54,18 @@ class BoatHelp(HelpCommand):
 
 	async def send_group_help(self, group: Group):
 		_ = await self.context.get_translate_function()
-		embed = discord.Embed(title=group.qualified_name,
-							  description=group.description)
+		embed = discord.Embed(title=group.qualified_name, description=group.description)
 		for command in group.walk_commands():
 			if isinstance(command, Command) and not command.hidden and command.parent == group:
-				embed.add_field(name=self.get_command_signature(command), value=command.short_doc)
+				if command.short_doc:
+					embed.add_field(name=self.get_command_signature(command), value=command.short_doc)
+				else:
+					embed.add_field(name=self.get_command_signature(command), value=_("No help available."))
 			elif isinstance(command, Group) and not command.hidden:
-				embed.add_field(name=command.qualified_name, value=command.help)
+				if command.help:
+					embed.add_field(name=command.qualified_name, value=command.help)
+				else:
+					embed.add_field(name=command.qualified_name, value=_("No help available."))
 
 		channel = self.get_destination()
 		await channel.send(embed=embed)
