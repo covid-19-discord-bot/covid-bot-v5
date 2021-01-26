@@ -26,7 +26,8 @@ class FutureSimulationsCog(Cog):
     @simulate.command(name="setup")
     async def _setup(self, ctx: MyContext):
         _ = await ctx.get_translate_function()
-        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True).fetch_related("future_simulations")
+        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
+        await db_user.fetch_related("future_simulation")
         db_user.future_simulation.is_set_up = True
         await db_user.save()
 
@@ -46,7 +47,8 @@ class FutureSimulationsCog(Cog):
                               "`WRL`"))
             return
 
-        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True).fetch_related("future_simulations")
+        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
+        await db_user.fetch_related("future_simulation")
         db_user.future_simulation.country_name = country_name
         await db_user.save()
         await ctx.reply(_("Country name for simulation set to {0}.", country_name))
@@ -58,7 +60,8 @@ class FutureSimulationsCog(Cog):
             await ctx.reply(_("3 years is the upper limit on simulation length. To unlock this, use a vote credit."))
             return
 
-        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True).fetch_related("future_simulations")
+        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
+        await db_user.fetch_related("future_simulation")
         db_user.future_simulation.time_to_simulate = delay
         await db_user.save()
         await ctx.reply(_("Simulation time set to {0} days.", delay))
@@ -98,7 +101,8 @@ class FutureSimulationsCog(Cog):
                 pass
 
         msg = await ctx.reply(_("Please wait, initializing..."))
-        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True).fetch_related("future_simulations")
+        db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
+        await db_user.fetch_related("future_simulation")
         model_data: FutureSimulations = db_user.future_simulation
         if not model_data.is_set_up:
             cmd_usage = f"`{ctx.prefix}simulate setup`"
