@@ -56,7 +56,7 @@ class FutureSimulationsCog(Cog):
     async def time(self, ctx: MyContext, delay: int):
         _ = await ctx.get_translate_function()
         if delay > 1095:  # TODO: actually implement vote credit bypass
-            await ctx.reply(_("3 years is the upper limit on simulation length. To unlock this, use a vote credit."))
+            await ctx.reply(_("3 years is the upper limit on simulation length."))
             return
 
         db_user: DiscordUser = await get_from_db(ctx.author, as_user=True)
