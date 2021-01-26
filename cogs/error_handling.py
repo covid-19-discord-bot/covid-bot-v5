@@ -10,7 +10,6 @@ from babel import dates
 from discord.ext import commands
 
 import utils
-from cogs.future_simulations import SimulationsDisabled
 from utils import checks
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
@@ -243,9 +242,6 @@ class CommandErrorHandler(Cog):
                                 commands.BucketType.role: _("per role")}
                 message = _("Too many users are using this command. Only {0} users can use it at the same time {1}.",
                             exception.number, bucket_types[exception.per])
-            elif isinstance(exception, SimulationsDisabled):
-                message = _("Simulations have been disabled in this guild due to a missing permission. Ask a admin to "
-                            "give me the Manage Messages permission.")
             else:
                 message = "{str(exception)} ({type(exception).__name__})"
                 ctx.logger.error(
