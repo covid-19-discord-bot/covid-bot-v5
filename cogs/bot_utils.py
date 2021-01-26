@@ -45,7 +45,7 @@ class UtilsCommands(Cog):
         invite_embed = discord.Embed(color=discord.Color.purple(), title=_("Invite Links"))
         oauth_url = "https://covid19.imaskeleton.me/invite"
         invite_embed.add_field(name=_("Bot Invite Link"), value=oauth_url)
-        invite_embed.add_field(name=_("Discord Server Invite Link"), value="https://discord.gg/v8qDQDc")
+        invite_embed.add_field(name=_("Discord Server Invite Link"), value=self.bot.support_server_invite)
         await ctx.send(embed=invite_embed)
 
     @commands.command()
