@@ -114,7 +114,7 @@ class FutureSimulationsCog(Cog):
             if j is None:
                 await msg.edit(content=_("Invalid country name! Try again, making sure the ISO3 code you passed is "
                                          "correct! For the world, the code is {0}!", "`WRL`"))
-                return
+                return 
             ret_data[i] = j
 
         e = discord.Embed(title=_("Results after {0} days", model_data.time_to_simulate),
