@@ -3,7 +3,6 @@ import datetime
 import traceback
 from typing import Optional
 
-import arrow
 import discord
 import sentry_sdk
 from babel import dates
