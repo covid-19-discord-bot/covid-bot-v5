@@ -1,5 +1,6 @@
 # coding=utf-8
 import datetime
+import json
 import logging
 import time
 from typing import Optional, Dict
@@ -49,11 +50,16 @@ class NewsAPI:
                 r.raise_for_status()
             except aiohttp.ClientResponseError as e:
                 try:
-                    js = await r.json()
-                except aiohttp.ClientConnectionError:
-                    js = None
-                return js, e
-            self.world_data = await r.json()
+                    with open("news.json", "r") as f:
+                        self.world_data = json.load(f)
+                except FileNotFoundError:
+                    try:
+                        js = await r.json()
+                    except aiohttp.ClientConnectionError:
+                        js = None
+                    return js, e
+            else:
+                self.world_data = await r.json()
 
             """
             for i in self.country_codes:
@@ -65,6 +71,8 @@ class NewsAPI:
                 self.country_data[i] = await r.json()
             """
         self._updated = True
+        with open("news.json", "w") as f:
+            json.dump(self.world_data, f)
         self.logger.info("Updated News API!")
 
     async def _check_updated(self):
