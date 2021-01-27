@@ -2,8 +2,6 @@
 """
 File designed for you to copy over and over again as a template for new parts of your bot
 """
-from typing import Optional
-
 from discord.ext import commands, tasks, menus
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
@@ -20,7 +18,7 @@ class NewsCog(Cog):
         self.do_news_update.cancel()
 
     @commands.command()
-    async def news(self, ctx: MyContext, country_name: Optional[str] = None):
+    async def news(self, ctx: MyContext):
         _ = await ctx.get_translate_function()
         """
         if country_name is not None and (len(country_name) != 2 or
@@ -33,7 +31,7 @@ class NewsCog(Cog):
         # data = await self.bot.news_api.get_country_news(country_name) if country_name else \
         #     await self.bot.news_api.get_world_news()
         data = await self.bot.news_api.get_world_news()
-        pages = menus.MenuPages(source=NewsAPIMenu(data), clear_reactions_after=True, timeout=60)
+        pages = menus.MenuPages(source=NewsAPIMenu(data["articles"]), clear_reactions_after=True, timeout=60)
         await pages.start(ctx)
 
     @tasks.loop(minutes=30)
