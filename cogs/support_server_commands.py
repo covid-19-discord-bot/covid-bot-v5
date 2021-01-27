@@ -59,9 +59,12 @@ class SupportServerCommands(Cog):
         await purge_channel_messages(status_channel)
         embed = discord.Embed(colour=discord.Colour.blurple(),
                               title=f"{self.bot.user.name}'s status")
-        user_count = 0
-        for guild in self.bot.guilds:
-            user_count += guild.member_count
+        try:
+            user_count = 0
+            for guild in self.bot.guilds:
+                user_count += guild.member_count
+        except AttributeError:
+            user_count = "unknown"
 
         embed.add_field(name="Guilds Count", value=str(len(self.bot.guilds)), inline=True)
         embed.add_field(name="Users Count", value=str(user_count), inline=True)
