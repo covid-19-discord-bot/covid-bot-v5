@@ -22,14 +22,17 @@ class NewsCog(Cog):
     @commands.command()
     async def news(self, ctx: MyContext, country_name: Optional[str] = None):
         _ = await ctx.get_translate_function()
+        """
         if country_name is not None and (len(country_name) != 2 or
                                          country_name.lower() not in self.bot.news_api.country_codes):
             codes = "` `".join(self.bot.news_api.country_codes)
             await ctx.send(_("That isn't a valid ISO2 code! Try one of the following: `{0}`", codes))
             return
+        """
 
-        data = await self.bot.news_api.get_country_news(country_name) if country_name else \
-            await self.bot.news_api.get_world_news()
+        # data = await self.bot.news_api.get_country_news(country_name) if country_name else \
+        #     await self.bot.news_api.get_world_news()
+        data = await self.bot.news_api.get_world_news()
         pages = menus.MenuPages(source=NewsAPIMenu(data), clear_reactions_after=True, timeout=60)
         await pages.start(ctx)
 

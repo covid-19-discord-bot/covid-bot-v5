@@ -35,7 +35,7 @@ class NewsAPI:
         self.api_key = api_key
         self.logger = logging.getLogger("news_api")
         self.world_data: Optional[dict] = None
-        self.country_data: Dict[str, Optional[dict]] = {}
+        # self.country_data: Dict[str, Optional[dict]] = {}
         self._updated: bool = False
 
     async def update(self, *, session: Optional[aiohttp.ClientSession] = None):
@@ -48,6 +48,7 @@ class NewsAPI:
             r.raise_for_status()
             self.world_data = await r.json()
 
+            """
             for i in self.country_codes:
                 self.logger.debug(f"Getting stats for {i}...")
                 r = await s.get(f"https://newsapi.org/v2/top-headlines?q=covid-19&country={i}&apiKey={self.api_key}")
@@ -55,6 +56,7 @@ class NewsAPI:
                 if (await r.json())["status"] != "ok":
                     raise aiohttp.ClientError("Status was not ok!")
                 self.country_data[i] = await r.json()
+            """
         self._updated = True
         self.logger.info("Updated News API!")
 
@@ -66,6 +68,7 @@ class NewsAPI:
         await self._check_updated()
         return self.world_data
 
+    """
     async def get_country_news(self, iso2_code: str) -> Optional[dict]:
         await self._check_updated()
         if len(iso2_code) != 2:
@@ -75,6 +78,7 @@ class NewsAPI:
             return self.country_data[iso2_code]
         else:
             return None
+    """
 
 
 class NewsAPIMenu(menus.ListPageSource):
