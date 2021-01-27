@@ -63,6 +63,10 @@ token = "000"
 [auth.statcord]
 # Your Statcord token
 token = "statcord.com-000"
+[auth.newsapi]
+# Your NewsAPI token
+# Checked if 32 characters long, raises ValueError if not
+token = ""
 
 [cogs.cog_reloader]
 # Names of cogs to load. Usually cogs.file_name_without_py
