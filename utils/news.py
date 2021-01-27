@@ -112,6 +112,7 @@ class NewsAPIMenu(menus.ListPageSource):
         parse = "%Y-%m-%dT%H:%M:%SZ" if timestamp.endswith("Z") else "%Y-%m-%dT%H:%M:%S%z"
         try:
             e.timestamp = from_time_to_datetime(time.strptime(timestamp, parse))
+            e.set_footer(text="Published at")
         except ValueError:
             # noinspection SpellCheckingInspection
             pass  # ignore ValueErrors from the time.strptime func
