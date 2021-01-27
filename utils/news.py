@@ -53,7 +53,7 @@ class NewsAPI:
                 r = await s.get(f"https://newsapi.org/v2/top-headlines?q=covid-19&country={i}&apiKey={self.api_key}")
                 r.raise_for_status()
                 if (await r.json())["status"] != "ok":
-                    raise aiohttp.ClientResponseError("Status was not ok!")
+                    raise aiohttp.ClientError("Status was not ok!")
                 self.country_data[i] = await r.json()
         self._updated = True
         self.logger.info("Updated News API!")
