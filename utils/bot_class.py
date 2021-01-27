@@ -11,7 +11,7 @@ import discord
 from discord.ext.commands.bot import AutoShardedBot
 from discord.ext import commands
 import statcord
-from utils import config as config
+from utils import config as config, news
 from utils.ctx_class import MyContext
 from utils.logger import FakeLogger
 from utils.models import get_from_db
@@ -54,6 +54,7 @@ class MyBot(AutoShardedBot):
         self._worldometers_api = covid19api.Covid19StatsWorldometers()
         self._vaccine_api = covid19api.VaccineStats()
         self._jhucsse_api = covid19api.Covid19JHUCSSEStats()
+        self.news_api = news.NewsAPI(self.config["auth"]["news_api"]["token"])
         self._owid_api = covid19api.OWIDData()
         self._client_session: Optional[aiohttp.ClientSession] = None
         self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
