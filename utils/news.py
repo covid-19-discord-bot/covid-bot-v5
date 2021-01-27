@@ -103,7 +103,7 @@ class NewsAPIMenu(menus.ListPageSource):
     async def format_page(self, menu: menus.MenuPages, page):
         offset = menu.current_page * self.per_page
         news_item = self.entries[offset]
-        e = Embed(title=news_item["title"], url=news_item["url"])
+        e = Embed(title=news_item["title"], url=news_item["url"], description=news_item["description"])
         author = f"{news_item['source']['name']} | {news_item['author']}" if news_item["author"] else \
             str(news_item['source']['name'])
         e.set_author(name=author)
