@@ -14,6 +14,10 @@ from utils.news import NewsAPIMenu
 class NewsCog(Cog):
     def __init__(self, bot: MyBot, *args, **kwargs):
         super().__init__(bot, *args, **kwargs)
+        self.do_news_update.start()
+
+    def cog_unload(self):
+        self.do_news_update.cancel()
 
     @commands.command()
     async def news(self, ctx: MyContext, country_name: Optional[str] = None):
