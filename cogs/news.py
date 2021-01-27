@@ -37,10 +37,9 @@ class NewsCog(Cog):
 
     @tasks.loop(minutes=30)
     async def do_news_update(self):
-        try:
-            await self.bot.news_api.update()
-        except ClientResponseError as e:
-            self.bot.logger.error(f"NewsAPI error while updating! Code {e.status}, msg {e.message}")
+        ret = await self.bot.news_api.update()
+        if ret:
+            self.bot.logger.error(f"News API error! code {ret[0]['code']}, msg {ret[0]['message']}")
 
 
 setup = NewsCog.setup

@@ -45,7 +45,10 @@ class NewsAPI:
         async with session as s:
             self.logger.debug("Getting global stats...")
             r = await s.get(f"https://newsapi.org/v2/top-headlines?q=covid-19&apiKey={self.api_key}")
-            r.raise_for_status()
+            try:
+                r.raise_for_status()
+            except aiohttp.ClientResponseError as e:
+                return await r.json(), e
             self.world_data = await r.json()
 
             """
