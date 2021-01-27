@@ -2,7 +2,6 @@
 """
 File designed for you to copy over and over again as a template for new parts of your bot
 """
-from aiohttp import ClientResponseError
 from discord.ext import commands, tasks, menus
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
