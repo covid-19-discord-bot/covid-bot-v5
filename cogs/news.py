@@ -39,7 +39,8 @@ class NewsCog(Cog):
     async def do_news_update(self):
         ret = await self.bot.news_api.update()
         if ret:
-            self.bot.logger.error(f"News API error! code {ret[0]['code']}, msg {ret[0]['message']}")
+            self.bot.logger.error(f"News API error! code {ret[0]['code']}, msg {ret[0]['message']}" if ret[0] else
+                                  f"News API error!")
 
 
 setup = NewsCog.setup

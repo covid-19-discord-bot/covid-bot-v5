@@ -48,7 +48,11 @@ class NewsAPI:
             try:
                 r.raise_for_status()
             except aiohttp.ClientResponseError as e:
-                return await r.json(), e
+                try:
+                    js = await r.json()
+                except aiohttp.ClientConnectionError:
+                    js = None
+                return js, e
             self.world_data = await r.json()
 
             """
