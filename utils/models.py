@@ -23,6 +23,7 @@ class AutoupdateTypes(enum.IntEnum):
     custom = 6
     graph = 7
 
+
 class DiscordGuild(Model):
     id = fields.IntField(pk=True)
     discord_id = fields.BigIntField(index=True)
