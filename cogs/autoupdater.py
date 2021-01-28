@@ -460,7 +460,7 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting a {0} graph for {1} in this channel every {2}.",
                           _("logarithmic") if logarithmic else _("linear"), friendly_country_name, human_update_time))
 
-    @_graph.command(name="country")
+    @_graph.command(name="state")
     async def __state(self, ctx: MyContext, delay: ShortTime, state: str, logarithmic: bool):
         """
         Enable autoupdaters for a US state.
