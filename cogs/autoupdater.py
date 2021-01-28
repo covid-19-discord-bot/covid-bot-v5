@@ -44,7 +44,7 @@ class AutoUpdaterCog(Cog):
                               "voting on top.gg.", db_guild.used_updaters, db_guild.total_updaters))
             return False
 
-        if requires_vote and db_guild.used_updaters - db_guild.total_updaters <= 1:
+        if requires_vote and db_guild.total_updaters - db_guild.used_updaters <= 1:
             await ctx.reply(_("You need to vote for one of these special updaters! See `/vote` for details."))
             return False
 
