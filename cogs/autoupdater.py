@@ -34,14 +34,6 @@ class AutoUpdaterCog(Cog):
     def cog_unload(self):
         self.push_auto_updates.cancel()
 
-    @staticmethod
-    def split_seq(seq, size):
-        new_seq = []
-        split_size = 1.0 / size * len(seq)
-        for i in range(size):
-            new_seq.append(seq[int(round(i * split_size)):int(round((i + 1) * split_size))])
-        return new_seq
-
     async def do_initial_checks(self, ctx: MyContext, db_guild: DiscordGuild, db_channel: DiscordChannel,
                                 delta_seconds: int, _):
         await db_channel.fetch_related("autoupdater")
@@ -99,9 +91,9 @@ class AutoUpdaterCog(Cog):
     @commands.has_permissions(manage_messages=True)
     async def autoupdate(self, ctx: MyContext):
         """
-		Invoking this command without subcommands starts interactive setup.
-		Subcommands can be found with `/help autoupdate`.
-		"""
+        Invoking this command without subcommands starts interactive setup.
+        Subcommands can be found with `/help autoupdate`.
+        """
         if ctx.invoked_subcommand is None:
             _ = await ctx.get_translate_function()
             msg = await ctx.send(_("Hi there! Welcome to the COVID-19 Bot autoupdater interactive setup.\n"
@@ -200,10 +192,10 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="country")
     async def _country(self, ctx: MyContext, delay: ShortTime, country: str):
         """
-		Enable autoupdaters for a continent. For a list of countries, run /list .
-		delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
-		continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
-		"""
+        Enable autoupdaters for a continent. For a list of countries, run /list .
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
+        """
         _ = await ctx.get_translate_function()
 
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
@@ -243,9 +235,9 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="world")
     async def _world(self, ctx: MyContext, delay: ShortTime):
         """
-		Enable autoupdaters for the world.
-		delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
-		"""
+        Enable autoupdaters for the world.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        """
         _ = await ctx.get_translate_function()
 
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
@@ -271,10 +263,10 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="continent")
     async def _continent(self, ctx: MyContext, delay: ShortTime, continent: str):
         """
-		Enable autoupdaters for a continent. For a list of all continents, run /list continents.
-		delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
-		continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
-		"""
+        Enable autoupdaters for a continent. For a list of all continents, run /list continents.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
+        """
         _ = await ctx.get_translate_function()
 
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
@@ -313,9 +305,9 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="disable", aliases=["delete", "remove"])
     async def _disable(self, ctx: MyContext, _id: str):
         """
-		Removes a autoupdater from this channel.
-		The only argument should be either a autoupdater ID, or "all" to delete all the updaters in the channel.
-		"""
+        Removes a autoupdater from this channel.
+        The only argument should be either a autoupdater ID, or "all" to delete all the updaters in the channel.
+        """
         _ = await ctx.get_translate_function()
         db_channel = await get_from_db(ctx.channel)
         all_ad = db_channel.autoupdater
@@ -352,8 +344,8 @@ class AutoUpdaterCog(Cog):
     @commands.cooldown(1, 30, type=commands.BucketType.channel)
     async def _list(self, ctx: MyContext):
         """
-		Lists all autoupdaters in this channel.
-		"""
+        Lists all autoupdaters in this channel.
+        """
         _ = await ctx.get_translate_function()
         cmd_usage = "{0}autoupdate disable <id>".format(ctx.prefix)
         update_embed = discord.Embed(title=_("List of Updaters"),
@@ -370,8 +362,8 @@ class AutoUpdaterCog(Cog):
     @commands.cooldown(1, 150, type=commands.BucketType.channel)
     async def force_updates(self, ctx: MyContext, _id: int):
         """
-		Forces a update in this channel. A ID must be passed.
-		"""
+        Forces a update in this channel. A ID must be passed.
+        """
         _ = await ctx.get_translate_function()
         db_channel = await get_from_db(ctx.channel)
         updater = await self.get_updater(str(_id), ctx)
@@ -388,9 +380,9 @@ class AutoUpdaterCog(Cog):
     @commands.cooldown(1, 600, type=commands.BucketType.channel)
     async def update_at(self, ctx: MyContext, _id: int, at: FutureTime):
         """
-		Can force a update at a specific time.
-		Useful for when you want to make your updates run when your country releases data.
-		"""
+        Can force a update at a specific time.
+        Useful for when you want to make your updates run when your country releases data.
+        """
         time_to_update_at: datetime.datetime = at.dt
         _ = await ctx.get_translate_function()
         db_channel = await get_from_db(ctx.channel)
@@ -415,7 +407,7 @@ class AutoUpdaterCog(Cog):
             db_data = await get_from_db(channel)
             channels_to_parse.append([db_channel, channel, db_data])
         self.bot.logger.info(f"Updating in {len(channels_to_parse)} channels.")
-        sized_list = self.split_seq(channels_to_parse, 100)  # split into chunks of 100: as of this writing there's
+        sized_list = split_seq(channels_to_parse, 100)  # split into chunks of 100: as of this writing there's
         # only 137 heh
         # next part seems weird, but it seems to give me a 10 to 1,000 times speedup (over three minutes cut down to
         # less than 1 second)
@@ -486,6 +478,14 @@ class AutoUpdaterCog(Cog):
                 continue
             await updater.save()
             await db_channel.save()
+
+
+def split_seq(seq, size):
+    new_seq = []
+    split_size = 1.0 / size * len(seq)
+    for i in range(size):
+        new_seq.append(seq[int(round(i * split_size)):int(round((i + 1) * split_size))])
+    return new_seq
 
 
 setup = AutoUpdaterCog.setup
