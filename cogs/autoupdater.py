@@ -334,7 +334,7 @@ class AutoUpdaterCog(Cog):
         """
         Enable autoupdaters for graphs. See all subcommands. This requires two vote credits to enable any of them.
         """
-        if ctx.invoked_subcommand is not None:
+        if ctx.invoked_subcommand is None:
             await ctx.send_help("autoupdate graphs")
 
     @_graph.command(name="world")
