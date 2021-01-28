@@ -671,7 +671,7 @@ class AutoUpdaterCog(Cog):
                 await channel.send(*embed)
                 if msg1:
                     await msg1.delete()
-            except (discord.DiscordException, discord.errors.Forbidden) as e:
+            except Exception as e:
                 if isinstance(e, discord.Forbidden):
                     # how da hell did that happen? should've been caught earlier
                     self.bot.logger.info("No permissions to send messages here!",
