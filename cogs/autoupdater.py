@@ -168,49 +168,6 @@ class AutoUpdaterCog(Cog):
                 await self._continent.__call__(ctx, delay, continent)
             await msg.delete()
 
-    @autoupdate.command(name="country")
-    async def _country(self, ctx: MyContext, delay: ShortTime, country: str):
-        """
-        Enable autoupdaters for a continent. For a list of countries, run /list .
-        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
-        continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
-        """
-        _ = await ctx.get_translate_function()
-
-        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
-        human_update_time = human_timedelta(delay.dt)
-
-        db_guild = await get_from_db(ctx.guild)
-        db_channel = await get_from_db(ctx.channel)
-
-        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _):
-            return
-
-        info = await self.bot.worldometers_api.try_to_get_name(country)
-        if info is None:
-            await ctx.reply(_("❌ Failed to get a ISO2 code for the country! `/list` will show you a list of countries "
-                              "and their IDs."))
-        elif info[0] == "country":
-            country_list = await self.bot.worldometers_api.get_all_iso_codes()
-            iso2_code = covid19api.get_iso2_code(country, country_list)
-            friendly_country_name = covid19api.get_country_name(country, country_list)
-        else:
-            cmd_usage = "{0}autoupdate {1} {2}".format(ctx.prefix, info[0], '' if info[0] != 'world' else country)
-            await ctx.reply(_("I found a {0} instead of a country! You can try `{1}` instead.", info[0], cmd_usage))
-            return
-
-        update_delay = delta_seconds
-        ad_data = AutoupdaterData(already_set=True, country_name=iso2_code, delay=update_delay,
-                                  discord_id=ctx.channel.id, type=AutoupdateTypes.country)
-        await ad_data.save()
-        db_guild.used_updaters += 1
-        await db_guild.save()
-        await db_channel.autoupdater.add(ad_data)
-        await db_channel.save()
-
-        await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
-                          friendly_country_name, human_update_time))
-
     @autoupdate.command(name="world")
     async def _world(self, ctx: MyContext, delay: ShortTime):
         """
@@ -272,6 +229,49 @@ class AutoUpdaterCog(Cog):
         update_delay = delta_seconds
         ad_data = AutoupdaterData(already_set=True, country_name=iso2_code, delay=update_delay,
                                   discord_id=ctx.channel.id, type=AutoupdateTypes.continent)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
+                          friendly_country_name, human_update_time))
+
+    @autoupdate.command(name="country")
+    async def _country(self, ctx: MyContext, delay: ShortTime, country: str):
+        """
+        Enable autoupdaters for a continent. For a list of countries, run /list .
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        continent is the continent name. If it includes spaces, be sure to wrap it in quotes.
+        """
+        _ = await ctx.get_translate_function()
+
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _):
+            return
+
+        info = await self.bot.worldometers_api.try_to_get_name(country)
+        if info is None:
+            await ctx.reply(_("❌ Failed to get a ISO2 code for the country! `/list` will show you a list of countries "
+                              "and their IDs."))
+        elif info[0] == "country":
+            country_list = await self.bot.worldometers_api.get_all_iso_codes()
+            iso2_code = covid19api.get_iso2_code(country, country_list)
+            friendly_country_name = covid19api.get_country_name(country, country_list)
+        else:
+            cmd_usage = "{0}autoupdate {1} {2}".format(ctx.prefix, info[0], '' if info[0] != 'world' else country)
+            await ctx.reply(_("I found a {0} instead of a country! You can try `{1}` instead.", info[0], cmd_usage))
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True, country_name=iso2_code, delay=update_delay,
+                                  discord_id=ctx.channel.id, type=AutoupdateTypes.country)
         await ad_data.save()
         db_guild.used_updaters += 1
         await db_guild.save()
