@@ -80,7 +80,6 @@ async def advanced_stats_embed(country: str, *, ctx: Optional[MyContext] = None,
                    ("zero_space", "zero_space") * 2,
                    (_("Critical Cases"), "critical"),
                    (_("Population"), "population"))
-    print(*country)
     if country is None:
         return None
     elif country[0] == "world":
