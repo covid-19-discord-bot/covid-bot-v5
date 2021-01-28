@@ -576,7 +576,6 @@ class AutoUpdaterCog(Cog):
         updater = await get_updater(str(_id), ctx)
         if not updater:
             await ctx.reply(_("❌ You don't have a autoupdater set here or the ID you sent is invalid!"))
-            await self.force_updates.reset_cooldown(ctx)
             return
         updater.force_update = True
         await updater.save()
