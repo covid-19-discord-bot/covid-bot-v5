@@ -66,27 +66,6 @@ class AutoUpdaterCog(Cog):
                 await db_guild.save()
         return True
 
-    @staticmethod
-    async def get_updater(_id: Union[str, int], ctx: MyContext, *, allow_all: bool = False) -> \
-            Optional[Union[List[AutoupdaterData], AutoupdaterData]]:
-        _id = _id.lower().strip()
-        try:
-            _id = int(_id)
-        except ValueError:
-            if not _id == "all":
-                return
-            else:
-                if allow_all:
-                    updater_list = []
-                    async for ad in AutoupdaterData().filter(discord_id=ctx.channel.id):
-                        updater_list.append(ad)
-                    return updater_list
-                else:
-                    raise commands.BadArgument("`all` is a invalid ID!")
-        else:
-            async for ad in AutoupdaterData().filter(discord_id=ctx.channel.id, id=_id):
-                return ad
-
     @commands.group()
     @commands.has_permissions(manage_messages=True)
     async def autoupdate(self, ctx: MyContext):
@@ -366,7 +345,7 @@ class AutoUpdaterCog(Cog):
         """
         _ = await ctx.get_translate_function()
         db_channel = await get_from_db(ctx.channel)
-        updater = await self.get_updater(str(_id), ctx)
+        updater = await get_updater(str(_id), ctx)
         if not updater:
             await ctx.reply(_("❌ You don't have a autoupdater set here or the ID you sent is invalid!"))
             await self.force_updates.reset_cooldown(ctx)
@@ -386,7 +365,7 @@ class AutoUpdaterCog(Cog):
         time_to_update_at: datetime.datetime = at.dt
         _ = await ctx.get_translate_function()
         db_channel = await get_from_db(ctx.channel)
-        updater = await self.get_updater(str(_id), ctx)
+        updater = await get_updater(str(_id), ctx)
         if not updater:
             await ctx.reply(_("❌ You don't have a autoupdater set here or the ID you sent is invalid!"))
             await self.update_at.reset_cooldown(ctx)
@@ -478,6 +457,27 @@ class AutoUpdaterCog(Cog):
                 continue
             await updater.save()
             await db_channel.save()
+
+
+async def get_updater(_id: Union[str, int], ctx: MyContext, *, allow_all: bool = False) -> \
+        Optional[Union[List[AutoupdaterData], AutoupdaterData]]:
+    _id = _id.lower().strip()
+    try:
+        _id = int(_id)
+    except ValueError:
+        if not _id == "all":
+            return
+        else:
+            if allow_all:
+                updater_list = []
+                async for ad in AutoupdaterData().filter(discord_id=ctx.channel.id):
+                    updater_list.append(ad)
+                return updater_list
+            else:
+                raise commands.BadArgument("`all` is a invalid ID!")
+    else:
+        async for ad in AutoupdaterData().filter(discord_id=ctx.channel.id, id=_id):
+            return ad
 
 
 def split_seq(seq, size):
