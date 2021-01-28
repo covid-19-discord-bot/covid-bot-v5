@@ -281,6 +281,9 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
                           friendly_country_name, human_update_time))
 
+    #######################
+    # Manglement Commands #
+    #######################
     @autoupdate.command(name="disable", aliases=["delete", "remove"])
     async def _disable(self, ctx: MyContext, _id: str):
         """
@@ -431,13 +434,7 @@ class AutoUpdaterCog(Cog):
                 else:
                     msg1 = await channel.send("\u0000")
                     ctx = await self.bot.get_context(msg1, cls=MyContext)
-                embed = await embeds.advanced_stats_embed(await self.bot.worldometers_api.try_to_get_name(country),
-                                                          ctx=ctx)
-                if embed is None:
-                    _ = await ctx.get_translate_function()
-                    await channel.send(_("I'm having a issue with finding the country name here! Here's what I'm "
-                                         "showing: {trying}",
-                                         trying=await self.bot.worldometers_api.try_to_get_name(country)))
+
                 await channel.send(embed=embed)
                 if msg1:
                     await msg1.delete()
