@@ -23,4 +23,9 @@ async def world(ctx: MyContext):
     return await continent(ctx, "world")
 
 
-country = state = continent
+async def country(ctx: MyContext, name: str):
+    return await continent(ctx, name)
+
+
+async def state(ctx: MyContext, name: str):
+    return await continent(ctx, name)

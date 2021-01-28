@@ -17,6 +17,15 @@ class AutoupdateTypes(enum.IntEnum):
     world = 1
     country = 2
     continent = 3
+    # all types after this comment require voting to enable
+    state = 4
+    province = 5
+    custom = 6
+    graph = 7
+    # all types after this comment require donating to enable to keep resources from being overloaded
+    # (also because they were hard to implement and i want money)
+    map = 8
+    simulation = 9
 
 
 class DiscordGuild(Model):

@@ -15,6 +15,7 @@ from discord.ext import tasks, commands
 
 import utils.api as covid19api
 import utils.embeds as embeds
+from utils import autoupdater
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.human_time import ShortTime, human_timedelta, FutureTime
@@ -408,7 +409,7 @@ class AutoUpdaterCog(Cog):
     async def run_updates_in_channels(self, channels: List[list]):
         """"""
         for channel_data in channels:
-            updater = channel_data[0]
+            updater: AutoupdaterData = channel_data[0]
             channel: discord.TextChannel = channel_data[1]
             db_channel: DiscordChannel = channel_data[2]
             now = datetime.datetime.utcnow()
@@ -434,7 +435,12 @@ class AutoUpdaterCog(Cog):
                 else:
                     msg1 = await channel.send("\u0000")
                     ctx = await self.bot.get_context(msg1, cls=MyContext)
-
+                if updater.type == AutoupdateTypes.world:
+                    embed = await autoupdater.world(ctx)
+                elif updater.type == AutoupdateTypes.continent:
+                    embed = await autoupdater.continent(ctx, country)
+                elif updater.type == AutoupdateTypes.country:
+                    embed = await autoupdater.country(ctx, country)
                 await channel.send(embed=embed)
                 if msg1:
                     await msg1.delete()
