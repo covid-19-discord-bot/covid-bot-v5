@@ -27,7 +27,7 @@ async def continent(ctx: MyContext, name: str):
                          await ctx.bot.worldometers_api.try_to_get_name(name)))
         return None
     else:
-        return embed
+        return {"embed": embed}
 
 
 async def world(ctx: MyContext):
@@ -47,11 +47,11 @@ async def province(ctx: MyContext, name: str):
     today = datetime.date.today()
     today = today - datetime.timedelta(days=1)
     e = await embeds.basic_stats_embed(n, today)
-    return e
+    return {"embed": e}
 
 
 async def custom(ctx: MyContext, custom_str: str):
-    return NotImplemented
+    return {"content": "not implemented"}
 
 
 async def graph(ctx: MyContext, name: str):
@@ -59,7 +59,16 @@ async def graph(ctx: MyContext, name: str):
     name, log = name.split("_")
     log = True if log == "log" else False
     name = await ctx.bot.jhucsse_api.try_to_get_name(name)
-    data = await ctx.bot.jhucsse_api.get_country_stats(name[1])
+    if name[0] == "world":
+        data = ctx.bot.jhucsse_api.global_historical_stats
+    elif name[0] == "country":
+        data = await ctx.bot.jhucsse_api.get_country_stats(name[1])
+    elif name[0] == "province":
+        data = await ctx.bot.jhucsse_api.get_province_stats(name[1])
+    elif name[0] == "state":
+        data = await ctx.bot.jhucsse_api.get_state_stats(name[1])
+    else:
+        return {"content": "internal bot error"}
     buffer_name = f"{name[1].title() if name[1] else 'world'}_{'log' if log else 'lin'}"
     st = time.perf_counter_ns()
     graph_buffer = graph_cache.get(buffer_name)
@@ -78,4 +87,4 @@ async def graph(ctx: MyContext, name: str):
     e.set_footer(text=_("Took {0} seconds ({1} nanoseconds) to generate • Cache Status: {2}",
                         format(round(tt / 1000000000, 1), ","), format(tt, ","), "HIT" if cache_hit else "MISS"))
     e.set_image(url="attachment://image.png")
-    await ctx.send(file=f, embed=e)
+    return {"embed": e, "file": f}

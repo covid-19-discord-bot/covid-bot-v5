@@ -8,7 +8,7 @@
 
 import asyncio
 import datetime
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Callable
 
 import discord
 from discord.ext import tasks, commands
@@ -36,12 +36,16 @@ class AutoUpdaterCog(Cog):
         self.push_auto_updates.cancel()
 
     async def do_initial_checks(self, ctx: MyContext, db_guild: DiscordGuild, db_channel: DiscordChannel,
-                                delta_seconds: int, _):
+                                delta_seconds: int, _: Callable, *, requires_vote: bool = False):
         await db_channel.fetch_related("autoupdater")
 
         if len(db_channel.autoupdater) + 1 > db_guild.total_updaters:
             await ctx.reply(_("You've used too many updaters! You've used {0} of your {1} updaters. Get more by "
                               "voting on top.gg.", db_guild.used_updaters, db_guild.total_updaters))
+            return False
+
+        if requires_vote and db_guild.used_updaters - db_guild.total_updaters <= 1:
+            await ctx.reply(_("You need to vote for one of these special updaters! See `/vote` for details."))
             return False
 
         if delta_seconds > 31536000:
@@ -52,7 +56,7 @@ class AutoUpdaterCog(Cog):
         if delta_seconds > 86400 and not db_guild.overtime_confirmed:
             def pred(c):
                 return c.author.id == ctx.author.id and c.channel.id == ctx.channel.id and \
-                       c.message.content.lower() == "ok"
+                       c.content.lower() == "ok"
 
             await ctx.reply(_("⚠ You're setting a delay longer than 1 day! Are you sure you want to do this? To "
                               "confirm, type `ok` within 15 seconds."))
@@ -282,6 +286,226 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
                           friendly_country_name, human_update_time))
 
+    @autoupdate.command(name="state")
+    async def _state(self, ctx: MyContext, delay: ShortTime, state: str):
+        """
+        Enable autoupdaters for a state. For a list of states, run /list .
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        state is the state name. If it includes spaces, be sure to wrap it in quotes.
+        This requires at least two vote credits.
+        """
+        _ = await ctx.get_translate_function()
+
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _):
+            return
+
+        info = await self.bot.worldometers_api.try_to_get_name()
+        if info is None:
+            await ctx.reply(_("❌ Failed to find a state with that name! `/list` will show you a list of states "
+                              "and their names."))
+        elif info[0] == "state":
+            iso2_code = friendly_country_name = state
+        else:
+            cmd_usage = "{0}autoupdate {1} {2}".format(ctx.prefix, info[0], '' if info[0] != 'world' else state)
+            await ctx.reply(_("I found a {0} instead of a state! You can try `{1}` instead.", info[0], cmd_usage))
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True, country_name=iso2_code, delay=update_delay,
+                                  discord_id=ctx.channel.id, type=AutoupdateTypes.state)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
+                          friendly_country_name, human_update_time))
+
+    @autoupdate.group(name="graphs", aliases=["graph"])
+    async def _graph(self, ctx: MyContext):
+        """
+        Enable autoupdaters for graphs. See all subcommands. This requires two vote credits to enable any of them.
+        """
+        if ctx.invoked_subcommand is not None:
+            await ctx.send_help("autoupdate graphs")
+
+    @_graph.command(name="world")
+    async def __world(self, ctx: MyContext, delay: ShortTime, logarithmic: bool):
+        """
+        Enable graph autoupdaters for the world.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        logarithmic is whether the graph should be logarithmic.
+        """
+        _ = await ctx.get_translate_function()
+
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True, country_name=f"world_{'log' if logarithmic else 'lin'}",
+                                  delay=update_delay, discord_id=ctx.channel.id, type=AutoupdateTypes.graph)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting a {0} graph for {1} in this channel every {2}.",
+                          _("logarithmic") if logarithmic else _("linear"), "world", human_update_time))
+
+    @_graph.command(name="country")
+    async def __country(self, ctx: MyContext, delay: ShortTime, country: str, logarithmic: bool):
+        """
+        Enable autoupdaters for a country.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        country is the country name. For a list of countries, run /list.
+        logarithmic is whether the graph should be logarithmic.
+        """
+        _ = await ctx.get_translate_function()
+
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+            return
+
+        info = await self.bot.jhucsse_api.try_to_get_name(country)
+        if info is None:
+            await ctx.reply(_("❌ Failed to get a ISO2 code for the country! `/list` will show you a list of countries "
+                              "and their IDs."))
+            return
+        elif info[0] == "country":
+            country_list = await self.bot.worldometers_api.get_all_iso_codes()
+            friendly_country_name = covid19api.get_country_name(country, country_list)
+        else:
+            cmd_usage = f"{ctx.prefix}autoupdate graphs {info[0]} {'' if info[0] != 'world' else country}"
+            await ctx.reply(_("I found a {0} instead of a country! You can try `{1}` instead.", info[0], cmd_usage))
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True,
+                                  country_name=f"{info[1].title() if info[1] else 'world'}_"
+                                               f"{'log' if logarithmic else 'lin'}",
+                                  delay=update_delay, discord_id=ctx.channel.id, type=AutoupdateTypes.graph)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting a {0} graph for {1} in this channel every {2}.",
+                          _("logarithmic") if logarithmic else _("linear"), friendly_country_name, human_update_time))
+
+    @_graph.command(name="province")
+    async def __province(self, ctx: MyContext, delay: ShortTime, province: str, logarithmic: bool):
+        """
+        Enable autoupdaters for a province.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        province is the province name.
+        logarithmic is whether the graph should be logarithmic.
+        """
+        _ = await ctx.get_translate_function()
+
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+            return
+
+        info = await self.bot.jhucsse_api.try_to_get_name(province)
+        if info is None:
+            await ctx.reply(_("❌ Failed to find that province name!"))
+            return
+        elif info[0] == "province":
+            friendly_country_name = province
+        else:
+            cmd_usage = f"{ctx.prefix}autoupdate graphs {info[0]} {'' if info[0] != 'world' else province}"
+            await ctx.reply(_("I found a {0} instead of a province! You can try `{1}` instead.", info[0], cmd_usage))
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True,
+                                  country_name=f"{info[1].title() if info[1] else 'world'}_"
+                                               f"{'log' if logarithmic else 'lin'}",
+                                  delay=update_delay, discord_id=ctx.channel.id, type=AutoupdateTypes.graph)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting a {0} graph for {1} in this channel every {2}.",
+                          _("logarithmic") if logarithmic else _("linear"), friendly_country_name, human_update_time))
+
+    @_graph.command(name="country")
+    async def __state(self, ctx: MyContext, delay: ShortTime, state: str, logarithmic: bool):
+        """
+        Enable autoupdaters for a US state.
+        delay is a human-readable time, like 12h for 12 hours, or 10m for 10 minutes.
+        state is the state name.
+        logarithmic is whether the graph should be logarithmic.
+        """
+        _ = await ctx.get_translate_function()
+
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+            return
+
+        info = await self.bot.jhucsse_api.try_to_get_name(state)
+        if info is None:
+            cmd_usage = f"`{ctx.prefix}list`"
+            await ctx.reply(_("❌ Failed to find that state name! See {0} for help!", cmd_usage))
+            return
+        elif info[0] == "state":
+            friendly_country_name = state
+        else:
+            cmd_usage = f"{ctx.prefix}autoupdate graphs {info[0]} {'' if info[0] != 'world' else state}"
+            await ctx.reply(_("I found a {0} instead of a state! You can try `{1}` instead.", info[0], cmd_usage))
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True,
+                                  country_name=f"{info[1].title() if info[1] else 'world'}_"
+                                               f"{'log' if logarithmic else 'lin'}",
+                                  delay=update_delay, discord_id=ctx.channel.id, type=AutoupdateTypes.graph)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting a {0} graph for {1} in this channel every {2}.",
+                          _("logarithmic") if logarithmic else _("linear"), friendly_country_name, human_update_time))
+
     #######################
     # Manglement Commands #
     #######################
@@ -441,12 +665,16 @@ class AutoUpdaterCog(Cog):
                     embed = await autoupdater.continent(ctx, country)
                 elif updater.type == AutoupdateTypes.country:
                     embed = await autoupdater.country(ctx, country)
-                await channel.send(embed=embed)
+                elif updater.type == AutoupdateTypes.state:
+                    embed = await autoupdater.state(ctx, country)
+                elif updater.type == AutoupdateTypes.graph:
+                    embed = await autoupdater.graph(ctx, country)
+                await channel.send(*embed)
                 if msg1:
                     await msg1.delete()
             except (discord.DiscordException, discord.errors.Forbidden) as e:
                 if isinstance(e, discord.Forbidden):
-                    # how da hell did that happen? should've been caught on L162
+                    # how da hell did that happen? should've been caught earlier
                     self.bot.logger.info("No permissions to send messages here!",
                                          channel=channel, guild=channel.guild)
                     updater.already_set = False  # no perms? heh: have fun
