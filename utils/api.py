@@ -5,10 +5,6 @@
 import asyncio
 import time
 import logging
-import json
-from pprint import pprint
-
-import aiofiles
 import aiohttp
 import datetime
 from typing import Optional, List, AnyStr, Dict, Tuple
@@ -60,7 +56,6 @@ def get_iso2_code(_input: str, _list: list) -> [str, None]:
             country_codes = (str(country['country']).lower(),
                              str(country['iso2']).lower(),
                              str(country['iso3']).lower())
-            print(country_codes)
             if _input in country_codes:
                 return country['iso2']
     except IndexError:
@@ -366,8 +361,6 @@ class Covid19JHUCSSEStats:
         await self._check_stats_are_valid()
         province = province.lower()
         if province in self.provinces:
-            with open("data.json", "w") as f:
-                print(self.provinces[province], file=f)
             return self.provinces[province]
         raise ProvinceNotFound()
 
