@@ -8,7 +8,7 @@
 
 import asyncio
 import datetime
-from typing import Optional, List, Union, Callable
+from typing import Optional, List, Union, Callable, Dict, Any
 
 import discord
 from discord.ext import tasks, commands
@@ -650,6 +650,7 @@ class AutoUpdaterCog(Cog):
                     continue
                 updater.last_updated = now
             country = updater.country_name
+            msg_to_send: Optional[Dict[str, Any]] = None
             try:
                 async for msg in channel.history(limit=1):
                     ctx = await self.bot.get_context(msg, cls=MyContext)
@@ -659,16 +660,16 @@ class AutoUpdaterCog(Cog):
                     msg1 = await channel.send("\u0000")
                     ctx = await self.bot.get_context(msg1, cls=MyContext)
                 if updater.type == AutoupdateTypes.world:
-                    embed = await autoupdater.world(ctx)
+                    msg_to_send = await autoupdater.world(ctx)
                 elif updater.type == AutoupdateTypes.continent:
-                    embed = await autoupdater.continent(ctx, country)
+                    msg_to_send = await autoupdater.continent(ctx, country)
                 elif updater.type == AutoupdateTypes.country:
-                    embed = await autoupdater.country(ctx, country)
+                    msg_to_send = await autoupdater.country(ctx, country)
                 elif updater.type == AutoupdateTypes.state:
-                    embed = await autoupdater.state(ctx, country)
+                    msg_to_send = await autoupdater.state(ctx, country)
                 elif updater.type == AutoupdateTypes.graph:
-                    embed = await autoupdater.graph(ctx, country)
-                await channel.send(*embed)
+                    msg_to_send = await autoupdater.graph(ctx, country)
+                await channel.send(**msg_to_send)
                 if msg1:
                     await msg1.delete()
             except Exception as e:
