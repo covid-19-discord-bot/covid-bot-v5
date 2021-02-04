@@ -1,0 +1,1560 @@
+# English translations for PROJECT.
+# Copyright (C) 2021 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-01-29 12:00-0700\n"
+"PO-Revision-Date: 2021-01-29 12:00-0700\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../cogs/autoupdater.py:43
+msgid ""
+"You've used too many updaters! You've used {0} of your {1} updaters. Get "
+"more by voting on top.gg."
+msgstr ""
+
+#: ../cogs/autoupdater.py:48
+msgid ""
+"You need to vote for one of these special updaters! See `/vote` for "
+"details."
+msgstr ""
+
+#: ../cogs/autoupdater.py:52
+msgid ""
+"❌ Did you really try to set the autoupdater delay to more than a year? "
+"Oi. Anyways, that isn't allowed. Try again with a more reasonable delay."
+msgstr ""
+
+#: ../cogs/autoupdater.py:61
+msgid ""
+"⚠ You're setting a delay longer than 1 day! Are you sure you want to do "
+"this? To confirm, type `ok` within 15 seconds."
+msgstr ""
+
+#: ../cogs/autoupdater.py:66
+msgid "Action cancelled."
+msgstr ""
+
+#: ../cogs/autoupdater.py:69
+msgid "Continuing setup..."
+msgstr ""
+
+#: ../cogs/autoupdater.py:83
+msgid ""
+"Hi there! Welcome to the COVID-19 Bot autoupdater interactive setup.\n"
+"Let's get started. Choose one of the following options.\n"
+"1⃣: Updates for the world.\n"
+"2⃣: Updates for a continent.\n"
+"3⃣: Updates for a country."
+msgstr ""
+
+#: ../cogs/autoupdater.py:99 ../cogs/autoupdater.py:115
+#: ../cogs/autoupdater.py:135 ../cogs/autoupdater.py:160 ../cogs/list.py:89
+msgid "Timed out."
+msgstr ""
+
+#: ../cogs/autoupdater.py:110
+msgid ""
+"Next, what update delay would you like? For example, 12h would do a "
+"update every 12 hours. Keep in mind any delays beyond 1 year will not "
+"work."
+msgstr ""
+
+#: ../cogs/autoupdater.py:121
+msgid "Invalid time provided. Make sure it's in the correct format!"
+msgstr ""
+
+#: ../cogs/autoupdater.py:128
+msgid ""
+"Finally, what country would you like to do a update for? Type the "
+"country's ISO2 code into chat."
+msgstr ""
+
+#: ../cogs/autoupdater.py:141
+msgid "Didn't find a country name! Try again."
+msgstr ""
+
+#: ../cogs/autoupdater.py:143
+msgid ""
+"I found a {0} instead of a country! You can let this time out and try "
+"again."
+msgstr ""
+
+#: ../cogs/autoupdater.py:153
+msgid ""
+"Finally, what continent would you like to do a update for? Type the "
+"continent name into chat."
+msgstr ""
+
+#: ../cogs/autoupdater.py:166
+msgid "Didn't find a continent name! Try again."
+msgstr ""
+
+#: ../cogs/autoupdater.py:168
+msgid ""
+"I found a {0} instead of a continent! You can let this time out and try "
+"again."
+msgstr ""
+
+#: ../cogs/autoupdater.py:202 ../cogs/autoupdater.py:243
+#: ../cogs/autoupdater.py:286 ../cogs/autoupdater.py:329
+msgid "✅ Posting stats for {0} in this channel every {1}."
+msgstr ""
+
+#: ../cogs/autoupdater.py:225
+msgid "❌ Failed to get a continent name! {0} will show you a list of continents."
+msgstr ""
+
+#: ../cogs/autoupdater.py:230
+msgid "❌ I found a {0} instead of a continent! You can try `{1}` instead."
+msgstr ""
+
+#: ../cogs/autoupdater.py:266 ../cogs/autoupdater.py:392
+msgid ""
+"❌ Failed to get a ISO2 code for the country! `/list` will show you a list"
+" of countries and their IDs."
+msgstr ""
+
+#: ../cogs/autoupdater.py:274 ../cogs/autoupdater.py:400
+msgid "I found a {0} instead of a country! You can try `{1}` instead."
+msgstr ""
+
+#: ../cogs/autoupdater.py:310
+msgid ""
+"❌ Failed to find a state with that name! `/list` will show you a list of "
+"states and their names."
+msgstr ""
+
+#: ../cogs/autoupdater.py:316 ../cogs/autoupdater.py:491
+msgid "I found a {0} instead of a state! You can try `{1}` instead."
+msgstr ""
+
+#: ../cogs/autoupdater.py:368 ../cogs/autoupdater.py:415
+#: ../cogs/autoupdater.py:460 ../cogs/autoupdater.py:506
+msgid "✅ Posting a {0} graph for {1} in this channel every {2}."
+msgstr ""
+
+#: ../cogs/autoupdater.py:369 ../cogs/autoupdater.py:416
+#: ../cogs/autoupdater.py:461 ../cogs/autoupdater.py:507
+msgid "logarithmic"
+msgstr ""
+
+#: ../cogs/autoupdater.py:369 ../cogs/autoupdater.py:416
+#: ../cogs/autoupdater.py:461 ../cogs/autoupdater.py:507
+msgid "linear"
+msgstr ""
+
+#: ../cogs/autoupdater.py:439
+msgid "❌ Failed to find that province name!"
+msgstr ""
+
+#: ../cogs/autoupdater.py:445
+msgid "I found a {0} instead of a province! You can try `{1}` instead."
+msgstr ""
+
+#: ../cogs/autoupdater.py:485
+msgid "❌ Failed to find that state name! See {0} for help!"
+msgstr ""
+
+#: ../cogs/autoupdater.py:527
+msgid "❌ Must pass either {0} or a ID as a argument."
+msgstr ""
+
+#: ../cogs/autoupdater.py:537
+msgid "✅ Deleted all autoupdaters in this channel."
+msgstr ""
+
+#: ../cogs/autoupdater.py:543
+msgid "❌ No autoupdater with that ID found."
+msgstr ""
+
+#: ../cogs/autoupdater.py:548
+msgid "✅ Deleted autoupdater with ID {0}."
+msgstr ""
+
+#: ../cogs/autoupdater.py:558
+msgid "List of Updaters"
+msgstr ""
+
+#: ../cogs/autoupdater.py:559
+msgid "To disable one of these updaters, run {0}, replacing {1} with the ID."
+msgstr ""
+
+#: ../cogs/autoupdater.py:562
+msgid ""
+"Country: {0}\n"
+"Delay: {1} seconds"
+msgstr ""
+
+#: ../cogs/autoupdater.py:565
+msgid "None 😞"
+msgstr ""
+
+#: ../cogs/autoupdater.py:565
+msgid "Add one with the {0} command!"
+msgstr ""
+
+#: ../cogs/autoupdater.py:578 ../cogs/autoupdater.py:597
+msgid "❌ You don't have a autoupdater set here or the ID you sent is invalid!"
+msgstr ""
+
+#: ../cogs/autoupdater.py:583
+msgid "✅ Forcing a update sometime in the next minute."
+msgstr ""
+
+#: ../cogs/autoupdater.py:602
+msgid "✅ Next update: {0}"
+msgstr ""
+
+#: ../cogs/background_updates.py:26
+msgid "Stopping task..."
+msgstr ""
+
+#: ../cogs/background_updates.py:28
+msgid "Task has been sent a stop signal. Waiting 10 seconds..."
+msgstr ""
+
+#: ../cogs/background_updates.py:30
+msgid "Sending terminate signal..."
+msgstr ""
+
+#: ../cogs/background_updates.py:32
+msgid "Task has been killed. Starting now..."
+msgstr ""
+
+#: ../cogs/background_updates.py:35
+msgid "Task has been sent a start signal."
+msgstr ""
+
+#: ../cogs/background_updates.py:37
+msgid "Task restarted!"
+msgstr ""
+
+#: ../cogs/bot_utils.py:21
+msgid "Credits"
+msgstr ""
+
+#: ../cogs/bot_utils.py:30
+msgid "current bot version: v5.2.0"
+msgstr ""
+
+#: ../cogs/bot_utils.py:31
+msgid "v3+ Creator"
+msgstr ""
+
+#: ../cogs/bot_utils.py:32
+msgid "Original Creator"
+msgstr ""
+
+#: ../cogs/bot_utils.py:33
+msgid "Bot Framework"
+msgstr ""
+
+#: ../cogs/bot_utils.py:34
+msgid "Moral Support"
+msgstr ""
+
+#: ../cogs/bot_utils.py:35
+msgid "API Providers"
+msgstr ""
+
+#: ../cogs/bot_utils.py:36
+msgid "discord.py Devs"
+msgstr ""
+
+#: ../cogs/bot_utils.py:45
+msgid "Invite Links"
+msgstr ""
+
+#: ../cogs/bot_utils.py:47
+msgid "Bot Invite Link"
+msgstr ""
+
+#: ../cogs/bot_utils.py:48
+msgid "Discord Server Invite Link"
+msgstr ""
+
+#: ../cogs/bot_utils.py:69
+msgid ""
+"I seem to be having issues, apparently I can't find the channel you ran "
+"that command in! Please try again."
+msgstr ""
+
+#: ../cogs/bot_utils.py:74
+msgid "Pong. — Time taken: {0}ms"
+msgstr ""
+
+#: ../cogs/bot_utils.py:81
+msgid "Calling `self.bot.async_setup()`..."
+msgstr ""
+
+#: ../cogs/bot_utils.py:83
+msgid "Bot has been setup!"
+msgstr ""
+
+#: ../cogs/bot_utils.py:91
+msgid "Vote Sites"
+msgstr ""
+
+#: ../cogs/bot_utils.py:92
+msgid ""
+"Voting for the bot gives it more visibility, which means it ends up in "
+"more servers, giving me (the dev) more incentive to add more features!\n"
+"If you want a specific feature, let me know with the `/suggest` command!"
+msgstr ""
+
+#: ../cogs/bot_utils.py:103
+msgid "**DO NOT disable adblockers!**"
+msgstr ""
+
+#: ../cogs/covid.py:31 ../cogs/covid.py:40
+msgid ""
+"A fatal error has happened! The world data seems to have gone missing. "
+"Please let a mod in the bot's support server know."
+msgstr ""
+
+#: ../cogs/covid.py:55
+msgid "Didn't find any continents with that name!"
+msgstr ""
+
+#: ../cogs/covid.py:72
+msgid "Use the `{0}covid world` command instead."
+msgstr ""
+
+#: ../cogs/covid.py:76 ../cogs/covid.py:96
+msgid ""
+"Didn't find a country with that name, or the country has no cases! Try "
+"searching for the name with `{0}list country`.\n"
+"Hint: if you're looking for North or South Korea, try `{0}covid KP` or "
+"`{0}covid KR` for North and South Korea, respectively!"
+msgstr ""
+
+#: ../cogs/covid.py:83 ../cogs/covid.py:103
+msgid ""
+"Didn't find a country with that name, or the country has no cases! Try "
+"searching for the name with `{0}list country`."
+msgstr ""
+
+#: ../cogs/covid.py:88
+msgid "You've used a incorrect command: try `{0}covid {1}`"
+msgstr ""
+
+#: ../cogs/covid.py:120
+msgid "Didn't find any provinces with that name!"
+msgstr ""
+
+#: ../cogs/covid.py:124
+msgid "I found a {0} instead of a province! Use the {1} command instead."
+msgstr ""
+
+#: ../cogs/covid.py:132
+msgid ""
+"Couldn't find a country with that ID (`/list` for a list of IDs) or the "
+"country has no cases!"
+msgstr ""
+
+#: ../cogs/covid.py:136
+msgid ""
+"Couldn't find a province with that name! If you're looking for US states,"
+" see the `{0}covid states` command."
+msgstr ""
+
+#: ../cogs/covid.py:142
+msgid ""
+"Something went wrong, I can't find today's stats! I'm currently trying to"
+" find stats for {0}!"
+msgstr ""
+
+#: ../cogs/covid.py:155
+msgid "Didn't find a state with that name! For a list, run `{0}list states`."
+msgstr ""
+
+#: ../cogs/covid.py:157
+msgid "That isn't a state! Try the `{0}covid {1}` command."
+msgstr ""
+
+#: ../cogs/database_commands.py:43
+msgid "The server prefix is set to `{0}`."
+msgstr ""
+
+#: ../cogs/database_commands.py:45
+msgid "There is no specific prefix set for this guild."
+msgstr ""
+
+#: ../cogs/database_commands.py:63
+msgid "The server language is now set to `{0}`."
+msgstr ""
+
+#: ../cogs/database_commands.py:69
+msgid "There is no specific language set for this guild."
+msgstr ""
+
+#: ../cogs/database_commands.py:83
+msgid ""
+"The API has been disabled for this channel. To restore your permissions, "
+"contact 0/0#0001 on the official support server."
+msgstr ""
+
+#: ../cogs/database_commands.py:88
+msgid "DMed your API key to you."
+msgstr ""
+
+#: ../cogs/database_commands.py:91
+msgid "Revoked/deleted API key."
+msgstr ""
+
+#: ../cogs/database_commands.py:96
+msgid "DMed your new API key to you."
+msgstr ""
+
+#: ../cogs/database_commands.py:98
+msgid "Invalid action. It must be one of {0}."
+msgstr ""
+
+#: ../cogs/database_commands.py:108
+msgid "Disabled the API for {0}."
+msgstr ""
+
+#: ../cogs/error_handling.py:85
+msgid ""
+"There was an error converting one of your arguments with {0}. The correct"
+" syntax would be `{1}`. The converter returned the following error: {2}"
+msgstr ""
+
+#: ../cogs/error_handling.py:88
+msgid "This command is missing an argument. The correct syntax would be `{0}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:92
+msgid ""
+"Too many quotes were provided in your message: don't forget to escape "
+"your quotes like this `\\{0}`. The correct syntax for the command is "
+"`{1}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:98
+msgid ""
+"A space was expected after a closing quote, but I found {0}. Please check"
+" that you are using the correct syntax: `{1}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:103
+msgid ""
+"A closing quote was expected, but wasn't found. Don't forget to close "
+"your quotes with `{0}` at the end of your argument. Please check that you"
+" are using the correct syntax: `{1}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:109
+msgid ""
+"Too many arguments were passed in this command. Please check that you are"
+" using the correct syntax: `{0}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:113
+msgid ""
+"The way you are invoking this command is confusing me. The correct syntax"
+" would be `{0}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:120
+msgid ""
+"An argument passed was incorrect. `{0}`.Please check that you are using "
+"the correct syntax: `{command_invoke_help}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:124
+msgid "{0} Please check that you are using the correct syntax: `{1}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:133
+msgid "This command can only be used in a private message."
+msgstr ""
+
+#: ../cogs/error_handling.py:135
+msgid "This command cannot be used in a private message."
+msgstr ""
+
+#: ../cogs/error_handling.py:137
+msgid "Multiple errors were encountered when running your command: {0}"
+msgstr ""
+
+#: ../cogs/error_handling.py:140
+msgid "You need to be the owner of the bot to run that."
+msgstr ""
+
+#: ../cogs/error_handling.py:145
+msgid "You are missing permissions to run this command. {0}"
+msgstr ""
+
+#: ../cogs/error_handling.py:148
+msgid "I am missing permissions to run this command. {0}"
+msgstr ""
+
+#: ../cogs/error_handling.py:150
+msgid "You are missing the following role: {0}"
+msgstr ""
+
+#: ../cogs/error_handling.py:153
+msgid "I am missing the following role: {0}"
+msgstr ""
+
+#: ../cogs/error_handling.py:157
+msgid "You are missing one of the following roles: {0}"
+msgstr ""
+
+#: ../cogs/error_handling.py:160
+msgid "I am missing one of the following roles: {0}"
+msgstr ""
+
+#: ../cogs/error_handling.py:162
+msgid "You need to be in a NSFW channel to run that."
+msgstr ""
+
+#: ../cogs/error_handling.py:168
+msgid "You need to be in the {0} server (`{1}`)."
+msgstr ""
+
+#: ../cogs/error_handling.py:173
+msgid "You need to be in a server with ID {0}."
+msgstr ""
+
+#: ../cogs/error_handling.py:176
+msgid "You have the `{0}` permission."
+msgstr ""
+
+#: ../cogs/error_handling.py:179
+msgid "You need the `{0}` permission."
+msgstr ""
+
+#: ../cogs/error_handling.py:182
+msgid "You have {0} or more of the following permissions: `{1}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:187
+msgid "You need {0} or more of the following permissions: `{1}`."
+msgstr ""
+
+#: ../cogs/error_handling.py:199
+msgid "The provided command was not found."
+msgstr ""
+
+#: ../cogs/error_handling.py:201
+msgid "That command has been disabled."
+msgstr ""
+
+#: ../cogs/error_handling.py:204
+msgid ""
+"I don't have permissions to send messages there! Try again somewhere I do"
+" have permissions to send messages!"
+msgstr ""
+
+#: ../cogs/error_handling.py:209
+msgid "The bot's still setting up, please wait a few minutes and try again!"
+msgstr ""
+
+#: ../cogs/error_handling.py:211
+msgid ""
+"I can't find your original message, Discord may be having issues! Try "
+"again."
+msgstr ""
+
+#: ../cogs/error_handling.py:213
+msgid ""
+"No data is available at the moment. Wait a few moments. **Spamming this "
+"command will result in a temporary ban!**"
+msgstr ""
+
+#: ../cogs/error_handling.py:216
+msgid ""
+"There was an error running the specified command‽ This error has been "
+"logged."
+msgstr ""
+
+#: ../cogs/error_handling.py:233
+msgid "You are being ratelimited. Please try again {0}."
+msgstr ""
+
+#: ../cogs/error_handling.py:235
+msgid "globally"
+msgstr ""
+
+#: ../cogs/error_handling.py:236
+msgid "per user"
+msgstr ""
+
+#: ../cogs/error_handling.py:237
+msgid "per guild"
+msgstr ""
+
+#: ../cogs/error_handling.py:238
+msgid "per channel"
+msgstr ""
+
+#: ../cogs/error_handling.py:239
+msgid "per member"
+msgstr ""
+
+#: ../cogs/error_handling.py:240
+msgid "per category"
+msgstr ""
+
+#: ../cogs/error_handling.py:241
+msgid "per role"
+msgstr ""
+
+#: ../cogs/error_handling.py:242
+msgid ""
+"Too many users are using this command. Only {0} users can use it at the "
+"same time {1}."
+msgstr ""
+
+#: ../cogs/error_handling.py:250
+msgid ""
+"This should not have happened. A command raised an error that does not "
+"comes from CommandError. Please inform the owner."
+msgstr ""
+
+#: ../cogs/error_handling.py:255
+msgid ""
+"\n"
+"For help, join the bot's support server at {0}\n"
+"Check <https://discordstatus.com/> for more details on Discord issues."
+msgstr ""
+
+#: ../cogs/error_handling.py:260
+msgid "No message was defined. This error has been logged."
+msgstr ""
+
+#: ../cogs/future_simulations.py:34
+msgid "Set up your simulation to default values. Edit them with the {0} commands."
+msgstr ""
+
+#: ../cogs/future_simulations.py:45
+msgid ""
+"ISO3 codes are always 3 characters long! If you're trying to get the "
+"world, try {0}."
+msgstr ""
+
+#: ../cogs/future_simulations.py:53
+msgid "Country name for simulation set to {0}."
+msgstr ""
+
+#: ../cogs/future_simulations.py:59
+msgid "3 years is the upper limit on simulation length."
+msgstr ""
+
+#: ../cogs/future_simulations.py:66
+msgid "Simulation time set to {0} days."
+msgstr ""
+
+#: ../cogs/future_simulations.py:83 ../cogs/old_future_simulations.py:88
+msgid ""
+"**WARNING**\n"
+"This is not a scientific modeling system by any means, this purely exists"
+" for entertainment purposes. For actual advice, refer to your medical "
+"specialist. By agreeing to these terms, you agree not to hold 0/0#0001 "
+"liable for anything stemming from the use of this modeling system. Type "
+"`ok` within 15 seconds to agree to these terms."
+msgstr ""
+
+#: ../cogs/future_simulations.py:93
+msgid "Didn't get a response. To try again, do {0}."
+msgstr ""
+
+#: ../cogs/future_simulations.py:102 ../cogs/old_future_simulations.py:103
+msgid "Please wait, initializing..."
+msgstr ""
+
+#: ../cogs/future_simulations.py:106
+msgid "You haven't set up your simulation! Run {0} to set your simulation up!"
+msgstr ""
+
+#: ../cogs/future_simulations.py:109
+msgid "Running simulation..."
+msgstr ""
+
+#: ../cogs/future_simulations.py:117
+msgid ""
+"Invalid country name! Try again, making sure the ISO3 code you passed is "
+"correct! For the world, the code is {0}."
+msgstr ""
+
+#: ../cogs/future_simulations.py:124
+msgid "Results after {0} days"
+msgstr ""
+
+#: ../cogs/future_simulations.py:125
+msgid ""
+"More features will be available later: join the support server for "
+"updates when new features are released!"
+msgstr ""
+
+#: ../cogs/future_simulations.py:127 ../utils/embeds.py:148
+msgid "Total Cases"
+msgstr ""
+
+#: ../cogs/future_simulations.py:128 ../utils/embeds.py:151
+msgid "Total Deaths"
+msgstr ""
+
+#: ../cogs/future_simulations.py:130
+msgid "Took {0} seconds ({1}ns) to run."
+msgstr ""
+
+#: ../cogs/graphs.py:37
+msgid ""
+"React with 📈 for a logarithmic graph.\n"
+"React with 📉 for a linear graph.\n"
+"This message expires after 10 seconds."
+msgstr ""
+
+#: ../cogs/graphs.py:51
+msgid "Timed out. Request a new message with `{0}graphs`"
+msgstr ""
+
+#: ../cogs/graphs.py:54 ../cogs/graphs.py:56
+msgid "Please wait, this could take a few seconds..."
+msgstr ""
+
+#: ../cogs/graphs.py:71 ../utils/autoupdater.py:86
+msgid "Graph for {0}"
+msgstr ""
+
+#: ../cogs/graphs.py:73 ../utils/autoupdater.py:88
+msgid "Took {0} seconds ({1} nanoseconds) to generate • Cache Status: {2}"
+msgstr ""
+
+#: ../cogs/graphs.py:103 ../cogs/graphs.py:123 ../cogs/graphs.py:144
+msgid ""
+"That isn't a valid name! Check out {0} for a list of all names I can get "
+"data for!"
+msgstr ""
+
+#: ../cogs/graphs.py:106
+msgid "I found a {0} instead of a country!"
+msgstr ""
+
+#: ../cogs/graphs.py:127
+msgid "I found a {0} instead of a province! Try {1} instead."
+msgstr ""
+
+#: ../cogs/graphs.py:148
+msgid "I found a {0} instead of a state! Try {1} instead."
+msgstr ""
+
+#: ../cogs/help.py:29 ../cogs/help.py:77 ../cogs/help.py:79
+msgid "Help"
+msgstr ""
+
+#: ../cogs/help.py:63 ../cogs/help.py:68 ../cogs/help.py:79
+msgid "No help available."
+msgstr ""
+
+#: ../cogs/help.py:83
+msgid "Aliases"
+msgstr ""
+
+#: ../cogs/help.py:90
+msgid "No command called {0} found."
+msgstr ""
+
+#: ../cogs/help.py:95
+msgid "Command \"{0.qualified_name}\" has no subcommand named {1}"
+msgstr ""
+
+#: ../cogs/help.py:96
+msgid "Command \"{0.qualified_name}\" has no subcommands."
+msgstr ""
+
+#: ../cogs/help.py:100
+msgid "Error"
+msgstr ""
+
+#: ../cogs/list.py:47
+msgid "List of {0}"
+msgstr ""
+
+#: ../cogs/list.py:48
+msgid "Use `{0}covid {1} <name>` when getting stats for a {1}!"
+msgstr ""
+
+#: ../cogs/list.py:51 ../cogs/list.py:128
+msgid "Name"
+msgstr ""
+
+#: ../cogs/list.py:69
+msgid ""
+"I can't send the entire country list: it's over Discord's 6,000 character"
+" limit! Try `{0}{1} <letter>` to get only countries starting with "
+"`<letter>`."
+msgstr ""
+
+#: ../cogs/list.py:82
+msgid ""
+"Whatever you have requested, it is over 6,000 characters. I can send a "
+"text file, however. React with 📔 any time in the next 15 seconds to be "
+"DMed a text file instead of a embed."
+msgstr ""
+
+#: ../cogs/list.py:94
+msgid "Sent you a DM!"
+msgstr ""
+
+#: ../cogs/list.py:96 ../cogs/list.py:110
+msgid "DMed a list to you!"
+msgstr ""
+
+#: ../cogs/list.py:118
+msgid "List of American States"
+msgstr ""
+
+#: ../cogs/list.py:119
+msgid "Use the `{0}covid states <name>` command when getting stats for `<name>`!"
+msgstr ""
+
+#: ../cogs/list.py:123 ../cogs/vaccine.py:48
+msgid ""
+"The page number you have selected is not between 1 and {0}. Please try "
+"again."
+msgstr ""
+
+#: ../cogs/list.py:130 ../cogs/list.py:134 ../cogs/vaccine.py:55
+#: ../cogs/vaccine.py:60
+msgid "Page {0} of {1}"
+msgstr ""
+
+#: ../cogs/list.py:131 ../cogs/vaccine.py:56
+msgid "To go to the next page, run `{0}{1} {2} {3}`"
+msgstr ""
+
+#: ../cogs/maps.py:35
+msgid "Map Types"
+msgstr ""
+
+#: ../cogs/maps.py:36
+msgid "Use one of these map types when running `{0}maps show <name>`."
+msgstr ""
+
+#: ../cogs/maps.py:51
+msgid ""
+"I don't know what map you're looking for! Run `{0}maps types` to see all "
+"the maps I can show you!"
+msgstr ""
+
+#: ../cogs/maps.py:54
+msgid "Map for {0}"
+msgstr ""
+
+#: ../cogs/maps.py:58
+msgid "The bot's still setting up, please wait up to 10 minutes."
+msgstr ""
+
+#: ../cogs/maps.py:67
+msgid "Updating maps..."
+msgstr ""
+
+#: ../cogs/maps.py:69
+msgid "Done!"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:56
+msgid "Data for Day {0}"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:97
+msgid "Didn't get a response. To try again, do `{0}{1}`."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:102
+msgid "I'll ping you when this is done, you can go do other stuff."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:112
+msgid ""
+"You haven't set up your simulation! Run `{0}simulate setup` to set your "
+"sim up!"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:138
+msgid "Submitting your item to be processed..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:146
+msgid "Waiting for next run of simulation processor, which will happen {0}."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:150
+msgid "Simulation failed: ran out of memory: retry with smaller values."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:152
+msgid ""
+"Simulation failed: had incorrect values passed to it: try with more "
+"reasonable values."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:154
+msgid ""
+"Simulation failed: process running the simulation has failed: ask a mod "
+"in the bot's support server (find it via {0}) to run {1}."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:158
+msgid ""
+"Simulation failed: had a unknown error: report ID ({0}) to 0/0#0001 to be"
+" fixed."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:168
+msgid "Processed simulation!"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:169
+msgid "Simulation Results"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:170
+msgid ""
+"Navigate using `next` to view the next day's stats, `prev` to view the "
+"previous day's stats, `first` to jump to the first day (tomorrow), and "
+"`last` to jump to the last day in your simulation. Type a number to jump "
+"straight to that day. Type `exit` to exit the paginator (for example, if "
+"you want to modify sim data)."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:176
+msgid "Total infections by end of simulation"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:177
+msgid "Total recoveries by end of simulation"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:178
+msgid "Total deaths by end of simulation"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:179
+msgid "Your simulation is ready: it will be available for 15 minutes."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:195
+msgid "Your simulation has timed out. Request a new one with `{0}{1}`."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:203
+msgid ""
+"I now require the MANAGE MESSAGES permission. I've disabled this command "
+"until you give me this permission. If you'd prefer not to give me such a "
+"permission, the bot will still function, just with the simulation module "
+"disabled. Thanks in advance!"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:224
+msgid "Internal bot error. Try again."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:227
+msgid "Out of bounds."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:240
+msgid ""
+"You aren't a mod in the bot's support server! You can't run this command."
+" If simulations are actually broken, ask a mod in the bot's support "
+"server (find it via {0}) to run this command."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:244
+msgid "This could take up to 60 seconds, please wait..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:245
+msgid "Stopping simulation runners..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:254
+msgid "Stopping broken process pools..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:257
+msgid "Waiting 20 seconds for the final tasks to stop..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:259
+msgid "Destroying pools..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:262
+msgid "Creating new pools..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:265
+msgid "Starting up simulation runners..."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:268
+msgid "Restarted pool sucessfully!"
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:275
+msgid ""
+"Simulation results are very inaccurate after 157 days. I have set the "
+"simulation length to 157 days."
+msgstr ""
+
+#: ../cogs/old_future_simulations.py:280
+msgid "Set simulation length to {0} days."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:51
+msgid "😃 You have that permission."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:53
+msgid "☹️ You don't have that permission."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:56
+msgid "Details of permissions hierarchy"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:62
+msgid "{0} Default (from {0}{1})"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:77
+msgid "{0} Guild role {1} (from {0}{2})"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:87
+msgid "{0} Channel role {1} (from {0}{2})"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:94
+msgid "{0} Member (from {0}{1})"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:100
+msgid "{0} Fixed (from {0}{1})"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:107
+msgid "{0} User (from {0}{1})"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:130 ../cogs/permissions_commands.py:161
+#: ../cogs/permissions_commands.py:188
+msgid "**{0} permissions**"
+msgstr ""
+
+#: ../cogs/permissions_commands.py:140
+msgid "There are no specific permissions set in this guild."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:171
+msgid "There are no specific permissions set in this channel."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:196
+msgid "There are no specific permissions for this member."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:221
+msgid "👌 Permission {0} for user {1} has been set to {2} globally."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:237
+msgid "👌 Permission {0} for member {1} has been set to {2} globally."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:251
+msgid "❌ Can't set permissions in a channel that is not in this guild."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:255 ../cogs/permissions_commands.py:281
+msgid "❌ Can't set permissions for a role that does not exist in this guild."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:268
+msgid "👌 Permission {0} for role {1} [`{2}`] has been set to {3} in this channel."
+msgstr ""
+
+#: ../cogs/permissions_commands.py:294
+msgid "👌 Permission {0} for role {1} [`{2}`] has been set to {3} in this guild."
+msgstr ""
+
+#: ../cogs/suggestions.py:23
+msgid "React to this message with 📥 within 10 seconds to send your reaction."
+msgstr ""
+
+#: ../cogs/suggestions.py:49
+msgid "Failed to send suggestion due to a Discord error. Try again."
+msgstr ""
+
+#: ../cogs/suggestions.py:51
+msgid "Sent suggestion successfully."
+msgstr ""
+
+#: ../cogs/support_server_commands.py:111
+msgid "The bot is not yet sharded."
+msgstr ""
+
+#: ../cogs/support_server_commands.py:120
+msgid "•\t Shard ID {0}: {1}ms"
+msgstr ""
+
+#: ../cogs/support_server_commands.py:122
+msgid " (ready)"
+msgstr ""
+
+#: ../cogs/support_server_commands.py:124
+msgid " (current shard)"
+msgstr ""
+
+#: ../cogs/support_server_commands.py:127
+msgid ""
+"\n"
+"\n"
+"Avg latency: {0}ms"
+msgstr ""
+
+#: ../cogs/support_server_commands.py:129
+msgid " (bot ready)"
+msgstr ""
+
+#: ../cogs/top.py:16
+msgid "Incorrect Top List Type"
+msgstr ""
+
+#: ../cogs/top.py:17
+msgid "Try sorting with one of the following:"
+msgstr ""
+
+#: ../cogs/top.py:40
+msgid "Top List"
+msgstr ""
+
+#: ../cogs/top.py:41
+msgid "Run `{0}help top` for a list of all possible sorts!"
+msgstr ""
+
+#: ../cogs/top.py:43
+msgid "{0}: {1}"
+msgstr ""
+
+#: ../cogs/vaccine.py:23
+msgid "{0}: {1} candidates\n"
+msgstr ""
+
+#: ../cogs/vaccine.py:24
+msgid "Vaccine Updates"
+msgstr ""
+
+#: ../cogs/vaccine.py:25
+msgid ""
+"(For more details, run `{0}help vaccine`)\n"
+"There are a total of **{1} vaccine candidates**.\n"
+"__**Phases**__\n"
+"{2}"
+msgstr ""
+
+#: ../cogs/vaccine.py:29 ../cogs/vaccine.py:61 ../cogs/vaccine.py:95
+#: ../utils/embeds.py:50
+msgid "Last updated at"
+msgstr ""
+
+#: ../cogs/vaccine.py:39
+msgid "Vaccine Candidates"
+msgstr ""
+
+#: ../cogs/vaccine.py:40
+msgid ""
+"To get more details on a vaccine candidate, run `{0}vaccine details <id>`"
+"\n"
+"The ID of any given candidate is under the name."
+msgstr ""
+
+#: ../cogs/vaccine.py:75
+msgid "That isn't a valid vaccine ID! View all the IDs in {0}!"
+msgstr ""
+
+#: ../cogs/vaccine.py:81
+msgid "Description is too long! Download the attachment to see it!"
+msgstr ""
+
+#: ../cogs/vaccine.py:85
+msgid "Mechanism"
+msgstr ""
+
+#: ../cogs/vaccine.py:89
+msgid "Sponsors"
+msgstr ""
+
+#: ../cogs/vaccine.py:90
+msgid "Phase"
+msgstr ""
+
+#: ../cogs/vaccine.py:94
+msgid "Institutions"
+msgstr ""
+
+#: ../cogs/votes.py:22
+msgid "You must pass a number or {0}."
+msgstr ""
+
+#: ../cogs/votes.py:32
+msgid ""
+"You don't have enough credits to transfer. Go vote on top.gg for more!\n"
+"{0}"
+msgstr ""
+
+#: ../cogs/votes.py:35
+msgid ""
+"You are going to transfer {0} updater credits to this guild ({1}). This "
+"action is irreversible. Type {2} within 30 seconds to confirm."
+msgstr ""
+
+#: ../cogs/votes.py:44
+msgid "Timed out waiting for response."
+msgstr ""
+
+#: ../cogs/votes.py:53
+msgid "Transferred {0} credits to {1}."
+msgstr ""
+
+#: ../utils/autoupdater.py:27
+msgid ""
+"I'm having a issue with finding the country name here! Here's what I'm "
+"showing: {0}"
+msgstr ""
+
+#: ../utils/bot_class.py:154
+msgid ""
+"Hi there! I'm a bot for giving live stats on the COVID-19 pandemic. My "
+"default prefix is `/`. This can be changed with `/settings prefix <new "
+"prefix>`, replacing <new prefix> with the prefix you want. For a list of "
+"my commands, run `/help`."
+msgstr ""
+
+#: ../utils/embeds.py:36 ../utils/embeds.py:62
+msgid "<:infected:775877435320565801> Total Cases"
+msgstr ""
+
+#: ../utils/embeds.py:37 ../utils/embeds.py:70
+msgid "<:deaths:775877434687488030> Total Deaths"
+msgstr ""
+
+#: ../utils/embeds.py:38 ../utils/embeds.py:74
+msgid "<:recovered:775877435089748008> Total Recoveries"
+msgstr ""
+
+#: ../utils/embeds.py:40
+msgid "Province Stats for {province} on {today}"
+msgstr ""
+
+#: ../utils/embeds.py:41
+msgid ""
+"Why such a small amount of data compared to country stats?\n"
+"Some provinces may report the same amount of data, but these provinces "
+"make up such a small amount of all provinces, meaning it's not worth it "
+"to try to show it for all of them."
+msgstr ""
+
+#: ../utils/embeds.py:47
+msgid "{0} (could also have no data)"
+msgstr ""
+
+#: ../utils/embeds.py:63 ../utils/embeds.py:149
+msgid "New Cases"
+msgstr ""
+
+#: ../utils/embeds.py:64
+msgid "Cases per 1m People"
+msgstr ""
+
+#: ../utils/embeds.py:66
+msgid "<:active:775877437056614491> Active Cases"
+msgstr ""
+
+#: ../utils/embeds.py:67
+msgid "Active Case Change"
+msgstr ""
+
+#: ../utils/embeds.py:68
+msgid "Active Cases per 1m People"
+msgstr ""
+
+#: ../utils/embeds.py:71 ../utils/embeds.py:152
+msgid "New Deaths"
+msgstr ""
+
+#: ../utils/embeds.py:72
+msgid "Deaths per 1m People"
+msgstr ""
+
+#: ../utils/embeds.py:75
+msgid "New Recoveries"
+msgstr ""
+
+#: ../utils/embeds.py:76
+msgid "Recovered per 1m People"
+msgstr ""
+
+#: ../utils/embeds.py:78
+msgid "<:tests:775877436075802676> Tests"
+msgstr ""
+
+#: ../utils/embeds.py:79
+msgid "Tests per 1m People"
+msgstr ""
+
+#: ../utils/embeds.py:81
+msgid "Critical Cases"
+msgstr ""
+
+#: ../utils/embeds.py:82 ../utils/embeds.py:194
+msgid "Population"
+msgstr ""
+
+#: ../utils/embeds.py:99
+msgid "COVID-19 Stats for {name}"
+msgstr ""
+
+#: ../utils/embeds.py:102
+msgid "Stats last updated at (UTC)"
+msgstr ""
+
+#: ../utils/embeds.py:115 ../utils/embeds.py:119
+msgid "no data"
+msgstr ""
+
+#: ../utils/embeds.py:121
+msgid "Affected Countries"
+msgstr ""
+
+#: ../utils/embeds.py:150
+msgid "New Cases (7d avg)"
+msgstr ""
+
+#: ../utils/embeds.py:153
+msgid "New Deaths (7d avg)"
+msgstr ""
+
+#: ../utils/embeds.py:154
+msgid "Total Cases per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:155
+msgid "New Cases per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:156
+msgid "New Cases per 1m (7d avg)"
+msgstr ""
+
+#: ../utils/embeds.py:157
+msgid "Total Deaths per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:158
+msgid "New Deaths per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:159
+msgid "New Deaths per 1m (7d avg)"
+msgstr ""
+
+#: ../utils/embeds.py:160
+msgid "R-Value"
+msgstr ""
+
+#: ../utils/embeds.py:161
+msgid "Stringency Index"
+msgstr ""
+
+#: ../utils/embeds.py:165
+msgid "ICU Patients"
+msgstr ""
+
+#: ../utils/embeds.py:166
+msgid "ICU Patients per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:167
+msgid "Hospitalized Patients"
+msgstr ""
+
+#: ../utils/embeds.py:168
+msgid "Hospitalized Patients per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:169
+msgid "Weekly ICU Admissions"
+msgstr ""
+
+#: ../utils/embeds.py:170
+msgid "Weekly ICU Admissions per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:171
+msgid "Weekly Hospital Admissions"
+msgstr ""
+
+#: ../utils/embeds.py:172
+msgid "Weekly Hospital Admissions per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:176
+msgid "Total Tests"
+msgstr ""
+
+#: ../utils/embeds.py:177
+msgid "New Tests"
+msgstr ""
+
+#: ../utils/embeds.py:178
+msgid "New Tests (7d avg)"
+msgstr ""
+
+#: ../utils/embeds.py:179
+msgid "Total Tests per 1k"
+msgstr ""
+
+#: ../utils/embeds.py:180
+msgid "New Tests per 1k"
+msgstr ""
+
+#: ../utils/embeds.py:181
+msgid "New Tests per 1k (7d avg)"
+msgstr ""
+
+#: ../utils/embeds.py:182
+msgid "Tests Per Case"
+msgstr ""
+
+#: ../utils/embeds.py:183
+msgid "Test Positivity Rate"
+msgstr ""
+
+#: ../utils/embeds.py:187
+msgid "Total Vaccinations"
+msgstr ""
+
+#: ../utils/embeds.py:188
+msgid "Total Vaccinations per 100"
+msgstr ""
+
+#: ../utils/embeds.py:189
+msgid "New Vaccinations"
+msgstr ""
+
+#: ../utils/embeds.py:190
+msgid "New Vaccinations per 1m"
+msgstr ""
+
+#: ../utils/embeds.py:195
+msgid "Population Density (km^2)"
+msgstr ""
+
+#: ../utils/embeds.py:196
+msgid "Median Age"
+msgstr ""
+
+#: ../utils/embeds.py:197
+#, python-format
+msgid "% of population 65+"
+msgstr ""
+
+#: ../utils/embeds.py:198
+#, python-format
+msgid "% of population 70+"
+msgstr ""
+
+#: ../utils/embeds.py:199
+msgid "GDP per person (USD$)"
+msgstr ""
+
+#: ../utils/embeds.py:200
+#, python-format
+msgid "% in extreme poverty"
+msgstr ""
+
+#: ../utils/embeds.py:201
+msgid "Cardiovascular Event Death Rate"
+msgstr ""
+
+#: ../utils/embeds.py:202
+#, python-format
+msgid "% of population with diabetes"
+msgstr ""
+
+#: ../utils/embeds.py:203
+#, python-format
+msgid "% of women that smoke"
+msgstr ""
+
+#: ../utils/embeds.py:204
+#, python-format
+msgid "% of men that smoke"
+msgstr ""
+
+#: ../utils/embeds.py:205
+#, python-format
+msgid "% of the population with access to handwashing facilities"
+msgstr ""
+
+#: ../utils/embeds.py:206
+msgid "Hospital beds per 1,000 people"
+msgstr ""
+
+#: ../utils/embeds.py:207
+msgid "Life expectancy"
+msgstr ""
+
+#: ../utils/embeds.py:208
+msgid "Human Development Index"
+msgstr ""
+
+#: ../utils/embeds.py:229
+msgid "COVID-19 Stats for {0}"
+msgstr ""
+
+#: ../utils/embeds.py:240
+msgid "COVID-19 Hospital Stats for {0}"
+msgstr ""
+
+#: ../utils/embeds.py:251
+msgid "COVID-19 Test Stats for {0}"
+msgstr ""
+
+#: ../utils/embeds.py:262
+msgid "COVID-19 Vaccination Stats for {0}"
+msgstr ""
+
+#: ../utils/embeds.py:273
+msgid "General Stats for {0}"
+msgstr ""
+
+#: ../utils/embeds.py:291
+msgid "Country List"
+msgstr ""
+
+#: ../utils/embeds.py:292
+msgid ""
+"Use either the country name, or the ISO2/ISO3 code when getting stats "
+"with `/covid <name>`!"
+msgstr ""
+
