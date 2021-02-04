@@ -657,7 +657,8 @@ class AutoUpdaterCog(Cog):
                     msg1 = None
                     break
                 else:
-                    msg1 = await channel.send("\u0000")
+                    # discord DOES accept empty strings... until you load it up in your IDE
+                    msg1 = await channel.send("​")
                     ctx = await self.bot.get_context(msg1, cls=MyContext)
                 if updater.type == AutoupdateTypes.world:
                     msg_to_send = await autoupdater.world(ctx)
