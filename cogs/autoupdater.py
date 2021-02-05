@@ -643,7 +643,6 @@ class AutoUpdaterCog(Cog):
         await self.bot.wait_until_ready()
 
     async def run_updates_in_channels(self, channels: List[list]):
-        """"""
         for channel_data in channels:
             updater: AutoupdaterData = channel_data[0]
             channel: discord.TextChannel = channel_data[1]
@@ -664,12 +663,15 @@ class AutoUpdaterCog(Cog):
                 updater.last_updated = now
             country = updater.country_name
             msg_to_send: Optional[Dict[str, Any]] = None
+            self.bot.logger.debug(f"Updater {updater.id} in {updater.discord_id} is updating for {country}, and firing "
+                                  f"every {updater.last_updated} seconds, and type is {updater.type}")
             try:
                 async for msg in channel.history(limit=1):
                     ctx = await self.bot.get_context(msg, cls=MyContext)
                     msg1 = None
                     break
                 else:
+                    self.bot.logger.debug(f"Updater {updater.id} has no messages in channel, sending one")
                     # discord DOES accept empty strings... until you load it up in your IDE
                     msg1 = await channel.send("​")
                     ctx = await self.bot.get_context(msg1, cls=MyContext)
