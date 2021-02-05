@@ -291,6 +291,42 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
                           friendly_country_name, human_update_time))
 
+    @autoupdate.command(name="province")
+    async def _province(self, ctx: MyContext, delay: ShortTime, province: str):
+        _ = await ctx.get_translate_function()
+
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+            return
+
+        info = await self.bot.jhucsse_api.try_to_get_name()
+        if info is None:
+            await ctx.reply(_("❌ Failed to find a province with that name! Make sure it is correct."))
+        elif info[0] == "province":
+            iso2_code = friendly_country_name = province
+        else:
+            cmd_usage = "{0}autoupdate {1} {2}".format(ctx.prefix, info[0], '' if info[0] != 'world' else province)
+            await ctx.reply(_("I found a {0} instead of a province! You can try `{1}` instead.", info[0], cmd_usage))
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True, country_name=iso2_code, delay=update_delay,
+                                  discord_id=ctx.channel.id, type=AutoupdateTypes.province)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
+                          friendly_country_name, human_update_time))
+
     @autoupdate.command(name="state")
     async def _state(self, ctx: MyContext, delay: ShortTime, state: str):
         """
@@ -307,7 +343,7 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
             return
 
         info = await self.bot.worldometers_api.try_to_get_name()
@@ -334,9 +370,9 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
                           friendly_country_name, human_update_time))
 
-    """
-    GRAPHS COMMANDS
-    """
+    ###################
+    # Graphs Commands #
+    ###################
 
     @autoupdate.group(name="graphs", aliases=["graph"])
     async def _graph(self, ctx: MyContext):
@@ -683,6 +719,8 @@ class AutoUpdaterCog(Cog):
                     msg_to_send = await autoupdater.country(ctx, country)
                 elif updater.type == AutoupdateTypes.state:
                     msg_to_send = await autoupdater.state(ctx, country)
+                elif updater.type == AutoupdateTypes.province:
+                    msg_to_send = await autoupdater.province(ctx, country)
                 elif updater.type == AutoupdateTypes.graph:
                     msg_to_send = await autoupdater.graph(ctx, country)
                 await channel.send(**msg_to_send)
