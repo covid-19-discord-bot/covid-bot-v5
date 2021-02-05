@@ -27,3 +27,6 @@ https://allcontributors.org/docs/en/emoji-key
 | DarkCommander#8409                | 🐛🤔💬📓       |
 | Gogeta#3657                       | 🐛            |
 | Rated the Realistic Reindeer#5076 | 🐛🤔           |
+
+### Windows Support
+No.
