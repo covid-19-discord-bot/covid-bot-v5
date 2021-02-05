@@ -377,7 +377,9 @@ class AutoUpdaterCog(Cog):
     @autoupdate.command(name="maps", aliases=["map"])
     async def _maps(self, ctx: MyContext, delay: ShortTime, map_type: str):
         """
-
+        Enable autoupdaters for maps. This requires two vote credits to enable any of them.
+        delay is a human-readable time like 12h for 12 hours or 15m for 15 minutes.
+        map_type should be one of the map types under `map types`
         """
         _ = await ctx.get_translate_function()
 
