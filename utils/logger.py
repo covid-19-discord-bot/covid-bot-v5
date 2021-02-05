@@ -1,10 +1,17 @@
 import logging
 import typing
-
+from pythonjsonlogger import jsonlogger
 import discord
 
 
 def init_logger() -> logging.Logger:
+    # Set root logger to log to file as JSON
+    logger = logging.getLogger()
+    log_handler = logging.FileHandler(filename='/tmp/covid_bot/log1.json')
+    formatter = jsonlogger.JsonFormatter()
+    log_handler.setFormatter(formatter)
+    logger.addHandler(log_handler)
+
     # Create the logger
 
     base_logger = logging.getLogger("matchmaking")
@@ -115,6 +122,7 @@ def init_logger() -> logging.Logger:
             import ctypes
             ctypes.windll.kernel32.SetConsoleTextAttribute(self._outhdl, code)
 
+        # noinspection SpellCheckingInspection
         def __init__(self, stream=None):
             logging.StreamHandler.__init__(self, stream)
             # get file handle for the stream
@@ -124,6 +132,7 @@ def init_logger() -> logging.Logger:
             if not crtname:
                 crtname = ctypes.util.find_library("msvcrt")
             crtlib = ctypes.cdll.LoadLibrary(crtname)
+            # noinspection PyProtectedMember
             self._outhdl = crtlib._get_osfhandle(self.stream.fileno())
 
         def emit(self, record):
@@ -157,6 +166,9 @@ def init_logger() -> logging.Logger:
     discord_steam_handler.setLevel(logging.INFO)
     discord_steam_handler.setFormatter(discord_formatter)
     discord_logger.addHandler(discord_steam_handler)
+
+    # override all changes made above and force debug
+    logger.setLevel(logging.DEBUG)
 
     return base_logger
 
