@@ -370,6 +370,43 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
                           friendly_country_name, human_update_time))
 
+    #################
+    # Maps Commands #
+    #################
+
+    @autoupdate.command(name="maps", aliases=["map"])
+    async def _maps(self, ctx: MyContext, delay: ShortTime, map_type: str):
+        """
+
+        """
+        _ = await ctx.get_translate_function()
+
+        if map_type.lower() not in self.bot.maps_api.get_map_names():
+            await ctx.reply(_("The map type must exactly match one of the following:\n`{0}`",
+                              "` `".join(self.bot.maps_api.get_map_names())))
+            return
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+            return
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True, country_name=map_type.lower(), delay=update_delay,
+                                  discord_id=ctx.channel.id, type=AutoupdateTypes.map)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting a map for {0} in this channel every {1}.",
+                          map_type.replace("_", " ").title(), human_update_time))
+
     ###################
     # Graphs Commands #
     ###################
@@ -723,6 +760,8 @@ class AutoUpdaterCog(Cog):
                     msg_to_send = await autoupdater.province(ctx, country)
                 elif updater.type == AutoupdateTypes.graph:
                     msg_to_send = await autoupdater.graph(ctx, country)
+                elif updater.type == AutoupdateTypes.map:
+                    msg_to_send = await autoupdater.maps()
                 await channel.send(**msg_to_send)
                 if msg1:
                     await msg1.delete()

@@ -22,6 +22,7 @@ class AutoupdateTypes(enum.IntEnum):
     province = 5
     custom = 6
     graph = 7
+    map = 8
 
 
 class DiscordGuild(Model):

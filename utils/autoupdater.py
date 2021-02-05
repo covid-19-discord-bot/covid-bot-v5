@@ -13,7 +13,7 @@ from utils import embeds, graphs
 from utils.async_helpers import wrap_in_async
 from utils.ctx_class import MyContext
 from utils.caching import TTLCache
-
+from utils.maps import map_identifiers
 
 graph_cache = TTLCache(82800)
 
@@ -88,3 +88,15 @@ async def graph(ctx: MyContext, name: str):
                         format(round(tt / 1000000000, 1), ","), format(tt, ","), "HIT" if cache_hit else "MISS"))
     e.set_image(url="attachment://image.png")
     return {"embed": e, "file": f}
+
+
+async def maps(ctx: MyContext, name: str):
+    _ = await ctx.get_translate_function()
+    map_embed = discord.Embed(title=_("Map for {0}", map_identifiers[name][1]))
+    try:
+        map_buffer = await wrap_in_async(ctx.bot.maps_api.get_map, name, thread_pool=True)
+    except KeyError:
+        return {"content": _("Bot still setting up...")}
+    img_file = discord.File(map_buffer, filename="map.png")
+    map_embed.set_image(url="attachment://map.png")
+    return {"embed": map_embed, "file": img_file}
