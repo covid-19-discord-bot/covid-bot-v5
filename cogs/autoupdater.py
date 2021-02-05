@@ -36,7 +36,8 @@ class AutoUpdaterCog(Cog):
         self.push_auto_updates.cancel()
 
     async def do_initial_checks(self, ctx: MyContext, db_guild: DiscordGuild, db_channel: DiscordChannel,
-                                delta_seconds: int, _: Callable, *, requires_vote: bool = False):
+                                delta_seconds: int, _: Callable, *, requires_vote: bool = False,
+                                min_delay: int = 0):
         await db_channel.fetch_related("autoupdater")
 
         if len(db_channel.autoupdater) + 1 > db_guild.total_updaters:
@@ -51,6 +52,10 @@ class AutoUpdaterCog(Cog):
         if delta_seconds > 31536000:
             await ctx.reply(_("❌ Did you really try to set the autoupdater delay to more than a year? Oi. "
                               "Anyways, that isn't allowed. Try again with a more reasonable delay."))
+            return False
+
+        if delta_seconds < min_delay:
+            await ctx.reply(_("You can't set the updater delay to fewer than {0} seconds!", format(min_delay, ",")))
             return False
 
         if delta_seconds > 86400 and not db_guild.overtime_confirmed:
@@ -329,6 +334,10 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting stats for {0} in this channel every {1}.",
                           friendly_country_name, human_update_time))
 
+    """
+    GRAPHS COMMANDS
+    """
+
     @autoupdate.group(name="graphs", aliases=["graph"])
     async def _graph(self, ctx: MyContext):
         """
@@ -352,7 +361,8 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True,
+                                            min_delay=82800):
             return
 
         update_delay = delta_seconds
@@ -384,7 +394,8 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True,
+                                            min_delay=82800):
             return
 
         info = await self.bot.jhucsse_api.try_to_get_name(country)
@@ -431,7 +442,8 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True,
+                                            min_delay=82800):
             return
 
         info = await self.bot.jhucsse_api.try_to_get_name(province)
@@ -476,7 +488,8 @@ class AutoUpdaterCog(Cog):
         db_guild = await get_from_db(ctx.guild)
         db_channel = await get_from_db(ctx.channel)
 
-        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True,
+                                            min_delay=82800):
             return
 
         info = await self.bot.jhucsse_api.try_to_get_name(state)
