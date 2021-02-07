@@ -54,7 +54,7 @@ async def province(ctx: MyContext, name: str):
 async def custom(ctx: MyContext, custom_str: str):
     custom_updater = ctx.bot.custom_updater_helper
     try:
-        custom_str = await custom_updater.parse(custom_str)
+        custom_str = custom_updater.parse(custom_str)
     except InvalidKeyError as e:
         _ = await ctx.get_translate_function()
         return {"content": _("Invalid key ({0}) found in the updater, requires fixing!", str(e))}
