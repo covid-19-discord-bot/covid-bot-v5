@@ -1,7 +1,4 @@
 # coding=utf-8
-from utils.bot_class import MyBot
-
-
 class CustomParserError(Exception):
     pass
 
@@ -29,7 +26,7 @@ class CustomUpdater:
                        lambda x: ["tests million",     x["testsPerOneMillion"]],
                        ]
 
-    def __init__(self, bot: MyBot):
+    def __init__(self, bot: "MyBot"):
         self.bot = bot
         self.data_dict = {}
 
