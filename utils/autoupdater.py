@@ -58,6 +58,10 @@ async def custom(ctx: MyContext, custom_str: str):
     except InvalidKeyError as e:
         _ = await ctx.get_translate_function()
         return {"content": _("Invalid key ({0}) found in the updater, requires fixing!", str(e))}
+    except AttributeError:
+        await ctx.bot.async_setup()
+        _ = await ctx.get_translate_function()
+        return {"content": _("Bot not set up!")}
     else:
         return {"content": custom_str}
 
