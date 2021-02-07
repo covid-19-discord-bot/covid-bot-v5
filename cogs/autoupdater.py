@@ -228,6 +228,7 @@ class AutoUpdaterCog(Cog):
         if info is None:
             cmd_usage = "`{0}list continent`".format(ctx.prefix)
             await ctx.reply(_("❌ Failed to get a continent name! {0} will show you a list of continents.", cmd_usage))
+            return
         elif info[0] == "continent":
             iso2_code = friendly_country_name = continent
         else:
