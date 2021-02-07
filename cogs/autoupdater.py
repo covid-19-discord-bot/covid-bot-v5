@@ -595,6 +595,54 @@ class AutoUpdaterCog(Cog):
         await ctx.reply(_("✅ Posting a {0} graph for {1} in this channel every {2}.",
                           _("logarithmic") if logarithmic else _("linear"), friendly_country_name, human_update_time))
 
+    #
+    #
+    #
+
+    @autoupdate.command(name="custom")
+    async def _custom(self, ctx: MyContext, delay: ShortTime, *, custom: str):
+        """
+        Enable autoupdaters for maps. This requires two vote credits to enable any of them.
+        delay is a human-readable time like 12h for 12 hours or 15m for 15 minutes.
+        map_type should be one of the map types under `map types`
+        """
+        _ = await ctx.get_translate_function()
+
+        example = self.bot.custom_updater_helper.parse(custom)  # exception will be raised to the global error handlers
+        delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
+        human_update_time = human_timedelta(delay.dt)
+
+        db_guild = await get_from_db(ctx.guild)
+        db_channel = await get_from_db(ctx.channel)
+
+        if not await self.do_initial_checks(ctx, db_guild, db_channel, delta_seconds, _, requires_vote=True):
+            return
+
+        def check(m: discord.Message):
+            return ctx.author.id == m.author.id and ctx.channel.id == m.channel.id and m.content.lower() == "ok"
+
+        msg = await ctx.reply(_("Your custom updater will look like the following:\n{0}\nType {1} within 15 seconds to "
+                                "confirm.", example, "`ok`"))
+        try:
+            await self.bot.wait_for("message", check=check, timeout=15)
+        except asyncio.TimeoutError:
+            await msg.edit(content=_("Timed out. Rerun this command to try again."))
+            return
+        else:
+            await msg.delete()
+
+        update_delay = delta_seconds
+        ad_data = AutoupdaterData(already_set=True, country_name=example, delay=update_delay,
+                                  discord_id=ctx.channel.id, type=AutoupdateTypes.custom)
+        await ad_data.save()
+        db_guild.used_updaters += 1
+        db_guild.total_updaters -= 1
+        await db_guild.save()
+        await db_channel.autoupdater.add(ad_data)
+        await db_channel.save()
+
+        await ctx.reply(_("✅ Posting a custom updater in this channel every {0}.", human_update_time))
+
     #######################
     # Manglement Commands #
     #######################
