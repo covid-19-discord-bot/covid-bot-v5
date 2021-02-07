@@ -13,6 +13,7 @@ from utils import embeds, graphs
 from utils.async_helpers import wrap_in_async
 from utils.ctx_class import MyContext
 from utils.caching import TTLCache
+from utils.custom_updaters import InvalidKeyError
 from utils.maps import map_identifiers
 
 graph_cache = TTLCache(82800)
@@ -51,7 +52,14 @@ async def province(ctx: MyContext, name: str):
 
 
 async def custom(ctx: MyContext, custom_str: str):
-    return {"content": "not implemented"}
+    custom_updater = ctx.bot.custom_updater_helper
+    try:
+        custom_str = await custom_updater.parse(custom_str)
+    except InvalidKeyError as e:
+        _ = await ctx.get_translate_function()
+        return {"content": _("Invalid key ({0}) found in the updater, requires fixing!", str(e))}
+    else:
+        return {"content": custom_str}
 
 
 async def graph(ctx: MyContext, name: str):

@@ -13,6 +13,7 @@ from discord.ext import commands
 import statcord
 from utils import config as config, news
 from utils.ctx_class import MyContext
+from utils.custom_updaters import CustomUpdater
 from utils.logger import FakeLogger
 from utils.models import get_from_db
 from utils import api as covid19api
@@ -56,6 +57,7 @@ class MyBot(AutoShardedBot):
         self._jhucsse_api = covid19api.Covid19JHUCSSEStats()
         self.news_api = news.NewsAPI(self.config["auth"]["news_api"]["token"])
         self._owid_api = covid19api.OWIDData()
+        self.custom_updater_helper: Optional[CustomUpdater] = None
         self._client_session: Optional[aiohttp.ClientSession] = None
         self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
         self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
@@ -136,6 +138,11 @@ class MyBot(AutoShardedBot):
                     await wrap_in_async(self._map_client.initalize_firefox, thread_pool=True)
         except Exception as e:
             self.logger.exception("Fatal error while initializing Firefox!", exception_instance=e)
+        try:
+            self.custom_updater_helper = CustomUpdater(self)
+            await self.custom_updater_helper.setup()
+        except Exception as e:
+            self.logger.exception("Fatal error while initializing the custom updater!", exception_instance=e)
 
     async def on_message(self, message: discord.Message):
         if not self.is_ready():

@@ -9,10 +9,11 @@ from babel import dates
 from discord.ext import commands
 
 import utils
-from utils import checks
+from utils import checks, api
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
+from utils.custom_updaters import InvalidKeyError
 from utils.interaction import escape_everything
 
 
@@ -31,7 +32,7 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
                f"ID: `{ctx.message.id}`\n\n" \
                f"Author details:\n" \
                f"ID: `{ctx.author.id}`\n" \
-               f"Name: `{str(ctx.author)}`"  # Quick way to get name#disc
+               f"Name: `{str(ctx.author)}`"
         sentry_sdk.set_context("user", {"repr": repr(ctx.author), "id": ctx.author.id,
                                         "name": str(ctx.author)})
         sentry_sdk.set_context("channel", {"repr": repr(ctx.channel), "id": ctx.channel.id})
@@ -48,6 +49,7 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
     error_embed.add_field(name="Exception Traceback", value=tb if len(tb) < 1024 else "Too long!")
     sentry_sdk.capture_exception(exc)
     await error_channel.send(embed=error_embed)
+    sentry_sdk.set_context()
 
 
 class CommandErrorHandler(Cog):
@@ -209,9 +211,13 @@ class CommandErrorHandler(Cog):
                     message = _("The bot's still setting up, please wait a few minutes and try again!")
                 elif isinstance(exception.original, discord.errors.NotFound):
                     message = _("I can't find your original message, Discord may be having issues! Try again.")
-                elif isinstance(exception.original, utils.api.NoDataAvailable):
+                elif isinstance(exception.original, api.NoDataAvailable):
                     message = _("No data is available at the moment. Wait a few moments. **Spamming this command will "
                                 "result in a temporary ban!**")
+                elif isinstance(exception.original, InvalidKeyError):
+                    message = _("A invalid key was found. If you want to use `{` and `}`, make sure you escape them by "
+                                "using two brackets instead of one. If you don't, make sure the values are correct."
+                                "{0}", exception.original.__str__())
                 else:
                     message = _("There was an error running the specified command‽ This error has been logged.")    
                     # we want the original instead of the CommandError one
