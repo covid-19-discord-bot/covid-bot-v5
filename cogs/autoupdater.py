@@ -813,6 +813,8 @@ class AutoUpdaterCog(Cog):
                     msg_to_send = await autoupdater.graph(ctx, country)
                 elif updater.type == AutoupdateTypes.map:
                     msg_to_send = await autoupdater.maps(ctx, country)
+                elif updater.type == AutoupdateTypes.custom:
+                    msg_to_send = await autoupdater.custom(ctx, country)
                 await channel.send(**msg_to_send)
                 if msg1:
                     await msg1.delete()
