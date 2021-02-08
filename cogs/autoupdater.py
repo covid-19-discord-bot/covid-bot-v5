@@ -18,7 +18,7 @@ import utils.embeds as embeds
 from utils import autoupdater
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-from utils.custom_updaters import InvalidKeyError
+from utils.custom_updaters import InvalidKeyError, CustomUpdater
 from utils.human_time import ShortTime, human_timedelta, FutureTime
 from utils.models import get_from_db, DiscordChannel, AutoupdaterData, DiscordGuild, AutoupdateTypes
 
@@ -613,7 +613,8 @@ class AutoUpdaterCog(Cog):
             example = self.bot.custom_updater_helper.parse(custom)
         except AttributeError:
             msg = await ctx.reply(_("Please wait, setting up..."))
-            await self.bot.async_setup()
+            self.custom_updater_helper = CustomUpdater(self.bot)
+            await self.custom_updater_helper.setup()
             await msg.edit(content=_("Resend your command again!"))
             return
         except InvalidKeyError as e:
