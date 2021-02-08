@@ -18,6 +18,7 @@ import utils.embeds as embeds
 from utils import autoupdater
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
+from utils.custom_updaters import InvalidKeyError
 from utils.human_time import ShortTime, human_timedelta, FutureTime
 from utils.models import get_from_db, DiscordChannel, AutoupdaterData, DiscordGuild, AutoupdateTypes
 
@@ -608,7 +609,12 @@ class AutoUpdaterCog(Cog):
         """
         _ = await ctx.get_translate_function()
 
-        example = self.bot.custom_updater_helper.parse(custom)  # exception will be raised to the global error handlers
+        try:
+            example = self.bot.custom_updater_helper.parse(custom)
+        except InvalidKeyError as e:
+            await ctx.reply(_("There was a invalid key in your updater: `{0}`. Either escape it with two brackets or "
+                              "remove it.", e.key))
+            return
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
         human_update_time = human_timedelta(delay.dt)
 
