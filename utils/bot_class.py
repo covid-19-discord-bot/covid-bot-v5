@@ -162,7 +162,8 @@ class MyBot(AutoShardedBot):
                              "`/`. This can be changed with `/settings prefix <new prefix>`, replacing <new prefix> "
                              "with the prefix you want. For a list of my commands, run `/help`."))
         elif ctx.prefix is not None:
-            await self.invoke(ctx)
+            async with ctx.typing():
+                await self.invoke(ctx)
 
     async def on_command(self, ctx: MyContext):
         if self.blackfire:
