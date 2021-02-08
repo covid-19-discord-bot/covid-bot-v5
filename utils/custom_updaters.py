@@ -41,8 +41,11 @@ class CustomUpdater:
         for i in ["global"] + [j["iso2"] for j in self.bot.worldometers_api.iso_codes]:
             for j in self.wom_updater_gen:
                 if i == "global":
-                    j = j(await self.bot.worldometers_api.get_global_stats())
+                    data = await self.bot.worldometers_api.get_global_stats()
                 else:
-                    j = j(await self.bot.worldometers_api.get_country_stats(i))
+                    data = await self.bot.worldometers_api.get_country_stats(i)
+                if data is None:
+                    continue
+                j = j(data)
                 # noinspection SpellCheckingInspection
                 d[f"covid worldometers {j[0]}"] = str(j[1])
