@@ -618,8 +618,9 @@ class AutoUpdaterCog(Cog):
             await msg.edit(content=_("Resend your command again!"))
             return
         except InvalidKeyError as e:
-            await ctx.reply(_("There was a invalid key in your updater: `{0}`. Either escape it with two brackets or "
-                              "remove it.", e.key))
+            # five brackets, twice escapes once, so need two of those, and the 5th makes it a placeholder as normal
+            await ctx.reply(_("There was a invalid key in your updater: `{0}`. Either escape it with two brackets "
+                              "(like so: {{{{{0}}}}}) or remove it.", e.key))
             return
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
         human_update_time = human_timedelta(delay.dt)
