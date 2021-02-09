@@ -14,6 +14,9 @@ https://covid19.imaskeleton.me
 Have fun!
 
 No, really: all you need to do is `git clone` the repo, set up a database, add it to the config (can find a example config in paris-ci/discord.py-boilerplate), and run `main.py`.
+### Windows Support
+No.
+
 
 ## Contributors
 https://allcontributors.org/docs/en/emoji-key
@@ -28,5 +31,3 @@ https://allcontributors.org/docs/en/emoji-key
 | Gogeta#3657                       | 🐛            |
 | Rated the Realistic Reindeer#5076 | 🐛🤔           |
 
-### Windows Support
-No.
