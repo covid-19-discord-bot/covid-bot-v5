@@ -62,7 +62,7 @@ class MyBot(AutoShardedBot):
         self.basic_process_pool = concurrent.futures.ProcessPoolExecutor(2)
         self.premium_process_pool = concurrent.futures.ProcessPoolExecutor(4)
         self.statcord: Optional[statcord.Client] = None
-        self._map_client: Optional[MapGetter] = None
+        self.maps_api: Optional[MapGetter] = None
         self.support_server_invite = "https://discord.gg/myJh5hkjpS"
         self.autoupdater_dump: asyncio.Queue = asyncio.Queue(maxsize=1)
         self.blackfire: bool = blackfire
@@ -105,13 +105,6 @@ class MyBot(AutoShardedBot):
         else:
             raise _runtime_error
 
-    @property
-    def maps_api(self):
-        if self._map_client.set_up:
-            return self._map_client
-        else:
-            raise _runtime_error
-
     def reload_config(self):
         self.config = config.load_config()
 
@@ -132,10 +125,9 @@ class MyBot(AutoShardedBot):
         except Exception as e:
             self.logger.exception("Fatal general error while running initial update!", exception_instance=e)
         try:
-            if not self._map_client:
-                self._map_client = MapGetter("/home/pi/covid_bot_beta/maps")
-                if not self._map_client.set_up:
-                    await wrap_in_async(self._map_client.initalize_firefox, thread_pool=True)
+            if not self.maps_api:
+                self.maps_api = MapGetter("/home/pi/covid_bot_beta/maps")
+                await wrap_in_async(self.maps_api.initalize_firefox, thread_pool=True)
         except Exception as e:
             self.logger.exception("Fatal error while initializing Firefox!", exception_instance=e)
         try:
