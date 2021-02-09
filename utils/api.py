@@ -473,6 +473,7 @@ class Covid19StatsWorldometers:
                 await _handle_client_exceptions(self, e)
                 return
             self.logger.info("Got country data! Parsing data and loading it into memory...")
+            self.iso_codes = []  # uh nice typo
             for country in data:
                 if country['countryInfo']['iso2'] is not None:
                     try:
