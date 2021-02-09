@@ -613,7 +613,7 @@ class AutoUpdaterCog(Cog):
             example = self.bot.custom_updater_helper.parse(custom)
         except AttributeError:
             self.custom_updater_helper = CustomUpdater(self.bot)
-            await self.custom_updater_helper.setup()
+            await self.custom_updater_helper.setup(self.bot)
             msg = await ctx.reply(_("Try sending your command again. If it errors out again, wait a few moments and "
                                     "then try again."))
         except InvalidKeyError as e:
