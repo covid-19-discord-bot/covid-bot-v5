@@ -609,28 +609,19 @@ class AutoUpdaterCog(Cog):
         """
         _ = await ctx.get_translate_function()
 
-        for i in range(100):
-            try:
-                example = self.bot.custom_updater_helper.parse(custom)
-            except AttributeError:
-                if i == 0:
-                    msg = await ctx.reply(_("Please wait, setting up..."))
-                else:
-                    # can be ignored here since it's created in the first iteration
-                    # noinspection PyUnresolvedReferences
-                    await msg.edit(content=_("Please wait, setting up..."))
-                self.custom_updater_helper = CustomUpdater(self.bot)
-                await self.custom_updater_helper.setup()
-                await msg.edit(content=_("Resend your command again!"))
-            except InvalidKeyError as e:
-                # five brackets, twice escapes once, so need two of those, and the 5th makes it a placeholder as normal
-                await ctx.reply(_("There was a invalid key in your updater: `{0}`. Either escape it with two brackets "
-                                  "(like so: {{{{{0}}}}}) or remove it.\n"
-                                  "If you need help finding the correct key, see "
-                                  "https://wiki.covid19.imaskeleton.me/index.php?title=Custom_Updaters.", e.key))
-                return
-            else:
-                break
+        try:
+            example = self.bot.custom_updater_helper.parse(custom)
+        except AttributeError:
+            self.custom_updater_helper = CustomUpdater(self.bot)
+            await self.custom_updater_helper.setup()
+            msg = await ctx.reply(_("Try sending your command again. If it errors out again, wait a few moments."))
+        except InvalidKeyError as e:
+            # five brackets, twice escapes once, so need two of those, and the 5th makes it a placeholder as normal
+            await ctx.reply(_("There was a invalid key in your updater: `{0}`. Either escape it with two brackets "
+                              "(like so: {{{{{0}}}}}) or remove it.\n"
+                              "If you need help finding the correct key, see "
+                              "https://wiki.covid19.imaskeleton.me/index.php?title=Custom_Updaters.", e.key))
+            return
         delta_seconds = int(abs((datetime.datetime.utcnow() - delay.dt).total_seconds()))
         human_update_time = human_timedelta(delay.dt)
 
