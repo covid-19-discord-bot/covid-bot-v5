@@ -713,7 +713,7 @@ class AutoUpdaterCog(Cog):
         Lists all autoupdaters in this channel.
         """
         _ = await ctx.get_translate_function()
-        cmd_usage = "{0}autoupdate disable <id>".format(ctx.prefix)
+        cmd_usage = f"{ctx.prefix}autoupdate disable <id>"
         update_embed = discord.Embed(title=_("List of Updaters"),
                                      description=_("To disable one of these updaters, run {0}, replacing {1} with the "
                                                    "ID.", cmd_usage, "`<id>`"))
