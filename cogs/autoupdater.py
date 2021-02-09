@@ -613,9 +613,9 @@ class AutoUpdaterCog(Cog):
             example = self.bot.custom_updater_helper.parse(custom)
         except AttributeError:
             self.custom_updater_helper = CustomUpdater(self.bot)
-            await self.custom_updater_helper.setup(self.bot)
-            msg = await ctx.reply(_("Try sending your command again. If it errors out again, wait a few moments and "
-                                    "then try again."))
+            await self.custom_updater_helper.setup()
+            await ctx.reply(_("Try sending your command again. If it errors out again, wait a few moments and then try "
+                              "again."))
         except InvalidKeyError as e:
             # five brackets, twice escapes once, so need two of those, and the 5th makes it a placeholder as normal
             await ctx.reply(_("There was a invalid key in your updater: `{0}`. Either escape it with two brackets "

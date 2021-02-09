@@ -41,18 +41,13 @@ class CustomUpdater:
         except KeyError as e:
             raise InvalidKeyError(e.args[0]) from None
 
-    async def setup(self, bot: Optional["MyBot"] = None):
-        log_channel: Optional[TextChannel] = None
-        if bot:
-            log_channel = bot.get_channel(796093696374079519)
+    async def setup(self):
         d = self.data_dict
         for i in ["global"] + [j["iso2"].upper() for j in self.bot.worldometers_api.iso_codes]:
-            await log_channel.send(i)
             if i == "global":
                 data = await self.bot.worldometers_api.get_global_stats()
             else:
                 data = await self.bot.worldometers_api.get_country_stats(i)
-            await log_channel.send(str(i))
             if data is None:
                 continue
             for j in self.wom_updater_gen:
