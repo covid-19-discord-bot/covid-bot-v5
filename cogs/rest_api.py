@@ -2,15 +2,18 @@
 """
 All credit to Eyesofcreeper#0001, i just changed it up a little
 """
+import asyncio
 import datetime
 import json
 from datetime import datetime
+from typing import Dict
 
 import aiohttp_cors
 import discord
 import tortoise
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest, HTTPInternalServerError
+from discord.ext import tasks
 
 from utils.cog_class import Cog
 from utils.models import get_from_db, DiscordUser
@@ -40,6 +43,8 @@ class RestAPI(Cog):
         self.runner = web.AppRunner(self.app, access_log=self.bot.logger.logger)
         self.site = None
         self.bot.reload_config()
+        self.user_callbacks: Dict[int, asyncio.Task] = {}
+        self.done_user_callbacks: Dict[int, asyncio.Task] = {}
         bot.loop.create_task(self.run())
 
     def cog_unload(self):
@@ -71,6 +76,7 @@ class RestAPI(Cog):
 
     async def add_votes(self, request: web.Response):
         await self.authenticate_request(request)
+        # noinspection PyCallingNonCallable
         data = json.loads(await request.text())
         self.bot.logger.info(f"Vote Request: {data}")
         user = await self.bot.fetch_user(data["user"])
@@ -85,11 +91,45 @@ class RestAPI(Cog):
         db_user.updater_credits += votes
         await db_user.save()
         try:
-            await user.send("Thank you for voting! You got {0} credit{1}".
-                            format(votes, "s (+1 for weekend bonus)." if data["isWeekend"] else "."))
+            msg = "Thank you for voting! You got "
+            if data["isWeekend"]:
+                msg += "2 credits (+1 for weekend bonus)."
+            else:
+                msg += "1 credit."
+            msg += " I'll remind you to vote again in 12 hours."
+            await user.send(msg)
         except discord.DiscordException:
             pass  # we don't care about any discord exceptions
+
+        task = asyncio.create_task(self.vote_reminder(user))
+        self.user_callbacks[user.id] = task
+
         return web.json_response({"result": "ok"})
+
+    async def vote_reminder(self, user: discord.User):
+        await asyncio.sleep(86460)
+        e = discord.Embed(title="Vote Reminder", description="Hi there {0}! It's been 12 hours since you voted, and "
+                                                             "this is a friendly reminder to do so again! Here's the "
+                                                             "link: https://top.gg/bot/675390513020403731/vote."
+                                                             "Thanks again for using this bot.".
+                          format(user.display_name))
+        e.set_footer(text="Thanks from 0/0#0001")
+        await user.send(embed=e)
+        user_callback = self.user_callbacks.pop(user.id)
+        if isinstance(user_callback, asyncio.Task):
+            self.done_user_callbacks[user.id] = user_callback
+
+    @tasks.loop(hours=24)
+    async def await_user_callbacks(self):
+        for user_id in self.done_user_callbacks:
+            self.bot.logger.debug(f"Awaiting {user_id}'s vote callback")
+            cb = self.done_user_callbacks.pop(user_id)
+            try:
+                await cb
+            except Exception as e:
+                self.bot.logger.exception("Ignoring exception in callback.", exception_instance=e)
+            else:
+                self.bot.logger.debug("Callback awaited successfully.")
 
     async def channel_info(self, request):
         """
