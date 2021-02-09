@@ -563,7 +563,8 @@ class Covid19StatsWorldometers:
                  found, returns None.
         """
         await self._check_stats_are_valid()
-        if iso2_code not in self.country_stats:
+        iso2_code = iso2_code.upper()
+        if len(iso2_code) != 2 or iso2_code not in self.country_stats:
             iso2_code = get_iso2_code(iso2_code, self.iso_codes)
         if iso2_code not in self.country_stats:
             return None
