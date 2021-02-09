@@ -39,13 +39,13 @@ class CustomUpdater:
     async def setup(self):
         d = self.data_dict
         for i in ["global"] + [j["iso2"].upper() for j in self.bot.worldometers_api.iso_codes]:
+            if i == "global":
+                data = await self.bot.worldometers_api.get_global_stats()
+            else:
+                data = await self.bot.worldometers_api.get_country_stats(i)
+            if data is None:
+                continue
             for j in self.wom_updater_gen:
-                if i == "global":
-                    data = await self.bot.worldometers_api.get_global_stats()
-                else:
-                    data = await self.bot.worldometers_api.get_country_stats(i)
-                if data is None:
-                    continue
                 j = j(data)
                 # noinspection SpellCheckingInspection
                 d[f"covid worldometers {j[0]}"] = str(j[1])
