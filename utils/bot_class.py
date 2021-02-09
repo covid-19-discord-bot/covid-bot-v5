@@ -148,7 +148,7 @@ class MyBot(AutoShardedBot):
             return
 
         ctx: MyContext = await self.get_context(message, cls=MyContext)
-        if self.user.mentioned_in(message) and ctx.prefix is None and self.user.id in message.content:
+        if self.user.mentioned_in(message) and ctx.prefix is None and str(self.user.id) in message.content:
             _ = await ctx.get_translate_function()
             await ctx.send(_("Hi there! I'm a bot for giving live stats on the COVID-19 pandemic. My default prefix is "
                              "`/`. This can be changed with `/settings prefix <new prefix>`, replacing <new prefix> "
