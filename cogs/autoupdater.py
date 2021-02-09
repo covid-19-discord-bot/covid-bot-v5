@@ -625,7 +625,9 @@ class AutoUpdaterCog(Cog):
             except InvalidKeyError as e:
                 # five brackets, twice escapes once, so need two of those, and the 5th makes it a placeholder as normal
                 await ctx.reply(_("There was a invalid key in your updater: `{0}`. Either escape it with two brackets "
-                                  "(like so: {{{{{0}}}}}) or remove it.", e.key))
+                                  "(like so: {{{{{0}}}}}) or remove it.\n"
+                                  "If you need help finding the correct key, see "
+                                  "https://wiki.covid19.imaskeleton.me/index.php?title=Custom_Updaters.", e.key))
                 return
             else:
                 break
