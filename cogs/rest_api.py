@@ -323,7 +323,7 @@ class RestAPI(Cog):
                 channels_with_perms.append({"name": channel.name, "id": channel.id})
         else:
             for channel in guild.text_channels:
-                if channel.permissions_for(member).manage_messages:
+                if (channel.permissions_for(member).value & 0x2000) == 0x2000:
                     channels_with_perms.append({"name": channel.name, "id": channel.id})
         result["channels"] = channels_with_perms
 
