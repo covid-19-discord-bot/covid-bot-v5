@@ -6,7 +6,7 @@ import asyncio
 import datetime
 import json
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List, Union
 
 import aiohttp_cors
 import discord
@@ -298,6 +298,38 @@ class RestAPI(Cog):
         await db_user.save()
         return web.json_response({"result": "ok"})
 
+    async def get_guild_details(self, request):
+        await self.authenticate_request(request)
+        try:
+            guild: discord.Guild = self.bot.get_guild(request.match_info["guild_id"]) or \
+                                   await self.bot.fetch_guild(request.match_info["guild_id"])
+        except discord.Forbidden:
+            raise HTTPForbidden(reason="Discord raised Forbidden")
+        if not guild:
+            raise HTTPNotFound(reason="No guild with that ID found")
+        try:
+            member: discord.Member = guild.get_member(request.match_info["user_id"]) or \
+                                     await guild.fetch_member(request.match_info["user_id"])
+        except discord.Forbidden:
+            raise HTTPForbidden(reason="Discord raised Forbidden")
+        if not member:
+            raise HTTPNotFound(reason="No member with that ID found")
+
+        result = {}
+
+        channels_with_perms: List[Dict[str, Union[str, int]]] = []
+        for channel in guild.text_channels:
+            if channel.permissions_for(member).manage_messages:
+                channels_with_perms.append({"name": channel.name, "id": channel.id})
+        result["channels"] = channels_with_perms
+
+        db_guild = await get_from_db(guild)
+        result["used_credits"] = db_guild.used_updaters
+        result["total_credits"] = db_guild.total_updaters
+        result["available_credits"] = db_guild.total_updaters - db_guild.used_updaters
+
+        return web.json_response(result)
+
     async def run(self):
         await self.bot.wait_until_ready()
         listen_ip = self.config()['listen_ip']
@@ -312,6 +344,7 @@ class RestAPI(Cog):
              self.check_channel_permissions),
             ('POST', f'{route_prefix}/protected/add_votes/{{user_id:\\d+}}/', self.add_extra_votes),
             ('POST', f'{route_prefix}/votes/', self.add_votes),
+            ('GET', f'{route_prefix}/protected/guild_info/{{guild_id:\\d+}}/{{user_id:\\d+}}', self.get_guild_details)
         ]
         for route_method, route_path, route_coro in routes:
             resource = self.cors.add(self.app.router.add_resource(route_path))
