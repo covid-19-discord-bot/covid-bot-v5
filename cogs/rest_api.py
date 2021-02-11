@@ -284,6 +284,35 @@ class RestAPI(Cog):
                 channels_with_permissions.append({"name": channel.name, "id": channel.id})
         return web.json_response(channels_with_permissions)
 
+    async def check_channel_perms(self, request):
+        await self.authenticate_request(request)
+        try:
+            guild: discord.Guild = self.bot.get_guild(int(request.match_info["guild_id"]))
+            #  or await self.bot.fetch_guild(request.match_info["guild_id"])
+        except discord.Forbidden:
+            raise HTTPForbidden(reason="Discord raised Forbidden")
+        if not guild:
+            raise HTTPNotFound(reason="No guild with that ID found")
+        try:
+            member: discord.Member = guild.get_member(int(request.match_info["user_id"])) or \
+                                     await guild.fetch_member(int(request.match_info["user_id"]))
+        except discord.Forbidden:
+            raise HTTPForbidden(reason="Discord raised Forbidden")
+        if not member:
+            raise HTTPNotFound(reason="No member with that ID found")
+
+        try:
+            channel: discord.TextChannel = guild.get_channel(int(request.match_info["channel_id"]))
+        except discord.Forbidden:
+            raise HTTPForbidden(reason="Discord raised Forbidden")
+        if not channel or not isinstance(channel, discord.TextChannel):
+            raise HTTPNotFound(reason="No text channel with that ID found")
+
+        if channel.permissions_for(member).manage_messages:
+            return web.json_response({"result": "ok"})
+        else:
+            return web.json_response({"result": "missing_permissions"})
+
     async def add_extra_votes(self, request):
         await self.authenticate_request(request)
         try:
@@ -351,7 +380,9 @@ class RestAPI(Cog):
              self.check_channel_permissions),
             ('POST', f'{route_prefix}/protected/add_votes/{{user_id:\\d+}}/', self.add_extra_votes),
             ('POST', f'{route_prefix}/votes/', self.add_votes),
-            ('GET', f'{route_prefix}/protected/guild_info/{{guild_id:\\d+}}/{{user_id:\\d+}}', self.get_guild_details)
+            ('GET', f'{route_prefix}/protected/guild_info/{{guild_id:\\d+}}/{{user_id:\\d+}}', self.get_guild_details),
+            ('GET', f'{route_prefix}/protected/user_perms/{{guild_id:\\d+}}/{{channel_id:\\d+}}/{{user_id:\\d+}}',
+             self.check_channel_perms),
         ]
         for route_method, route_path, route_coro in routes:
             resource = self.cors.add(self.app.router.add_resource(route_path))
