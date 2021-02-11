@@ -317,14 +317,15 @@ class RestAPI(Cog):
 
         result = {}
 
-        channels_with_perms: List[Dict[str, Union[str, int]]] = []
-        if guild.owner_id == int(request.match_info["user_id"]):
+        channels_with_perms: List[Dict[str, Union[str, int]]]
+        if guild.owner_id == member.id:
             channels_with_perms = [{"name": channel.name, "id": channel.id}
                                    for channel in guild.channels]
         else:
             channels_with_perms = [{"name": channel.name, "id": channel.id}
                                    for channel in guild.channels if channel.permissions_for(member).manage_messages]
         result["channels"] = channels_with_perms
+        print(channels_with_perms)
 
         db_guild = await get_from_db(guild)
         result["used_credits"] = db_guild.used_updaters
