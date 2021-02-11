@@ -301,15 +301,15 @@ class RestAPI(Cog):
     async def get_guild_details(self, request):
         await self.authenticate_request(request)
         try:
-            guild: discord.Guild = self.bot.get_guild(request.match_info["guild_id"])
+            guild: discord.Guild = self.bot.get_guild(int(request.match_info["guild_id"]))
             #  or await self.bot.fetch_guild(request.match_info["guild_id"])
         except discord.Forbidden:
             raise HTTPForbidden(reason="Discord raised Forbidden")
         if not guild:
             raise HTTPNotFound(reason="No guild with that ID found")
         try:
-            member: discord.Member = guild.get_member(request.match_info["user_id"]) or \
-                                     await guild.fetch_member(request.match_info["user_id"])
+            member: discord.Member = guild.get_member(int(request.match_info["user_id"])) or \
+                                     await guild.fetch_member(int(request.match_info["user_id"]))
         except discord.Forbidden:
             raise HTTPForbidden(reason="Discord raised Forbidden")
         if not member:
