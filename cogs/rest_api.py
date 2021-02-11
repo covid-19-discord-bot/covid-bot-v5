@@ -309,7 +309,7 @@ class RestAPI(Cog):
             raise HTTPNotFound(reason="No text channel with that ID found")
 
         if channel.permissions_for(member).manage_messages:
-            return web.json_response({"result": "ok"})
+            return web.json_response({"result": "ok", "name": channel.name})
         else:
             return web.json_response({"result": "missing_permissions"})
 
