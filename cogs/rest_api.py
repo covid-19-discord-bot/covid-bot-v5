@@ -301,8 +301,8 @@ class RestAPI(Cog):
     async def get_guild_details(self, request):
         await self.authenticate_request(request)
         try:
-            guild: discord.Guild = self.bot.get_guild(request.match_info["guild_id"]) or \
-                                   await self.bot.fetch_guild(request.match_info["guild_id"])
+            guild: discord.Guild = self.bot.get_guild(request.match_info["guild_id"])
+            #  or await self.bot.fetch_guild(request.match_info["guild_id"])
         except discord.Forbidden:
             raise HTTPForbidden(reason="Discord raised Forbidden")
         if not guild:
@@ -325,7 +325,6 @@ class RestAPI(Cog):
             channels_with_perms = [{"name": channel.name, "id": channel.id}
                                    for channel in guild.channels if channel.permissions_for(member).manage_messages]
         result["channels"] = channels_with_perms
-        print(channels_with_perms)
 
         db_guild = await get_from_db(guild)
         result["used_credits"] = db_guild.used_updaters
