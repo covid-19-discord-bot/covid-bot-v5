@@ -319,11 +319,15 @@ class RestAPI(Cog):
 
         channels_with_perms: List[Dict[str, Union[str, int]]]
         if guild.owner_id == member.id:
-            channels_with_perms = [{"name": channel.name, "id": channel.id}
-                                   for channel in guild.channels]
+            channels_with_perms = []
+            for channel in guild.channels:
+                if isinstance(channel, discord.TextChannel):
+                    channels_with_perms.append({"name": channel.name, "id": channel.id})
         else:
-            channels_with_perms = [{"name": channel.name, "id": channel.id}
-                                   for channel in guild.channels if channel.permissions_for(member).manage_messages]
+            channels_with_perms = []
+            for channel in guild.channels:
+                if isinstance(channel, discord.TextChannel) and channel.permissions_for(member).manage_messages:
+                    channels_with_perms.append({"name": channel.name, "id": channel.id})
         result["channels"] = channels_with_perms
 
         db_guild = await get_from_db(guild)
