@@ -69,7 +69,7 @@ async def custom(ctx: MyContext, custom_str: str):
 async def graph(ctx: MyContext, name: str):
     _ = await ctx.get_translate_function()
     name, log = name.split("_")
-    log = True if log == "log" else False
+    log = log == "log"
     name = await ctx.bot.jhucsse_api.try_to_get_name(name)
     if name[0] == "world":
         data = ctx.bot.jhucsse_api.global_historical_stats
