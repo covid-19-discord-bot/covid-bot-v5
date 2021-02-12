@@ -69,7 +69,7 @@ class PermissionsCommands(Cog):
 
             for role in ctx.author.roles:
                 role_permissions = guild_permissions.get(str(role.id), {})
-                if len(role_permissions):
+                if role_permissions:
                     value, by = _recursive_permission_check(parsed_permission, role_permissions)
                     if value in [True, False] or show_none:
                         message.append(_("{0} Guild role {1} (from {0}{2})",
@@ -80,7 +80,7 @@ class PermissionsCommands(Cog):
             channel_permissions = db_channel.permissions
             for role in ctx.author.roles:
                 role_permissions = channel_permissions.get(str(role.id), {})
-                if len(role_permissions):
+                if role_permissions:
                     value, by = _recursive_permission_check(parsed_permission, role_permissions)
                     if value in [True, False] or show_none:
                         message.append(_("{0} Channel role {1} (from {0}{2})",
@@ -126,7 +126,7 @@ class PermissionsCommands(Cog):
 
         for role_id, role_permissions in permissions_by_role.items():
             role = guild.get_role(int(role_id))
-            if role and len(role_permissions):
+            if role and role_permissions:
                 message = [_("**{0} permissions**", escape_everything(role.name)), "```diff"]
 
                 for permission, value in role_permissions.items():
@@ -157,7 +157,7 @@ class PermissionsCommands(Cog):
 
         for role_id, role_permissions in permissions_by_role.items():
             role = guild.get_role(int(role_id))
-            if role and len(role_permissions):
+            if role and role_permissions:
                 message = [_("**{0} permissions**", escape_everything(role.name)), "```diff"]
 
                 for permission, value in role_permissions.items():
@@ -184,7 +184,7 @@ class PermissionsCommands(Cog):
         db_member = await get_from_db(member, as_user=False)
         permissions = db_member.permissions
 
-        if len(permissions):
+        if permissions:
             message = [_("**{0} permissions**", str(member)), "```diff"]
 
             for permission, value in permissions.items():
