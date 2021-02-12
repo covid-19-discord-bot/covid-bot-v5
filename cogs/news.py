@@ -3,6 +3,8 @@
 File designed for you to copy over and over again as a template for new parts of your bot
 """
 from discord.ext import commands, tasks, menus
+
+from cogs.error_handling import submit_error_message
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
@@ -31,8 +33,20 @@ class NewsCog(Cog):
         # data = await self.bot.news_api.get_country_news(country_name) if country_name else \
         #     await self.bot.news_api.get_world_news()
         data = await self.bot.news_api.get_world_news()
-        pages = menus.MenuPages(source=NewsAPIMenu(data["articles"]), clear_reactions_after=True, timeout=60)
-        await pages.start(ctx)
+        try:
+            pages = menus.MenuPages(source=NewsAPIMenu(data["articles"]), clear_reactions_after=True, timeout=60)
+            await pages.start(ctx)
+        except menus.MenuError as e:
+            if isinstance(e, menus.CannotEmbedLinks):
+                await ctx.reply(_("The bot does not have permissions to embed links in this channel."))
+            elif isinstance(e, menus.CannotAddReactions):
+                await ctx.reply(_("The bot does not have permissions to add reactions in this channel."))
+            elif isinstance(e, menus.CannotReadMessageHistory):
+                await ctx.reply(_("The bot does not have permissions to read message history in this channel."))
+            elif isinstance(e, menus.CannotSendMessages):
+                cmd_usage = f"`{ctx.prefix}news"
+                await ctx.author.send(_("You called me with the {0} command in {1}, but I don't have permissions to "
+                                        "send messages there.", cmd_usage, ctx.channel.mention))
 
     @tasks.loop(minutes=30)
     async def do_news_update(self):
