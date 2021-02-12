@@ -232,7 +232,7 @@ async def owid_embed(name: str, *, ctx: Optional[MyContext] = None, bot: Optiona
         value = d.get(i[1], None)
         if value is None:
             continue  # skip the field if no data
-        if isinstance(value, float) or isinstance(value, int):
+        if isinstance(value, (float, int)):
             value = format(int(value), ",")
         e0.add_field(name=i[0], value=value)
     embeds.append(e0)
@@ -242,7 +242,7 @@ async def owid_embed(name: str, *, ctx: Optional[MyContext] = None, bot: Optiona
         value = d.get(i[1], None)
         if value is None:
             continue  # skip the field if no data
-        if isinstance(value, float) or isinstance(value, int):
+        if isinstance(value, (float, int)):
             value = format(int(value), ",")
         e1.add_field(name=i[0], value=value)
     if not len(e1.fields) == 0:
@@ -253,7 +253,7 @@ async def owid_embed(name: str, *, ctx: Optional[MyContext] = None, bot: Optiona
         value = d.get(i[1], None)
         if value is None:
             continue  # skip the field if no data
-        if isinstance(value, float) or isinstance(value, int):
+        if isinstance(value, (float, int)):
             value = format(int(value), ",")
         e2.add_field(name=i[0], value=value)
     if not len(e2.fields) == 0:
@@ -264,7 +264,7 @@ async def owid_embed(name: str, *, ctx: Optional[MyContext] = None, bot: Optiona
         value = d.get(i[1], None)
         if value is None:
             continue  # skip the field if no data
-        if isinstance(value, float) or isinstance(value, int):
+        if isinstance(value, (float, int)):
             value = format(int(value), ",")
         e3.add_field(name=i[0], value=value)
     if not len(e3.fields) == 0:
@@ -275,7 +275,7 @@ async def owid_embed(name: str, *, ctx: Optional[MyContext] = None, bot: Optiona
         value = data.get(i[1], None)
         if value is None:
             continue  # skip the field if no data
-        if isinstance(value, float) or isinstance(value, int):
+        if isinstance(value, (float, int)):
             value = format(int(value), ",")
         e4.add_field(name=i[0], value=value)
     if not len(e4.fields) == 0:
