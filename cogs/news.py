@@ -4,7 +4,6 @@ File designed for you to copy over and over again as a template for new parts of
 """
 from discord.ext import commands, tasks, menus
 
-from cogs.error_handling import submit_error_message
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
