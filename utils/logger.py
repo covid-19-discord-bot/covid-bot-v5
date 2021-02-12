@@ -216,39 +216,38 @@ class FakeLogger:
               guild: typing.Optional[discord.Guild] = None,
               channel: typing.Optional[discord.ChannelType] = None,
               member: typing.Optional[discord.Member] = None):
-        return self.logger.debug(self.make_message_prefix(guild, channel, member) + str(message))
+        return self.logger.debug(self.make_message_prefix(guild, channel, member), str(message))
 
     def info(self, message: str,
              guild: typing.Optional[discord.Guild] = None,
              channel: typing.Optional[discord.ChannelType] = None,
              member: typing.Optional[discord.Member] = None):
-        return self.logger.info(self.make_message_prefix(guild, channel, member) + str(message))
+        return self.logger.info(self.make_message_prefix(guild, channel, member), str(message))
 
     def warn(self, message: str,
              guild: typing.Optional[discord.Guild] = None,
              channel: typing.Optional[discord.ChannelType] = None,
              member: typing.Optional[discord.Member] = None):
-        return self.logger.warning(self.make_message_prefix(guild, channel, member) + str(message))
+        return self.logger.warning(self.make_message_prefix(guild, channel, member), str(message))
 
     def warning(self, message: str,
                 guild: typing.Optional[discord.Guild] = None,
                 channel: typing.Optional[discord.ChannelType] = None,
                 member: typing.Optional[discord.Member] = None):
-        return self.logger.warning(self.make_message_prefix(guild, channel, member) + str(message))
+        return self.logger.warning(self.make_message_prefix(guild, channel, member), str(message))
 
     def error(self, message: str,
               guild: typing.Optional[discord.Guild] = None,
               channel: typing.Optional[discord.ChannelType] = None,
               member: typing.Optional[discord.Member] = None):
-        return self.logger.error(self.make_message_prefix(guild, channel, member) + str(message))
+        return self.logger.error(self.make_message_prefix(guild, channel, member), str(message))
 
     def exception(self, message: str,
                   guild: typing.Optional[discord.Guild] = None,
                   channel: typing.Optional[discord.ChannelType] = None,
                   member: typing.Optional[discord.Member] = None,
                   exception_instance: BaseException = None):
-        return self.logger.exception(self.make_message_prefix(guild, channel, member) + str(message),
-                                     exc_info=exception_instance)
+        return self.logger.exception(self.make_message_prefix(guild, channel, member), str(message), exc_info=exception_instance)
 
 
 class LoggerConstant:
