@@ -134,7 +134,7 @@ class MapGetter:
 
     @staticmethod
     def get_map_names() -> list:
-        return [key for key in map_identifiers]
+        return list(map_identifiers)
 
     def get_map(self, map_name: str) -> Optional[io.BytesIO]:
         self._check_if_set_up()
