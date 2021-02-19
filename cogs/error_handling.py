@@ -118,7 +118,7 @@ class CommandErrorHandler(Cog):
 
                 elif isinstance(exception, commands.BadArgument):
                     message = _("An argument passed was incorrect. `{0}`."
-                                "Please check that you are using the correct syntax: `{command_invoke_help}`.",
+                                "Please check that you are using the correct syntax: `{1}`.",
                                 str(exception),
                                 command_invoke_help)
                 elif isinstance(exception, commands.BadUnionArgument):
