@@ -33,11 +33,9 @@ class SuggestionsCommands(Cog):
             return
 
         suggestion = " ".join(suggestion)
+        description = "By %s.\nReact with ✅ to vote for this suggestion, and ❌ to vote against this suggestion.\n0/0 can deny a suggestion by reacting with 🛑.\n" % (ctx.author.mention)
         suggestion_embed = discord.Embed(title="Suggestion",
-                                         description="By {ctx.author.mention}.\n"
-                                                     "React with ✅ to vote for this suggestion, and ❌ to vote "
-                                                     "against this suggestion.\n"
-                                                     "0/0 can deny a suggestion by reacting with 🛑.\n")
+                                         description=description)
         suggestion_embed.add_field(name="Suggestion", value=suggestion)
         try:
             suggestion_channel = self.bot.get_channel(796428867715596358)
