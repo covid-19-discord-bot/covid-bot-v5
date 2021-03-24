@@ -81,6 +81,7 @@ class DiscordUser(Model):
     is_premium = fields.BooleanField(default=False)
     future_simulation = fields.ForeignKeyField('models.FutureSimulations')
     updater_credits = fields.SmallIntField(default=0)
+    opened_support_tickets = fields.SmallIntField(default=0)
 
     class Meta:
         table = "users"
