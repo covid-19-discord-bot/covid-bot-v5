@@ -1,5 +1,7 @@
+# coding=utf-8
 import logging
 import typing
+
 import discord
 
 
@@ -9,6 +11,7 @@ def init_logger() -> logging.Logger:
     base_logger = logging.getLogger("matchmaking")
     base_logger.setLevel(logging.DEBUG)
 
+    # noinspection SpellCheckingInspection
     formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
 
     # Logging to a file
@@ -65,6 +68,7 @@ def init_logger() -> logging.Logger:
             color = self._get_color(record.levelno)
             return color + text + self.DEFAULT
 
+    # noinspection SpellCheckingInspection
     class _WinColorStreamHandler(logging.StreamHandler):
         # wincon.h
         FOREGROUND_BLACK = 0x0000
@@ -152,6 +156,7 @@ def init_logger() -> logging.Logger:
     discord_logger = logging.getLogger('discord')
     discord_logger.setLevel(logging.INFO)
 
+    # noinspection SpellCheckingInspection
     discord_formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
 
     discord_steam_handler = ColorStreamHandler()
@@ -191,38 +196,37 @@ class FakeLogger:
               guild: typing.Optional[discord.Guild] = None,
               channel: typing.Optional[discord.ChannelType] = None,
               member: typing.Optional[discord.Member] = None):
-        return self.logger.debug(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.debug(self.make_message_prefix(guild, channel, member) + str(message))
 
     def info(self, message: str,
              guild: typing.Optional[discord.Guild] = None,
              channel: typing.Optional[discord.ChannelType] = None,
              member: typing.Optional[discord.Member] = None):
-        return self.logger.info(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.info(self.make_message_prefix(guild, channel, member) + str(message))
 
     def warn(self, message: str,
              guild: typing.Optional[discord.Guild] = None,
              channel: typing.Optional[discord.ChannelType] = None,
              member: typing.Optional[discord.Member] = None):
-        return self.logger.warning(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.warning(self.make_message_prefix(guild, channel, member) + str(message))
 
     def warning(self, message: str,
                 guild: typing.Optional[discord.Guild] = None,
                 channel: typing.Optional[discord.ChannelType] = None,
                 member: typing.Optional[discord.Member] = None):
-        return self.logger.warning(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.warning(self.make_message_prefix(guild, channel, member) + str(message))
 
     def error(self, message: str,
               guild: typing.Optional[discord.Guild] = None,
               channel: typing.Optional[discord.ChannelType] = None,
               member: typing.Optional[discord.Member] = None):
-        return self.logger.error(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.error(self.make_message_prefix(guild, channel, member) + str(message))
 
-    def exception(self, message: str,
-                  guild: typing.Optional[discord.Guild] = None,
-                  channel: typing.Optional[discord.ChannelType] = None,
-                  member: typing.Optional[discord.Member] = None,
-                  exception_instance: BaseException = None):
-        return self.logger.exception(self.make_message_prefix(guild, channel, member), str(message), exc_info=exception_instance)
+    def exception(self, message: str, guild: typing.Optional[discord.Guild] = None,
+                  channel: typing.Optional[discord.ChannelType] = None, member: typing.Optional[discord.Member] = None,
+                  exc_info: BaseException = None):
+        return self.logger.exception(self.make_message_prefix(guild, channel, member) + str(message),
+                                     exc_info=exc_info)
 
 
 class LoggerConstant:

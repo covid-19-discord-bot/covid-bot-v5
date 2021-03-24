@@ -95,7 +95,7 @@ class PrivateMessagesSupport(Cog):
                     try:
                         await user.send(embed=inactivity_embed)
                     except discord.DiscordException as e:
-                        self.bot.logger.exception(f"Failed to send message to {user!s}!", exception_instance=e)
+                        self.bot.logger.exception(f"Failed to send message to {user!s}!", exc_info=e)
 
                     await self.clear_caches(ticket_channel)
 

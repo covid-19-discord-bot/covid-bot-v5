@@ -127,7 +127,7 @@ class RestAPI(Cog):
             try:
                 await cb
             except Exception as e:
-                self.bot.logger.exception("Ignoring exception in callback.", exception_instance=e)
+                self.bot.logger.exception("Ignoring exception in callback.", exc_info=e)
             else:
                 self.bot.logger.debug("Callback awaited successfully.")
 

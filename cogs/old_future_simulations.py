@@ -318,8 +318,7 @@ class FutureSimulations(Cog):
                                                                     sim['simulation']['time_to_simulate']))
                 except Exception as e:
                     await sim['queue'].put(e)
-                    self.bot.logger.exception(f"Simulation ID {sim['id']} failed to process.",
-                                              exception_instance=e)
+                    self.bot.logger.exception(f"Simulation ID {sim['id']} failed to process.", exc_info=e)
                     continue
                 await sim['queue'].put(result)
                 self.bot.logger.debug(f"Processed simulation ID {sim['id']} sucessfully.")
@@ -350,8 +349,7 @@ class FutureSimulations(Cog):
                                                                     sim['simulation']['time_to_simulate']))
                 except Exception as e:
                     await sim['queue'].put(e)
-                    self.bot.logger.exception(f"Simulation ID {sim['id']} failed to process.",
-                                              exception_instance=e)
+                    self.bot.logger.exception(f"Simulation ID {sim['id']} failed to process.", exc_info=e)
                     continue
                 await sim['queue'].put(result)
                 self.bot.logger.debug(f"Processed simulation ID {sim['id']} sucessfully.")

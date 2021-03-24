@@ -143,8 +143,7 @@ async def _check_stats_are_valid(cls):
 
 
 async def _handle_client_exceptions(cls, e):
-    cls.logger.exception(f"ClientException while getting data in class {cls.__class__.__name__}!",
-                         e.exc)
+    cls.logger.exception(f"ClientException while getting data in class {cls.__class__.__name__}!", e.exc)
     if cls._has_been_updated:
         return
     elif cls._update_tries <= MAX_UPDATE_TRIES:
