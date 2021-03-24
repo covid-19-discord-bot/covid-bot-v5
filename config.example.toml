@@ -42,6 +42,7 @@ database = "000"
 "permissionscommands.*"    = true
 "vaccine.*"                = true
 "privatemessagessupport.*" = true
+"tags.*"                   = true
 
 
 [permissions.fixed]
@@ -56,6 +57,9 @@ database = "000"
 "bot.bypass_cooldowns" = false
 "bot.ignored"          = false
 "bot.administrator"    = false
+
+# That way only trusted users can override tags
+"tags.manage" = false
 
 
 [auth.discord]
@@ -93,3 +97,8 @@ route_prefix = '/v1'
 [cogs.PrivateMessagesSupport]
 # A category to send private message support channels to. **THERE SHOULD NOT BE ANY OTHER CHANNELS IN HERE!**
 forwarding_category = 824407017745285150
+
+[cogs.Tags]
+allowed_in_guilds = [
+    675390855716274216, # 0/0's Boat Support
+]
