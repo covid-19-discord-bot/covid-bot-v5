@@ -1,31 +1,9 @@
 import logging
 import typing
-from datetime import datetime
-from pythonjsonlogger import jsonlogger
 import discord
 
 
-class CustomJsonFormatter(jsonlogger.JsonFormatter):
-    def add_fields(self, log_record, record, message_dict):
-        super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
-        if not log_record.get('timestamp'):
-            # this doesn't use record.created, so it is slightly off
-            now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-            log_record['timestamp'] = now
-        if log_record.get('level'):
-            log_record['level'] = log_record['level'].upper()
-        else:
-            log_record['level'] = record.levelname
-
-
 def init_logger() -> logging.Logger:
-    # Set root logger to log to file as JSON
-    logger = logging.getLogger()
-    log_handler = logging.FileHandler(filename='/tmp/covid_bot/log1.json')
-    formatter = CustomJsonFormatter('%(timestamp)s %(level)s %(name)s %(message)s')
-    log_handler.setFormatter(formatter)
-    logger.addHandler(log_handler)
-
     # Create the logger
 
     base_logger = logging.getLogger("matchmaking")
@@ -181,9 +159,6 @@ def init_logger() -> logging.Logger:
     discord_steam_handler.setFormatter(discord_formatter)
     discord_logger.addHandler(discord_steam_handler)
 
-    # override all changes made above and force debug
-    logger.setLevel(logging.DEBUG)
-
     return base_logger
 
 
@@ -278,4 +253,3 @@ class LoggerConstant:
 
     def exception(self, message: str):
         return self.logger.exception(message, self.guild, self.channel, self.member)
-
