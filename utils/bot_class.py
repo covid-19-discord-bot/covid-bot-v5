@@ -143,10 +143,6 @@ class MyBot(AutoShardedBot):
         if message.author.bot:
             return  # ignore messages from other bots
 
-        if message.guild is None:
-            await message.channel.send("I don't support DMs due to Discord limitations!")
-            return
-
         ctx: MyContext = await self.get_context(message, cls=MyContext)
         if self.user.mentioned_in(message) and ctx.prefix is None and str(self.user.id) in message.content:
             _ = await ctx.get_translate_function()
