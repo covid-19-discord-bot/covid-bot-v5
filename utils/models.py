@@ -81,6 +81,7 @@ class DiscordUser(Model):
     is_premium = fields.BooleanField(default=False)
     future_simulation = fields.ForeignKeyField('models.FutureSimulations')
     updater_credits = fields.SmallIntField(default=0)
+    opened_support_tickets = fields.SmallIntField(default=0)
 
     class Meta:
         table = "users"
@@ -201,6 +202,64 @@ class FutureSimulations(Model):
 
     class Meta:
         table = "future_simulations"
+
+
+class Tag(Model):
+    owner = fields.ForeignKeyField('models.DiscordUser', related_name='tags')
+
+    # Statistics
+    created = fields.DatetimeField(auto_now_add=True)
+    last_modified = fields.DatetimeField(auto_now=True)
+    uses = fields.IntField(default=0)
+    revisions = fields.IntField(default=0)
+
+    # Tag
+    official = fields.BooleanField(default=False)
+    name = fields.CharField(max_length=90, db_index=True, unique=True)
+    content = fields.TextField()
+
+    @property
+    def pages(self):
+        return [page.strip(" \n") for page in "\n".join(self.content.splitlines()).split('\n\n---')]
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class TagAlias(Model):
+    owner = fields.ForeignKeyField('models.DiscordUser', related_name='tags_aliases')
+    tag = fields.ForeignKeyField('models.Tag', related_name='aliases')
+
+    uses = fields.IntField(default=0)
+
+    name = fields.CharField(max_length=90, db_index=True, unique=True)
+
+    def __str__(self):
+        return f"{self.name} -> {self.tag.name}"
+
+
+async def get_tag(name, increment_uses=True) -> typing.Optional[Tag]:
+    tag: typing.Optional[Tag] = await Tag.filter(name=name).first()
+    if tag:
+        if increment_uses:
+            tag.uses += 1
+            await tag.save()
+        return tag
+    else:
+        # Search for an alias
+        alias: typing.Optional[TagAlias] = await TagAlias.filter(name=name).prefetch_related("tag").first()
+        if alias:
+            tag: Tag = alias.tag
+            if increment_uses:
+                alias.uses += 1
+                tag.uses += 1
+
+                await alias.save()
+                await tag.save()
+            return tag
+        else:
+            # No alias and no tag
+            return None
 
 
 # noinspection PyUnresolvedReferences

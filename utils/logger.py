@@ -1,36 +1,17 @@
+# coding=utf-8
 import logging
 import typing
-from datetime import datetime
-from pythonjsonlogger import jsonlogger
+
 import discord
 
 
-class CustomJsonFormatter(jsonlogger.JsonFormatter):
-    def add_fields(self, log_record, record, message_dict):
-        super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
-        if not log_record.get('timestamp'):
-            # this doesn't use record.created, so it is slightly off
-            now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-            log_record['timestamp'] = now
-        if log_record.get('level'):
-            log_record['level'] = log_record['level'].upper()
-        else:
-            log_record['level'] = record.levelname
-
-
 def init_logger() -> logging.Logger:
-    # Set root logger to log to file as JSON
-    logger = logging.getLogger()
-    log_handler = logging.FileHandler(filename='/tmp/covid_bot/log1.json')
-    formatter = CustomJsonFormatter('%(timestamp)s %(level)s %(name)s %(message)s')
-    log_handler.setFormatter(formatter)
-    logger.addHandler(log_handler)
-
     # Create the logger
 
     base_logger = logging.getLogger("matchmaking")
     base_logger.setLevel(logging.DEBUG)
 
+    # noinspection SpellCheckingInspection
     formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
 
     # Logging to a file
@@ -87,6 +68,7 @@ def init_logger() -> logging.Logger:
             color = self._get_color(record.levelno)
             return color + text + self.DEFAULT
 
+    # noinspection SpellCheckingInspection
     class _WinColorStreamHandler(logging.StreamHandler):
         # wincon.h
         FOREGROUND_BLACK = 0x0000
@@ -174,15 +156,13 @@ def init_logger() -> logging.Logger:
     discord_logger = logging.getLogger('discord')
     discord_logger.setLevel(logging.INFO)
 
+    # noinspection SpellCheckingInspection
     discord_formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
 
     discord_steam_handler = ColorStreamHandler()
     discord_steam_handler.setLevel(logging.INFO)
     discord_steam_handler.setFormatter(discord_formatter)
     discord_logger.addHandler(discord_steam_handler)
-
-    # override all changes made above and force debug
-    logger.setLevel(logging.DEBUG)
 
     return base_logger
 
@@ -216,38 +196,37 @@ class FakeLogger:
               guild: typing.Optional[discord.Guild] = None,
               channel: typing.Optional[discord.ChannelType] = None,
               member: typing.Optional[discord.Member] = None):
-        return self.logger.debug(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.debug(self.make_message_prefix(guild, channel, member) + str(message))
 
     def info(self, message: str,
              guild: typing.Optional[discord.Guild] = None,
              channel: typing.Optional[discord.ChannelType] = None,
              member: typing.Optional[discord.Member] = None):
-        return self.logger.info(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.info(self.make_message_prefix(guild, channel, member) + str(message))
 
     def warn(self, message: str,
              guild: typing.Optional[discord.Guild] = None,
              channel: typing.Optional[discord.ChannelType] = None,
              member: typing.Optional[discord.Member] = None):
-        return self.logger.warning(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.warning(self.make_message_prefix(guild, channel, member) + str(message))
 
     def warning(self, message: str,
                 guild: typing.Optional[discord.Guild] = None,
                 channel: typing.Optional[discord.ChannelType] = None,
                 member: typing.Optional[discord.Member] = None):
-        return self.logger.warning(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.warning(self.make_message_prefix(guild, channel, member) + str(message))
 
     def error(self, message: str,
               guild: typing.Optional[discord.Guild] = None,
               channel: typing.Optional[discord.ChannelType] = None,
               member: typing.Optional[discord.Member] = None):
-        return self.logger.error(self.make_message_prefix(guild, channel, member), str(message))
+        return self.logger.error(self.make_message_prefix(guild, channel, member) + str(message))
 
-    def exception(self, message: str,
-                  guild: typing.Optional[discord.Guild] = None,
-                  channel: typing.Optional[discord.ChannelType] = None,
-                  member: typing.Optional[discord.Member] = None,
-                  exception_instance: BaseException = None):
-        return self.logger.exception(self.make_message_prefix(guild, channel, member), str(message), exc_info=exception_instance)
+    def exception(self, message: str, guild: typing.Optional[discord.Guild] = None,
+                  channel: typing.Optional[discord.ChannelType] = None, member: typing.Optional[discord.Member] = None,
+                  exc_info: BaseException = None):
+        return self.logger.exception(self.make_message_prefix(guild, channel, member) + str(message),
+                                     exc_info=exc_info)
 
 
 class LoggerConstant:
@@ -278,4 +257,3 @@ class LoggerConstant:
 
     def exception(self, message: str):
         return self.logger.exception(message, self.guild, self.channel, self.member)
-

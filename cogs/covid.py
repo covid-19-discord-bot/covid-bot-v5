@@ -164,8 +164,7 @@ class CovidCog(Cog):
         try:
             await self.bot.worldometers_api.update_covid_19_virus_stats()
         except Exception as e:
-            await self.bot.worldometers_api.logger.exception("Fatal error while updating stats!",
-                                                             exc_info=e)
+            await self.bot.worldometers_api.logger.exception("Fatal error while updating stats!")
         # Well that was simple :P
 
     # ignore it here, as it may not be in the correct state

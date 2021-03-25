@@ -841,9 +841,8 @@ class AutoUpdaterCog(Cog):
                     await updater.save()
                     await db_channel.save()
                 else:
-                    self.bot.logger.exception("Exception in autoupdater!",
-                                              exception_instance=e,
-                                              channel=channel, guild=channel.guild)
+                    self.bot.logger.exception("Exception in autoupdater!", guild=channel.guild, channel=channel,
+                                              exc_info=e)
                 # Since it failed this time, don't save it and force a update at next loop.
                 continue
             await updater.save()

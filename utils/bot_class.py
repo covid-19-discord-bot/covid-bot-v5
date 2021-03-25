@@ -121,20 +121,20 @@ class MyBot(AutoShardedBot):
             await self._jhucsse_api.update_covid_19_virus_stats()
             await self._owid_api.update_covid_19_owid_data()
         except RuntimeError as e:
-            self.logger.exception("Fatal RuntimeError while running initial update!", exception_instance=e)
+            self.logger.exception("Fatal RuntimeError while running initial update!", exc_info=e)
         except Exception as e:
-            self.logger.exception("Fatal general error while running initial update!", exception_instance=e)
+            self.logger.exception("Fatal general error while running initial update!", exc_info=e)
         try:
             if not self.maps_api:
                 self.maps_api = MapGetter("/home/pi/covid_bot_beta/maps")
                 await wrap_in_async(self.maps_api.initalize_firefox, thread_pool=True)
         except Exception as e:
-            self.logger.exception("Fatal error while initializing Firefox!", exception_instance=e)
+            self.logger.exception("Fatal error while initializing Firefox!", exc_info=e)
         try:
             self.custom_updater_helper = CustomUpdater(self)
             await self.custom_updater_helper.setup()
         except Exception as e:
-            self.logger.exception("Fatal error while initializing the custom updater!", exception_instance=e)
+            self.logger.exception("Fatal error while initializing the custom updater!", exc_info=e)
 
     async def on_message(self, message: discord.Message):
         if not self.is_ready():
@@ -142,10 +142,6 @@ class MyBot(AutoShardedBot):
 
         if message.author.bot:
             return  # ignore messages from other bots
-
-        if message.guild is None:
-            await message.channel.send("I don't support DMs due to Discord limitations!")
-            return
 
         ctx: MyContext = await self.get_context(message, cls=MyContext)
         if self.user.mentioned_in(message) and ctx.prefix is None and str(self.user.id) in message.content:

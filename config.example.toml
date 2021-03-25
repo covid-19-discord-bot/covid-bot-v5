@@ -1,5 +1,5 @@
 [bot]
-prefixes = ["covid", "/", "c!"]
+prefixes = ["covid ", "/", "c!"]
 description = """Get live stats on the COVID-19 pandemic!"""
 playing = "with COVID-19 stats"
 commands_are_case_insensitive = true
@@ -29,18 +29,20 @@ database = "000"
 # Dont forget that each command have, by default and unless another check exists, a permission going by the form
 # CogName.command_name. As you might see in [permissions.fixed], they are by default evaluted to false. So if you want
 # to make them by-default accessible to anyone, you have to give that permission (or a lower wildcard) here.
-"autoupdatercog.*"      = true
-"covidcog.*"            = true
-"databasecommands.*"    = true
-"futuresimulations.*"   = true
-"historicaldata.*"      = true
-"premiumsettings.*"     = true
-"mapscommands.*"        = true
-"server.ignored"        = false
-"suggestionscommands.*" = true
-"utilscommands.*"       = true
-"permissionscommands.*" = true
-"vaccine.*"             = true
+"autoupdatercog.*"         = true
+"covidcog.*"               = true
+"databasecommands.*"       = true
+"futuresimulations.*"      = true
+"historicaldata.*"         = true
+"premiumsettings.*"        = true
+"mapscommands.*"           = true
+"server.ignored"           = false
+"suggestionscommands.*"    = true
+"utilscommands.*"          = true
+"permissionscommands.*"    = true
+"vaccine.*"                = true
+"privatemessagessupport.*" = true
+"tags.*"                   = true
 
 
 [permissions.fixed]
@@ -55,6 +57,9 @@ database = "000"
 "bot.bypass_cooldowns" = false
 "bot.ignored"          = false
 "bot.administrator"    = false
+
+# That way only trusted users can override tags
+"tags.manage" = false
 
 
 [auth.discord]
@@ -73,7 +78,7 @@ token = ""
 cogs_to_load = ['cogs.rest_api', 'jishaku', 'cogs.autoupdater', 'cogs.background_loop', 'cogs.covid',
     'cogs.database_commands', 'cogs.error_handling', 'cogs.future_simulations', 'cogs.graphs', 'cogs.historical_data',
     'cogs.maps', 'cogs.permissions_commands', 'cogs.premium', 'cogs.support_server_commands', 'cogs.suggestions',
-    'cogs.utils', 'cogs.vaccine', 'cogs.slash_commands']
+    'cogs.utils', 'cogs.vaccine', 'cogs.slash_commands', 'cogs.private_msg_support']
 # Disable the reload command for the following cogs
 disable_reload_for = ['cogs.cog_reloader']
 
@@ -88,3 +93,12 @@ global_api_keys = []
 listen_ip = "0.0.0.0"
 listen_port = 15855
 route_prefix = '/v1'
+
+[cogs.PrivateMessagesSupport]
+# A category to send private message support channels to. **THERE SHOULD NOT BE ANY OTHER CHANNELS IN HERE!**
+forwarding_category = 824407017745285150
+
+[cogs.Tags]
+allowed_in_guilds = [
+    675390855716274216, # 0/0's Boat Support
+]
