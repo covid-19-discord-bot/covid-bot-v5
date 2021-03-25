@@ -353,7 +353,6 @@ class PrivateMessagesSupport(Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        self.bot.logger.debug("on_message in DM support fired")
         if message.author.bot:
             # Don't listen to bots (ourselves in this case)
             return
