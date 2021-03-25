@@ -184,7 +184,7 @@ class PrivateMessagesSupport(Cog):
                 name=str(user.id),
                 topic=f"This is the logs of a DM with {user.name}#{user.discriminator}. "
                       f"What's written in here will be sent back to them, except if "
-                      f"the message starts with > or is a DuckHunt command.\nChannel opened: {now_str}"
+                      f"the message starts with > or is a bot command.\nChannel opened: {now_str}"
                       f"\n\n\n[getbeaned:disable_automod]\n[getbeaned:disable_logging]",
                 reason="Received a DM.")
 
@@ -231,6 +231,8 @@ class PrivateMessagesSupport(Cog):
                                    f"• `c!ps block` will block the user from opening further channels.\n"
                                    f"• `c!ps huh` should be used if the message is not a support request, "
                                    f"and will silently close the channel.\n"
+                                   f"• `c!ps tag <tag name>` will send the tag named <tag name> to the user's DMs."
+                                   f"The reactions on either will flip pages in here and in DMs.\n"
                                    f"Attachments are supported in messages.\n\n"
                                    f"Thanks for helping with the bot DM support! <3")
 
@@ -305,7 +307,7 @@ class PrivateMessagesSupport(Cog):
             dm_invite_embed.description = "COVID-19 Bot, like other discord bots, can't join servers by using an " \
                                           "invite link.\nYou instead have to be a server admin (or at least have the" \
                                           " Manage Server permission). You can invite the bot " \
-                                          "[here](https://covid19.imaskeleton.me/invite) If you need more help, you " \
+                                          "[here](https://covid19.imaskeleton.me/invite), If you need more help, you " \
                                           "can ask here and we'll get back to you."
 
             dm_invite_embed.set_footer(text="This is an automatic message.")
@@ -386,7 +388,7 @@ class PrivateMessagesSupport(Cog):
     @commands.group(aliases=["ps"])
     async def private_support(self, ctx: MyContext):
         """
-        The DuckHunt bot DMs are monitored. All of these commands are used to control the created channels, and to
+        The COVID-19 Bot DMs are monitored. All of these commands are used to control the created channels, and to
         interact with remote users.
         """
         await self.is_in_forwarding_channels(ctx)
