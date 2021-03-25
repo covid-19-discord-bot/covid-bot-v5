@@ -10,14 +10,58 @@ from typing import Dict, List
 
 import discord
 from babel.dates import format_datetime, format_timedelta
-from discord.ext import commands, tasks
+from discord.ext import commands, tasks, menus
 from discord.utils import snowflake_time
 
+from cogs.tags import TagMenuSource, TagName
 from utils.bot_class import MyBot
 from utils.checks import NotInServer
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-from utils.models import get_from_db, DiscordUser
+from utils.models import get_from_db, DiscordUser, get_tag
+
+
+class MirrorMenuPage(menus.MenuPages):
+    def __init__(self, source, **kwargs):
+        super().__init__(source, **kwargs)
+        self.other = None
+
+    def reaction_check(self, payload: discord.RawReactionActionEvent) -> bool:
+        # Allow anyone to use the menu.
+        # self.ctx: MyContext
+        if payload.message_id != self.message.id:
+            return False
+
+        # self.bot: MyBot
+        if payload.user_id == self.bot.user.id:
+            return False
+
+        return payload.emoji in self.buttons
+
+    async def show_page(self, page_number, propagate=True):
+        if propagate and self.other:
+            try:
+                await self.other.show_page(page_number, propagate=False)
+            except discord.NotFound:
+                # Break the link, one was deleted.
+                self.other = None
+            except discord.Forbidden:
+                # Break the link, can't speak anymore.
+                self.other = None
+
+        return await super().show_page(page_number)
+
+    def stop(self, propagate=True):
+        if propagate and self.other:
+            try:
+                self.other.stop(propagate=False)
+            except discord.NotFound:
+                # Break the link, one was deleted.
+                self.other = None
+            except discord.Forbidden:
+                # Break the link, can't speak anymore.
+                self.other = None
+        return super().stop()
 
 
 class PrivateMessagesSupport(Cog):
@@ -412,6 +456,29 @@ class PrivateMessagesSupport(Cog):
 
         self.blocked_ids.append(int(ctx.channel.name))
         await ctx.send("👌")
+
+    @private_support.command(aliases=["send_tag", "t"])
+    async def tag(self, ctx: MyContext, *, tag_name: TagName):
+        """
+        Send a tag to the user, as if you used the dh!tag command in their DMs.
+        """
+        await self.is_in_forwarding_channels(ctx)
+
+        user = await self.get_user(ctx.channel.name)
+        tag = await get_tag(tag_name)
+
+        if tag:
+            support_pages = MirrorMenuPage(timeout=86400, source=TagMenuSource(ctx, tag), clear_reactions_after=True)
+            dm_pages = MirrorMenuPage(timeout=86400, source=TagMenuSource(ctx, tag), clear_reactions_after=True)
+
+            dm_pages.other = support_pages
+            support_pages.other = dm_pages
+
+            await support_pages.start(ctx)
+            await dm_pages.start(ctx, channel=await user.create_dm())
+        else:
+            _ = await ctx.get_translate_function()
+            await ctx.reply(_("❌ There is no tag with that name."))
 
 
 setup = PrivateMessagesSupport.setup
