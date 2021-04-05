@@ -78,7 +78,7 @@ token = ""
 cogs_to_load = ['cogs.rest_api', 'jishaku', 'cogs.autoupdater', 'cogs.background_loop', 'cogs.covid',
     'cogs.database_commands', 'cogs.error_handling', 'cogs.future_simulations', 'cogs.graphs', 'cogs.historical_data',
     'cogs.maps', 'cogs.permissions_commands', 'cogs.premium', 'cogs.support_server_commands', 'cogs.suggestions',
-    'cogs.utils', 'cogs.vaccine', 'cogs.slash_commands', 'cogs.private_msg_support']
+    'cogs.utils', 'cogs.vaccine', 'cogs.slash_commands', 'cogs.private_msg_support', 'cogs.tags']
 # Disable the reload command for the following cogs
 disable_reload_for = ['cogs.cog_reloader']
 
