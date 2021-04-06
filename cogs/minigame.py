@@ -20,10 +20,11 @@ class Coronavirus(Cog):
         return await game_enabled(ctx)
 
     async def log_message(self, db_guild: DiscordGuild, message):
-        global_log_channel = await self.bot.get_channel(self.config()["log_channel"])
+        self.bot.logger.debug(f"Logging message \"{message}\"")
+        global_log_channel = self.bot.get_channel(self.config()["log_channel"])
         if global_log_channel is not None:
             await global_log_channel.send(message)
-        guild_log_channel = await self.bot.get_channel(db_guild.log_channel)
+        guild_log_channel = self.bot.get_channel(db_guild.log_channel)
         if guild_log_channel is not None:
             await guild_log_channel.send(message)
 
