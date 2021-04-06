@@ -983,6 +983,9 @@ class Coronavirus(Cog):
         """
         Main on_message listener
         """
+        if message.author.bot:
+            return
+
         ctx = await self.bot.get_context(message, cls=MyContext)
 
         if ctx.valid:
