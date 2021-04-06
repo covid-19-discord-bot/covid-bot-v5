@@ -10,11 +10,12 @@ from utils.ctx_class import MyContext
 from utils.models import get_player, save_player, get_from_db, DiscordGuild
 
 
+async def game_enabled(ctx: MyContext):
+    db_guild = await get_from_db(ctx.guild)
+    return db_guild.minigame_enabled
+
+
 class Coronavirus(Cog):
-    @staticmethod
-    async def game_enabled(ctx: MyContext):
-        db_guild = await get_from_db(ctx.guild)
-        return db_guild.minigame_enabled
 
     async def log_message(self, db_guild: DiscordGuild, message):
         global_log_channel = await self.bot.get_channel(self.config()["log_channel"])
