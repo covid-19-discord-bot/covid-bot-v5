@@ -46,9 +46,15 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
     tb = f"```py\n{''.join(traceback.format_tb(exc.__traceback__))}\n```"
     error_embed.add_field(name="Exception Name", value=str(exc.__class__))
     error_embed.add_field(name="Exception Reason", value=str(exc), inline=False)
-    error_embed.add_field(name="Exception Traceback", value=tb if len(tb) < 1024 else "Too long!")
+    kwargs = {}
+    if len(tb) < 1024:
+        error_embed.add_field(name="Exception Traceback", value=tb)
+    else:
+        error_embed.add_field(name="Exception Traceback", value="Attached File")
+        kwargs["file"] = discord.File(''.join(traceback.format_tb(exc.__traceback__)))
+    kwargs["embed"] = error_embed
     sentry_sdk.capture_exception(exc)
-    await error_channel.send(embed=error_embed)
+    await error_channel.send(**kwargs)
     sentry_sdk.set_context()
 
 
