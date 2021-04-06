@@ -972,7 +972,7 @@ class Coronavirus(Cog):
     @commands.Cog.listener()
     @commands.max_concurrency(1, commands.BucketType.user, wait=True)
     async def on_command_completion(self, ctx: MyContext):
-        if not await self.game_enabled(ctx):
+        if not await game_enabled(ctx):
             return
 
         await self.dispatch_maybes(ctx.message)
@@ -989,7 +989,7 @@ class Coronavirus(Cog):
             # ctx.logger.debug("Ignoring message since it's a command")
             return
 
-        if not await self.game_enabled(ctx):
+        if not await game_enabled(ctx):
             return
 
         await self.dispatch_maybes(message)
