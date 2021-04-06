@@ -53,7 +53,7 @@ class Coronavirus(Cog):
         if player.is_dead():
             return
 
-        if player.achievements.vaccined:
+        if player.achievements.vaccinated:
             return
 
         infection_chance = 10
