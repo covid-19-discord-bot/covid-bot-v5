@@ -103,7 +103,10 @@ class Coronavirus(Cog):
                 await message.channel.send(f"🎈 RIP {message.author.mention}. He's dead, Jim!")
                 await self.log_message(db_guild, f"Looks like {message.author.mention} is dead :(")
                 if not message.author.discriminator == "0000":
-                    await message.author.add_roles(message.guild.get_role(db_guild.dead_role), reason="RIP!")
+                    try:
+                        await message.author.add_roles(message.guild.get_role(db_guild.dead_role), reason="RIP!")
+                    except discord.DiscordException:
+                        pass
             return
 
         if player.achievements.tested_positive:
@@ -133,8 +136,11 @@ class Coronavirus(Cog):
             player.achievements.tested_positive = True
             await save_player(player)
             if not message.author.discriminator == "0000":
-                await message.author.add_roles(message.guild.get_role(db_guild.infected_role),
-                                               reason="Achoo!")
+                try:
+                    await message.author.add_roles(message.guild.get_role(db_guild.infected_role),
+                                                   reason="Achoo!")
+                except discord.DiscordException:
+                    pass
 
             await self.log_message(db_guild, f"Looks like {message.author.mention} is infected :(")
 
