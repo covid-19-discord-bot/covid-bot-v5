@@ -41,6 +41,12 @@ class DiscordGuild(Model):
     used_updaters = fields.SmallIntField(default=0)
     total_updaters = fields.SmallIntField(default=1)
 
+    minigame_enabled = fields.BooleanField(default=False)
+    log_channel = fields.BigIntField(default=None, null=True)
+    infected_role = fields.BigIntField(default=None, null=True)
+    cured_role = fields.BigIntField(default=None, null=True)
+    dead_role = fields.BigIntField(default=None, null=True)
+
     class Meta:
         table = "guilds"
 
@@ -446,7 +452,7 @@ async def get_tag(name, increment_uses=True) -> typing.Optional[Tag]:
 # noinspection PyUnresolvedReferences
 async def get_from_db(discord_object, as_user=True):
     if isinstance(discord_object, discord.Guild):
-        db_obj = await DiscordGuild.filter(discord_id=discord_object.id).first()
+        db_obj = await (DiscordGuild.filter(discord_id=discord_object.id).first())
         if not db_obj:
             db_obj = DiscordGuild(discord_id=discord_object.id,
                                   name=discord_object.name)
@@ -549,3 +555,35 @@ async def init_db_connection(config):
     await Tortoise.init(tortoise_config)
 
     await Tortoise.generate_schemas()
+
+
+async def get_player(user: typing.Union[discord.User, discord.Member]) -> Player:
+    player = await Player.filter(discord_id=user.id).first()
+
+    if not player:
+        player = Player(discord_id=user.id,
+                        discord_name=user.name,
+                        immunodeficient=random.randint(0, 100) <= 15,
+                        doctor=random.randint(0, 100) <= 2,
+                        good=random.choice(list(AlignmentGood)),
+                        law=random.choice(list(AlignmentLaw)),
+                        charisma=random.randint(0, 10)
+                        )
+        await player.save()
+        inventory = Inventory(player=player)
+        await inventory.save()
+        achievements = Achievements(player=player)
+        await achievements.save()
+        statistics = Statistics(player=player)
+        await statistics.save()
+
+    await player.fetch_related('inventory', 'statistics', 'achievements')
+    return player
+
+
+# noinspection PyUnresolvedReferences
+async def save_player(player: Player) -> None:
+    await player.save()
+    await player.inventory.save()
+    await player.achievements.save()
+    await player.statistics.save()
