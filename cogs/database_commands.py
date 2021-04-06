@@ -107,5 +107,36 @@ class DatabaseCommands(Cog):
         await db_channel.save()
         await ctx.reply(_("Disabled the API for {0}.", channel.name))
 
+    @settings.command()
+    async def minigame(self, ctx: MyContext, enabled: bool, log_channel: Optional[discord.TextChannel],
+                       infected_role: Optional[discord.Role], cured_role: Optional[discord.Role],
+                       dead_role: Optional[discord.Role]):
+        _ = await ctx.get_translate_function()
+        db_guild = await get_from_db(ctx.guild)
+        if enabled:
+            if not log_channel and not db_guild.log_channel:
+                await ctx.reply(_("You must mention a channel to log to if one is not already set."))
+            elif not infected_role and not db_guild.infected_role:
+                await ctx.reply(_("You must mention a role to use as the infected role if one is not already set."))
+            elif not cured_role and not db_guild.cured_role:
+                await ctx.reply(_("You must mention a role to use as the cured role if one is not already set."))
+            elif not dead_role and not db_guild.dead_role:
+                await ctx.reply(_("You must mention a role to use as the dead role if one is not already set."))
+            else:
+                if log_channel:
+                    db_guild.log_channel = log_channel.id
+                if infected_role:
+                    db_guild.infected_role = infected_role.id
+                if cured_role:
+                    db_guild.cured_role = cured_role.id
+                if dead_role:
+                    db_guild.dead_role = dead_role.id
+                db_guild.minigame_enabled = True
+                await ctx.reply(_("The minigame has now been enabled for your server! Have fun!"))
+        else:
+            db_guild.minigame_enabled = False
+            await ctx.reply(_("The minigame has now been disabled for your server."))
+        await db_guild.save()
+
 
 setup = DatabaseCommands.setup
