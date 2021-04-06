@@ -1,6 +1,7 @@
 # coding=utf-8
 import datetime
 import traceback
+from io import StringIO
 from typing import Optional
 
 import discord
@@ -51,7 +52,7 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
         error_embed.add_field(name="Exception Traceback", value=tb)
     else:
         error_embed.add_field(name="Exception Traceback", value="Attached File")
-        kwargs["file"] = discord.File(''.join(traceback.format_tb(exc.__traceback__)))
+        kwargs["file"] = discord.File(StringIO(''.join(traceback.format_tb(exc.__traceback__))))
     kwargs["embed"] = error_embed
     sentry_sdk.capture_exception(exc)
     await error_channel.send(**kwargs)
