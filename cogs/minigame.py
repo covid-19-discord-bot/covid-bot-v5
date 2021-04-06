@@ -16,6 +16,8 @@ async def game_enabled(ctx: MyContext):
 
 
 class Coronavirus(Cog):
+    async def cog_check(self, ctx: MyContext):
+        return await game_enabled(ctx)
 
     async def log_message(self, db_guild: DiscordGuild, message):
         global_log_channel = await self.bot.get_channel(self.config()["log_channel"])
@@ -135,12 +137,6 @@ class Coronavirus(Cog):
                                                reason="Achoo!")
 
             await self.log_message(db_guild, f"Looks like {message.author.mention} is infected :(")
-
-    @commands.group(name="minigame", aliases=["mg", "g", "cv"])
-    @commands.check(game_enabled)
-    async def core(self, ctx: MyContext):
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help("minigame")
 
     # noinspection PyUnresolvedReferences
     @commands.command()
