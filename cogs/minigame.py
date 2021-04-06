@@ -10,7 +10,6 @@ from utils.ctx_class import MyContext
 from utils.models import get_player, save_player, get_from_db, DiscordGuild
 
 
-# noinspection PyUnresolvedReferences
 class Coronavirus(Cog):
     @staticmethod
     async def game_enabled(ctx: MyContext):
@@ -92,8 +91,8 @@ class Coronavirus(Cog):
             player.infect()
             await save_player(player)
 
-    async def maybe_test(self, player, message):
-        db_guild = await get_from_db(ctx.guild)
+    async def maybe_test(self, player, message: discord.Message):
+        db_guild = await get_from_db(message.guild)
         if player.is_dead():
             if not player.achievements.died:
                 player.achievements.died = True
@@ -142,6 +141,7 @@ class Coronavirus(Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send_help("minigame")
 
+    # noinspection PyUnresolvedReferences
     @commands.command()
     @commands.cooldown(2, 600, commands.BucketType.user)
     @commands.max_concurrency(1, commands.BucketType.user)
@@ -264,7 +264,7 @@ class Coronavirus(Cog):
         player.touched_last = datetime.utcnow()
         target_player.touched_last = datetime.utcnow()
         player.statistics.hugs_given += 1
-        target_player.statistics.hugs_recived += 1
+        target_player.statistics.hugs_received += 1
 
         if player.is_infected() or target_player.is_infected():
             player.infect()
@@ -381,6 +381,8 @@ class Coronavirus(Cog):
         """
         The people here are trying their best to find a cure. Let them work, they are only using a lot of 🔬 anyway.
         """
+        _ = await ctx.get_translate_function()
+
         items = models.ItemsEmojis
 
         player = await get_player(ctx.author)
@@ -606,7 +608,7 @@ class Coronavirus(Cog):
             player.immunodeficient = True
             player.doctor = False
             player.percent_infected = 20
-            player.law = models.AlignementLaw.chaotic
+            player.law = models.AlignmentLaw.chaotic
             player.good = target_player.good
 
             db_guild = await get_from_db(ctx.guild)
@@ -866,7 +868,6 @@ class Coronavirus(Cog):
 
         await save_player(player)
 
-    # noinspection PyUnresolvedReferences
     @commands.command()
     @commands.cooldown(2, 20, commands.BucketType.user)
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -931,6 +932,8 @@ class Coronavirus(Cog):
         """
         Shows some cool statistics about the game.
         """
+        _ = await ctx.get_translate_function()
+
         embed = discord.Embed(colour=discord.Colour.dark_green(),
                               title=_("Have you been infected yet?"),
                               description=_("Global game statistics. • Event made by Eyesofcreeper#0001 in one night, "
@@ -944,9 +947,9 @@ class Coronavirus(Cog):
         infected_count = await models.Achievements.filter(tested_positive=True).count()
         vaccines_count = await models.Statistics.filter(made_vaccines__gt=0).count()
 
-        embed.add_field(name="People infected", value=str(infected_count), inline=True)
-        embed.add_field(name="Virus name", value="COVID-19", inline=True)
-        embed.add_field(name="Vaccines made", value=str(vaccines_count), inline=True)
+        embed.add_field(name=_("People infected"), value=str(infected_count), inline=True)
+        embed.add_field(name=_("Virus name"), value="COVID-19", inline=True)
+        embed.add_field(name=_("Vaccines made"), value=str(vaccines_count), inline=True)
 
         await ctx.reply(embed=embed)
 
