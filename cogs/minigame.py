@@ -254,7 +254,7 @@ class Coronavirus(Cog):
         target_player = await get_player(target)
 
         if player.is_dead():
-            await ctx.reply(_("❌ Ghost hug ? :("))
+            await ctx.reply(_("❌ Ghost hug? :("))
             return
         if not player.can_be_touched():
             await ctx.reply(_("❌ You probably shouldn't be doing that right now..."))
@@ -334,41 +334,41 @@ class Coronavirus(Cog):
                 cost = random.randint(-40, -10)
                 player.inventory.money += cost
                 player.inventory.soap += 1
-                await ctx.reply(_("{0} : Wash your hands regularly... [**soap**: 1, **money**: {1}]", item, cost))
+                await ctx.reply(_("{0}: Wash your hands regularly... [**soap**: 1, **money**: {1}]", item, cost))
             else:
-                await ctx.reply(_("{0} : Y'know, I also need payment sometimes... Get some {1} and come back later!",
+                await ctx.reply(_("{0}: Y'know, I also need payment sometimes... Get some {1} and come back later!",
                                   item, items.money.value))
         elif item == items.food.value:
             if player.inventory.money >= 70:
                 cost = random.randint(-70, -5)
                 player.inventory.money += cost
                 player.inventory.food += 1
-                await ctx.reply(_("{0} : Don't forget to eat 5 vegetables a day... [**food**: 1, **money**: {1}]",
+                await ctx.reply(_("{0}: Don't forget to eat 5 vegetables a day... [**food**: 1, **money**: {1}]",
                                   item, cost))
             else:
-                await ctx.reply(_("{0} : I know, we all want to eat, but still... Get some {1} and come back later!",
+                await ctx.reply(_("{0}: I know, we all want to eat, but still... Get some {1} and come back later!",
                                   item, items.money.value))
         elif item == items.airplane_ticket.value:
             if player.inventory.money >= 3000:
                 cost = -2500
                 player.inventory.money += cost
                 player.inventory.airplane_ticket += 1
-                await ctx.reply(_("{0} : Flying during a global outbreak of a deadly pandemic? Sure!... "
+                await ctx.reply(_("{0}: Flying during a global outbreak of a deadly pandemic? Sure!... "
                                   "[**airplane ticket**: 1, **money**: {1}]", item, cost))
             else:
-                await ctx.reply(_("{0} : WTF No, don't fly during this outbreak!", item))
+                await ctx.reply(_("{0}: WTF No, don't fly during this outbreak!", item))
         elif item == items.lottery_ticket.value:
             if player.inventory.money >= 150:
                 cost = random.randint(-150, 5)
                 player.inventory.money += cost
                 player.inventory.lottery_ticket += 1
-                await ctx.reply(_("{0} : Your chances of winning are so small... "
+                await ctx.reply(_("{0}: Your chances of winning are so small... "
                                   "[**lottery ticket**: 1, **money**: {1}]", item, cost))
             else:
-                await ctx.reply(_("{0} : You are not even rich enough to buy a friggin' lottery ticket... "
+                await ctx.reply(_("{0}: You are not even rich enough to buy a friggin' lottery ticket... "
                                   "Get some {1} and come back later!", item, items.money.value))
         else:
-            await ctx.reply(_("{0} : I'm sorry, I don't have stock for {0} yet... "
+            await ctx.reply(_("{0}: I'm sorry, I don't have stock for {0} yet... "
                               "Hopefully there will be a delivery sometime soon...", item))
 
         if random.randint(1, 100) <= 2:
@@ -441,12 +441,12 @@ class Coronavirus(Cog):
             player.inventory.knowledge_points -= item_cost
             item_attr_name = items(item).name
             player.inventory.__setattr__(item_attr_name, player.inventory.__getattribute__(item_attr_name) + 10)
-            await ctx.reply(_("{0} : Heh, I made that myself! [**{1}**: 10]", item, item_attr_name))
+            await ctx.reply(_("{0}: Heh, I made that myself! [**{1}**: 10]", item, item_attr_name))
 
             if item == items.vaccine.value:
                 player.statistics.made_vaccines += 10
         else:
-            await ctx.reply(_("{0} : This laboratory is not a place for interns. Go away!", item))
+            await ctx.reply(_("{0}: This laboratory is not a place for interns. Go away!", item))
 
         await save_player(player)
 
@@ -492,7 +492,7 @@ class Coronavirus(Cog):
             return
 
         if item in [items.education.value, items.knowledge_points.value, items.working_points.value]:
-            await ctx.reply(_("{0} : It's like, hard to give something that doesn't exist.", item))
+            await ctx.reply(_("{0}: It's like, hard to give something that doesn't exist.", item))
             return
 
         item_attr_name = items(item).name
@@ -502,10 +502,10 @@ class Coronavirus(Cog):
             target_player.inventory.__setattr__(item_attr_name, target_player.inventory.__getattribute__(item_attr_name)
                                                 + 1)
 
-            await ctx.reply(_("{0} : You gave {1} an {0}.", item, who.mention))
+            await ctx.reply(_("{0}: You gave {1} an {0}.", item, who.mention))
 
         else:
-            await ctx.reply(_("{0} : Spirit of giving is good, but you need to get something to give first!", item))
+            await ctx.reply(_("{0}: Spirit of giving is good, but you need to get something to give first!", item))
 
         await save_player(player)
         await save_player(target_player)
@@ -547,7 +547,7 @@ class Coronavirus(Cog):
                 return
 
             if random.randint(1, 100) <= 10:
-                await ctx.reply("❌ Did you forget your magical healing powers? Anyway, that didn't work...")
+                await ctx.reply(_("❌ Did you forget your magical healing powers? Anyway, that didn't work..."))
                 return
 
         player.statistics.heals += 1
@@ -574,7 +574,7 @@ class Coronavirus(Cog):
         target_player = await get_player(who)
 
         if not player.is_dead():
-            await ctx.reply("Oh no! It appears that you are in fact alive and very much not a zombie 🧟")
+            await ctx.reply(_("Oh no! It appears that you are in fact alive and very much not a zombie 🧟"))
             return
 
         if target_player.is_dead():
@@ -682,26 +682,26 @@ class Coronavirus(Cog):
             if player.inventory.soap >= 1:
                 player.inventory.soap -= 1
                 player.infect(-3)
-                await ctx.reply(_("{0} : You washed your hands. Good job! [**soap**: -1]", item))
+                await ctx.reply(_("{0}: You washed your hands. Good job! [**soap**: -1]", item))
             else:
-                await ctx.reply(_("{0} : Go and buy some {0} first!", item))
+                await ctx.reply(_("{0}: Go and buy some {0} first!", item))
         elif item == items.food.value:
             if player.inventory.food >= 1:
                 player.inventory.food -= 1
                 player.infect(-4)
-                await ctx.reply(_("{0} : Home cooked meals FTW!... [**food**: -1]", item))
+                await ctx.reply(_("{0}: Home cooked meals FTW!... [**food**: -1]", item))
             else:
-                await ctx.reply(_("{0} : Oh no! Your fridge is empty!", item))
+                await ctx.reply(_("{0}: Oh no! Your fridge is empty!", item))
         elif item == items.airplane_ticket.value:
             if player.inventory.airplane_ticket >= 1:
                 player.inventory.airplane_ticket -= 1
                 player.infect(25)
                 player.isolation = models.Isolation.goes_to_parties
                 player.achievements.traveler = True
-                await ctx.reply(_("{0} : I'm going to the airport and flying to another channel to avoid the virus!",
+                await ctx.reply(_("{0}: I'm going to the airport and flying to another channel to avoid the virus!",
                                   item), file=discord.File("memes/airplane_ticket.png"))
             else:
-                await ctx.reply(_("{0} : Airports are closed!", item))
+                await ctx.reply(_("{0}: Airports are closed!", item))
         elif item == items.lottery_ticket.value:
             if player.inventory.lottery_ticket >= 1:
                 player.inventory.lottery_ticket -= 1
@@ -711,47 +711,47 @@ class Coronavirus(Cog):
                     player.immunodeficient = True
                     player.charisma = -999
                     player.infect(100)
-                    await ctx.reply(_("{0} : Oops...", item))
+                    await ctx.reply(_("{0}: Oops...", item))
                 elif random_number <= 31:
                     player.inventory.money += 100
-                    await ctx.reply(_("{0} : Jackpot!", item))
+                    await ctx.reply(_("{0}: Jackpot!", item))
                 elif random_number == 100:
                     player.inventory.money += 5000
-                    await ctx.reply(_("{0} : Jackpot! 💸", item))
+                    await ctx.reply(_("{0}: Jackpot! 💸", item))
                 else:
-                    await ctx.reply(_("{0} : You won nothing. Better luck next time!", item))
+                    await ctx.reply(_("{0}: You won nothing. Better luck next time!", item))
             else:
-                await ctx.reply(_("{0} : You are still poor!", item))
+                await ctx.reply(_("{0}: You are still poor!", item))
         elif item == items.herb.value:
             if player.inventory.herb >= 1:
                 player.inventory.herb -= 1
                 player.infect(random.randint(-10, 10))
                 player.isolation = models.Isolation.stays_at_home_country
-                await ctx.reply(_("{0} : Does homeopathy work?!", item))
+                await ctx.reply(_("{0}: Does homeopathy work?!", item))
             else:
-                await ctx.reply(_("{0} : lol no.", item))
+                await ctx.reply(_("{0}: lol no.", item))
         elif item == items.music_cd.value:
             if player.inventory.music_cd >= 1:
                 player.inventory.music_cd -= 1
                 player.infect(random.randint(-14, 5))
                 if random.randint(0, 100) <= 15:
                     player.isolation = models.Isolation.goes_to_parties
-                await ctx.reply(_("{0} : Music cures boredom?!", item))
+                await ctx.reply(_("{0}: Music cures boredom?!", item))
             else:
-                await ctx.reply(_("{0} : Maybe if you sing out loud it could have the same effect.", item))
+                await ctx.reply(_("{0}: Maybe if you sing out loud it could have the same effect.", item))
         elif item == items.pill.value:
             if player.inventory.pill >= 1:
                 player.inventory.pill -= 1
                 if random.randint(0, 100) <= 8:
-                    await ctx.reply(_("{0} : Huh?! It's rat poison, why would you eat that?", item))
+                    await ctx.reply(_("{0}: Huh?! It's rat poison, why would you eat that?", item))
                     player.infect()
                 else:
                     player.infect(random.randint(-70, 0))
                     if random.randint(0, 100) <= 15:
                         player.isolation = models.Isolation.normal_life
-                    await ctx.reply(_("{0} : Acetaminophen cures cancer, change my mind?!", item))
+                    await ctx.reply(_("{0}: Acetaminophen cures cancer, change my mind?!", item))
             else:
-                await ctx.reply(_("{0} : You'd have to go and see a doctor for that buddy.", item))
+                await ctx.reply(_("{0}: You'd have to go and see a doctor for that buddy.", item))
         elif item == items.vaccine.value:
             if player.inventory.vaccine >= 1:
                 if random.randint(0, 100) <= 70:
@@ -855,15 +855,15 @@ class Coronavirus(Cog):
         elif item == items.virus_test.value:
             if player.inventory.virus_test >= 1:
                 player.inventory.virus_test -= 1
-                await ctx.reply(_("{0} : An extensive test was done on your virtual body. You are infected at {1}%. "
+                await ctx.reply(_("{0}: An extensive test was done on your virtual body. You are infected at {1}%. "
                                   "If this goes to 100% you are dead.\nHistorical analysis reveals you were infected "
                                   "at {2}% maximum, and you managed to cure yourself from {3}% of the sickness.",
                                   item, player.percent_infected, player.maximum_infected_points,
                                   player.total_cured_points))
             else:
-                await ctx.reply(_("{0} : You need a test first, to test yourself, y'know.", item))
+                await ctx.reply(_("{0}: You need a test first, to test yourself, y'know.", item))
         else:
-            await ctx.reply(_("{0} : Do you know how to use an {0} anyway?", item))
+            await ctx.reply(_("{0}: Do you know how to use an {0} anyway?", item))
             return
 
         if random.randint(1, 100) <= 2:
@@ -940,7 +940,7 @@ class Coronavirus(Cog):
         embed = discord.Embed(colour=discord.Colour.dark_green(),
                               title=_("Have you been infected yet?"),
                               description=_("Global game statistics. • Event made by Eyesofcreeper#0001 in one night, "
-                                            "inspired by Rapptz event bot.\nWho said statistics had to be exact ?\n"
+                                            "inspired by Rapptz event bot.\nWho said statistics had to be exact?\n"
                                             "Source code available, with spoilers: "
                                             "||https://github.com/DuckHunt-discord/Coroned-event||\n"
                                             "Pull requests accepted and encouraged. Have fun, don't remove credit :)"))
