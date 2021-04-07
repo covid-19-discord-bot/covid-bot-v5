@@ -150,7 +150,10 @@ class MyBot(AutoShardedBot):
                              "`c!`. This can be changed with `c!settings prefix <new prefix>`, replacing <new prefix> "
                              "with the prefix you want. For a list of my commands, run `c!help`."))
         elif ctx.valid:
-            async with ctx.typing():
+            try:
+                async with ctx.typing():
+                    await self.invoke(ctx)
+            except discord.Forbidden:
                 await self.invoke(ctx)
 
     async def on_command(self, ctx: MyContext):
