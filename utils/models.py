@@ -552,7 +552,7 @@ async def init_db_connection(config):
         }
     }
 
-    await Tortoise.init(tortoise_config, use_tz=True)
+    await Tortoise.init(tortoise_config)
 
     await Tortoise.generate_schemas()
 
