@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html style="color: rgb(45,45,45);background: rgb(45,45,45);">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Home - COVID-19 Bot</title>
+    <meta name="twitter:description" content="The best COVID-19 bot for Discord in existence!">
+    <meta name="twitter:card" content="summary">
+    <meta name="description" content="The best COVID-19 bot for Discord in existence!">
+    <meta name="twitter:title" content="COVID-19 Bot">
+    <link rel="stylesheet" href="/static/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/assets/fonts/fontawesome5-overrides.min.css">
+    <link rel="stylesheet" href="/static/assets/css/styles.min.css">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <nav class="navbar navbar-dark navbar-expand sticky-top bg-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
+            <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="/">
+                    <div class="sidebar-brand-icon rotate-n-15"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-virus">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <path d="M12 7v-4m-1 0h2"></path>
+                            <path d="M12 7v-4m-1 0h2" transform="rotate(45 12 12)"></path>
+                            <path d="M12 7v-4m-1 0h2" transform="rotate(90 12 12)"></path>
+                            <path d="M12 7v-4m-1 0h2" transform="rotate(135 12 12)"></path>
+                            <path d="M12 7v-4m-1 0h2" transform="rotate(180 12 12)"></path>
+                            <path d="M12 7v-4m-1 0h2" transform="rotate(225 12 12)"></path>
+                            <path d="M12 7v-4m-1 0h2" transform="rotate(270 12 12)"></path>
+                            <path d="M12 7v-4m-1 0h2" transform="rotate(315 12 12)"></path>
+                        </svg></div>
+                    <div class="sidebar-brand-text mx-3"><span>COVID-19 Bot</span></div>
+                </a>
+                <hr class="sidebar-divider my-0">
+                <ul class="nav navbar-nav text-light" id="accordionSidebar">
+                    <li class="nav-item"><a class="nav-link" href="https://discord.gg/3CyedKbWpR" target="_blank"><i class="fa fa-question-circle-o"></i><span style="padding-left: 5px;">Support Server</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="/invite"><i class="fa fa-user-plus"></i><span style="padding-left: 5px;">Invite</span></a></li>
+                </ul>
+                <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+            </div>
+        </nav>
+        <div class="d-flex flex-column" id="content-wrapper" style="width: 100%;">
+            <div id="content">
+                <div class="container-fluid" style="color: var(--white);">
+                    <div class="text-center d-sm-flex justify-content-between align-items-center mb-4" style="padding-top: 3.5%;color: var(--white);">
+                        <h1 class="text-center text-light mb-0" style="color: var(--white);">COVID-19 Bot</h1>
+                    </div>
+                    <div class="row row-cols-2">
+                        <div class="col">
+                            <h2 class="text-light">Features</h2>
+                            <ul class="text-light">
+                                <li>A auto-updater to send updates on a country every amount of time. See /help autoupdate for details.<br></li>
+                                <li>Global, Country, and Province stats (/covid world for global, /covid country &lt;country&gt; for stats on &lt;country&gt;, and /covid province &lt;province&gt; for stats on &lt;province&gt;! For stats on American States, check out /covid state &lt;name&gt; for stats in &lt;name&gt;!<br></li>
+                                <li>Maps! See a global, high-quality map for a lot of stuff, like total cases! See /maps for details.<br></li>
+                                <li>Vaccine stats! Get details on the latest vaccine candidates without leaving Discord! See /vaccine for details.<br></li>
+                                <li>And much more!</li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <h2 class="text-light">Features Coming Soon</h2>
+                            <ul class="text-light">
+                                <li>Graphs</li>
+                                <li>Historical Data</li>
+                                <li>Future Simulations</li>
+                                <li>COVID-19 News</li>
+                                <li>COVID-19 Minigames</li>
+                                <li>Customized Autoupdates</li>
+                                <li>Autoupdates for everything, from the world, to states, to maps, and even more!</li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <h2 class="text-light">FAQ</h2>
+                            <div role="tablist" id="accordion-1">
+                                <div class="card">
+                                    <div class="card-header" role="tab">
+                                        <h5 class="mb-0"><a data-toggle="collapse" aria-expanded="false" aria-controls="accordion-1 .item-1" href="#accordion-1 .item-1">How can I get started quickly?</a></h5>
+                                    </div>
+                                    <div class="collapse item-1" role="tabpanel" data-parent="#accordion-1">
+                                        <div class="card-body">
+                                            <p class="card-text">Most users like doing a autoupdate for the world, once daily, so start with that! Type the following into the channel you want to do a update in:&nbsp;&nbsp;</p><code>/autoupdate world 1d</code>
+                                            <p>The bot will now send a update for the world, once daily.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header" role="tab">
+                                        <h5 class="mb-0"><a data-toggle="collapse" aria-expanded="false" aria-controls="accordion-1 .item-2" href="#accordion-1 .item-2">What's up with this website? Why don't buttons work?</a></h5>
+                                    </div>
+                                    <div class="collapse item-2" role="tabpanel" data-parent="#accordion-1">
+                                        <div class="card-body">
+                                            <p class="card-text">The web UI is coming shortly! Keep a eye on this site, and join the support server for updates!</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header" role="tab">
+                                        <h5 class="mb-0"><a data-toggle="collapse" aria-expanded="false" aria-controls="accordion-1 .item-3" href="#accordion-1 .item-3">I want more help!</a></h5>
+                                    </div>
+                                    <div class="collapse item-3" role="tabpanel" data-parent="#accordion-1">
+                                        <div class="card-body">
+                                            <p class="card-text">Sure! Click the support server invite at the top of the page, head over to #support, ask your question, and be sure to ping the @Support role for a quicker response!</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h2 class="text-light">Get Started</h2>
+                            <section style="margin-bottom: 16px;"><a class="btn btn-outline-primary btn-block btn-lg" role="button" href="/invite">Invite The Bot</a></section>
+                            <section style="margin-bottom: 16px;"><a class="btn btn-outline-primary btn-block btn-lg" role="button" href="https://discord.gg/ZD3zB3w" target="_blank">Get Support</a></section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="text-center text-dark bg-white sticky-footer" style="background: rgb(34,34,34);width: 100%;">
+                <div class="container-fluid text-monospace my-auto" style="background: rgb(34,34,34);width: 100%;margin: 0px;padding-right: 0px;padding-left: 0px;">
+                    <div class="text-center my-auto copyright" style="background: rgb(34,34,34);width: 100%;"><span style="color: rgb(200,200,200);background: rgb(34,34,34);">Copyright © ImASkeleton 2020</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+    <script async defer src="https://sa.imaskeleton.me/latest.js"></script>
+    <noscript><img src="https://sa.imaskeleton.me/noscript.gif" alt=""/></noscript>
+</body>
+</html>
