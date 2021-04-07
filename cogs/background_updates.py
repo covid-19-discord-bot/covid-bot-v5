@@ -4,6 +4,7 @@ from discord.ext import tasks
 from utils.async_helpers import wrap_in_async
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
+from cogs.error_handling import submit_error_message
 
 
 class BackgroundUpdates(Cog):
@@ -20,6 +21,7 @@ class BackgroundUpdates(Cog):
         for updater in self.updaters:
             updater: tasks.Loop
             updater.start()
+            updater.error(self.handle_error)
 
     def cog_unload(self):
         for updater in self.updaters:
@@ -52,6 +54,9 @@ class BackgroundUpdates(Cog):
         await self.bot.wait_until_ready()
         # selenium hates being run in another process
         await wrap_in_async(self.bot.maps_api.download_maps, thread_pool=True)
+
+    async def handle_error(self, error: BaseException):
+        await submit_error_message(error, "updating stats", self.bot)
 
 
 setup = BackgroundUpdates.setup
