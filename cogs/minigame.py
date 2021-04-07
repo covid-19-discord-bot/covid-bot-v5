@@ -976,10 +976,10 @@ class Coronavirus(Cog):
         user_made_vaccine = False
         for i, user in enumerate(top_vaccines):
             if user.player.discord_id not in self.bot.owner_ids:
-                embed.add_field(name=f"#{i+1}: {user.player.discord_name}", value=f"{user.made_vaccines}", inline=False)
+                embed.add_field(name=f"#{i+1}: {user.player.discord_name}", value=user.made_vaccines, inline=False)
                 user_made_vaccine = True
             else:
-                embed.add_field(name=f"#{i+1}: Bot Admin", value=f"{user.made_vaccines}", inline=False)
+                embed.add_field(name=f"#{i+1}: Bot Admin", value=user.made_vaccines, inline=False)
         if not user_made_vaccine:
             embed.add_field(name=_("No users have made a vaccine!"),
                             value=_("Will you be the first? Go to school until you complete your degree and then "
