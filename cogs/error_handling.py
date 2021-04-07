@@ -60,7 +60,6 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
     except Exception as e:
         bot.logger.exception("Error while sending exception to Sentry!", exc_info=e)
     await error_channel.send(**kwargs)
-    sentry_sdk.set_context()
 
 
 class CommandErrorHandler(Cog):
