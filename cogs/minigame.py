@@ -7,7 +7,7 @@ from discord.ext import commands
 from utils import models
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-from utils.models import get_player, save_player, get_from_db, DiscordGuild
+from utils.models import get_player, save_player, get_from_db, DiscordGuild, Statistics
 
 
 async def game_enabled(ctx: MyContext):
@@ -955,6 +955,30 @@ class Coronavirus(Cog):
         embed.add_field(name=_("Virus name"), value="COVID-19", inline=True)
         embed.add_field(name=_("Vaccines made"), value=str(vaccines_count), inline=True)
 
+        await ctx.reply(embed=embed)
+
+    @commands.command()
+    async def game_top(self, ctx: MyContext):
+        """
+        Who's the top user?
+
+        Bot admins are not included in this list.
+        """
+        _ = await ctx.get_translate_function()
+
+        embed = discord.Embed(color=discord.Color.dark_green(),
+                              title=_("Global Top Users"),
+                              description=_("These are the users who have made the most vaccines."))
+
+        top_vaccines: typing.List[Statistics] = await models.Statistics.filter(made_vaccines__gt=0).\
+            order_by("made_vaccines").limit(10).prefetch_related("player")
+        for user in top_vaccines:
+            embed.add_field(name=f"{user.player.discord_name}", value=f"{user.made_vaccines}")
+        if len(embed.fields) == 0:
+            embed.add_field(name=_("No users have made a vaccine!"),
+                            value=_("Will you be the first? Go to school until you complete your degree and then "
+                                    "research until you have 10k 🔬! After that you're on your own to figure out how "
+                                    "to get the vaccine."))
         await ctx.reply(embed=embed)
 
     async def dispatch_maybes(self, message: discord.Message):
