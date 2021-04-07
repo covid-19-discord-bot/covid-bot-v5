@@ -970,10 +970,11 @@ class Coronavirus(Cog):
                               title=_("Global Top Users"),
                               description=_("These are the users who have made the most vaccines."))
 
-        top_vaccines: typing.List[Statistics] = await models.Statistics.filter(made_vaccines__gt=0).\
+        top_vaccines: typing.List[Statistics] = await models.Statistics.filter(made_vaccines__gt=0). \
             order_by("made_vaccines").limit(10).prefetch_related("player")
         for user in top_vaccines:
-            embed.add_field(name=f"{user.player.discord_name}", value=f"{user.made_vaccines}")
+            if user.player.discord_id not in self.bot.owner_ids:
+                embed.add_field(name=f"{user.player.discord_name}", value=f"{user.made_vaccines}")
         if len(embed.fields) == 0:
             embed.add_field(name=_("No users have made a vaccine!"),
                             value=_("Will you be the first? Go to school until you complete your degree and then "
