@@ -149,7 +149,7 @@ class MyBot(AutoShardedBot):
             await ctx.send(_("Hi there! I'm a bot for giving live stats on the COVID-19 pandemic. My default prefix is "
                              "`c!`. This can be changed with `c!settings prefix <new prefix>`, replacing <new prefix> "
                              "with the prefix you want. For a list of my commands, run `c!help`."))
-        elif ctx.prefix is not None:
+        elif ctx.valid:
             async with ctx.typing():
                 await self.invoke(ctx)
 
