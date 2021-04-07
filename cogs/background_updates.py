@@ -29,32 +29,29 @@ class BackgroundUpdates(Cog):
 
     @tasks.loop(minutes=5)
     async def update_worldometers_stats(self):
+        await self.bot.wait_until_ready()
         await self.bot.worldometers_api.update_covid_19_virus_stats()
 
     @tasks.loop(minutes=15)
     async def update_jhucsse_stats(self):
+        await self.bot.wait_until_ready()
         await self.bot.jhucsse_api.update_covid_19_virus_stats()
 
     @tasks.loop(hours=12)
     async def update_vaccine_stats(self):
+        await self.bot.wait_until_ready()
         await self.bot.vaccine_api.update_covid_19_vaccine_stats()
 
     @tasks.loop(hours=12)
     async def update_owid_stats(self):
+        await self.bot.wait_until_ready()
         await self.bot.owid_api.update_covid_19_owid_data()
 
     @tasks.loop(hours=24)
     async def update_maps(self):
+        await self.bot.wait_until_ready()
         # selenium hates being run in another process
         await wrap_in_async(self.bot.maps_api.download_maps, thread_pool=True)
-
-    @update_worldometers_stats.before_loop()
-    @update_jhucsse_stats.before_loop()
-    @update_vaccine_stats.before_loop()
-    @update_owid_stats.before_loop()
-    @update_maps.before_loop()
-    async def before_loop(self):
-        await self.bot.wait_until_ready()
 
 
 setup = BackgroundUpdates.setup
