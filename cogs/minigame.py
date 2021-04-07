@@ -968,14 +968,19 @@ class Coronavirus(Cog):
 
         embed = discord.Embed(color=discord.Color.dark_green(),
                               title=_("Global Top Users"),
-                              description=_("These are the users who have made the most vaccines."))
+                              description=_("These are the users who have made the most vaccines. The top user at the "
+                                            "end of each month can claim a gift of Nitro Classic!"))
 
         top_vaccines: typing.List[Statistics] = await models.Statistics.filter(made_vaccines__gt=0). \
             order_by("made_vaccines").limit(10).prefetch_related("player")
-        for user in top_vaccines:
+        user_made_vaccine = False
+        for i, user in enumerate(top_vaccines):
             if user.player.discord_id not in self.bot.owner_ids:
-                embed.add_field(name=f"{user.player.discord_name}", value=f"{user.made_vaccines}")
-        if len(embed.fields) == 0:
+                embed.add_field(name=f"#{i}: {user.player.discord_name}", value=f"{user.made_vaccines}")
+                user_made_vaccine = True
+            else:
+                embed.add_field(name=f"#{i}: Bot Admin", value=f"{user.made_vaccines}")
+        if not user_made_vaccine:
             embed.add_field(name=_("No users have made a vaccine!"),
                             value=_("Will you be the first? Go to school until you complete your degree and then "
                                     "research until you have 10k 🔬! After that you're on your own to figure out how "
