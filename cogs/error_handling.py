@@ -55,7 +55,10 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
         kwargs["file"] = discord.File(StringIO(''.join(traceback.format_tb(exc.__traceback__))),
                                       filename="traceback.txt")
     kwargs["embed"] = error_embed
-    sentry_sdk.capture_exception(exc)
+    try:
+        sentry_sdk.capture_exception(exc)
+    except Exception as e:
+        bot.logger.exception("Error while sending exception to Sentry!", exc_info=e)
     await error_channel.send(**kwargs)
     sentry_sdk.set_context()
 
