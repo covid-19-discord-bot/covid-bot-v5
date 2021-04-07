@@ -734,7 +734,7 @@ class OWIDData:
         self.logger.info("Getting OWID data...")
         async with session as session:
             try:
-                data = await get_data(session, "w")
+                data = await get_data(session, "https://covid.ourworldindata.org/data/owid-covid-data.json")
             except NetworkException as e:
                 self._update_tries += 1
                 await _handle_client_exceptions(self, e)
