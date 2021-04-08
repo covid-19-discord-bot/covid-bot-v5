@@ -272,8 +272,7 @@ class Player(Model):
     def can_be_touched(self) -> bool:
         if not self.is_dead():
             return self.touched_last + datetime.timedelta(hours=3) < datetime.datetime.utcnow()
-        else:
-            return self.touched_last + datetime.timedelta(hours=1) < datetime.datetime.utcnow()
+        return self.touched_last + datetime.timedelta(hours=1) < datetime.datetime.utcnow()
 
     def infect(self, add_infected: int = None) -> None:
         if add_infected is None:

@@ -219,7 +219,7 @@ class Coronavirus(Cog):
             await ctx.reply(_("❌ It's harder to do science when you are dead :("))
             return
 
-        elif not player.doctor:
+        if not player.doctor:
             await ctx.reply(_("❌ Maybe you should leave that to professionals :("))
             return
 
@@ -295,7 +295,7 @@ class Coronavirus(Cog):
         _ = await ctx.get_translate_function()
 
         items = models.ItemsEmojis
-        items_list = list([e.value for e in models.ItemsEmojis])
+        items_list = [e.value for e in models.ItemsEmojis]
         player = await get_player(ctx.author)
         if player.is_dead():
             await ctx.reply(_("❌ Oh no! It appears that you are not alive :("))
@@ -482,7 +482,7 @@ class Coronavirus(Cog):
             return
 
         items = models.ItemsEmojis
-        items_list = list([e.value for e in models.ItemsEmojis])
+        items_list = [e.value for e in models.ItemsEmojis]
         item = next((item for item in items_list if item in what), None)
 
         if not item:
@@ -643,7 +643,7 @@ class Coronavirus(Cog):
         _ = await ctx.get_translate_function()
 
         items = models.ItemsEmojis
-        items_list = list([e.value for e in models.ItemsEmojis])
+        items_list = [e.value for e in models.ItemsEmojis]
         player = await get_player(ctx.author)
         if player.is_dead():
             await ctx.reply(_("❌ Oh no! It appears that you are not alive, you can't use things if you are dead :("))
