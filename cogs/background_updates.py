@@ -1,58 +1,62 @@
 # coding=utf-8
-"""
-File designed for you to copy over and over again as a template for new parts of your bot
-"""
-from asyncio import sleep
-
-from discord.ext import commands
 from discord.ext import tasks
 
 from utils.async_helpers import wrap_in_async
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
-from utils.ctx_class import MyContext
+from cogs.error_handling import submit_error_message
 
 
 class BackgroundUpdates(Cog):
     def __init__(self, bot: MyBot, *args, **kwargs):
         super().__init__(bot, *args, **kwargs)
         self.index = 0
-        self.update_all_stats.start()
-
-    @commands.command(name="restart_autoupdaters")
-    @commands.has_any_role(686939763927678986)
-    async def you_ve_got_to_be_kidding(self, ctx: MyContext):
-        _ = await ctx.get_translate_function()
-        stats_msg = await ctx.send(_("Stopping task..."))
-        self.update_all_stats.stop()
-        await stats_msg.edit(content=_("Task has been sent a stop signal. Waiting 10 seconds..."))
-        await sleep(10)
-        await stats_msg.edit(content=_("Sending terminate signal..."))
-        self.update_all_stats.cancel()
-        await stats_msg.edit(content=_("Task has been killed. Starting now..."))
-        await sleep(10)
-        self.update_all_stats.start()
-        await stats_msg.edit(content=_("Task has been sent a start signal."))
-        await sleep(10)
-        await stats_msg.edit(content=_("Task restarted!"))
+        self.updaters = [
+            self.update_worldometers_stats,
+            self.update_jhucsse_stats,
+            self.update_vaccine_stats,
+            self.update_owid_stats,
+            self.update_maps
+        ]
+        for updater in self.updaters:
+            updater: tasks.Loop
+            updater.start()
+            updater.error(self.handle_error)
 
     def cog_unload(self):
-        self.update_all_stats.stop()
+        for updater in self.updaters:
+            updater: tasks.Loop
+            updater.clear_exception_types()  # just in case it throws a exception, we don't want it to keep trying.
+            updater.stop()
 
-    @tasks.loop(minutes=30)
-    async def update_all_stats(self):
+    @tasks.loop(minutes=5)
+    async def update_worldometers_stats(self):
         await self.bot.wait_until_ready()
-        self.bot.logger.info("Starting stat updates...")
-        if self.index == 0:
-            await self.bot.async_setup()  # just to be 100% certain this is called
         await self.bot.worldometers_api.update_covid_19_virus_stats()
+
+    @tasks.loop(minutes=15)
+    async def update_jhucsse_stats(self):
+        await self.bot.wait_until_ready()
         await self.bot.jhucsse_api.update_covid_19_virus_stats()
+
+    @tasks.loop(hours=12)
+    async def update_vaccine_stats(self):
+        await self.bot.wait_until_ready()
         await self.bot.vaccine_api.update_covid_19_vaccine_stats()
+
+    @tasks.loop(hours=12)
+    async def update_owid_stats(self):
+        await self.bot.wait_until_ready()
         await self.bot.owid_api.update_covid_19_owid_data()
-        await sleep(120)  # wait 120 seconds...
+
+    @tasks.loop(hours=24)
+    async def update_maps(self):
+        await self.bot.wait_until_ready()
         # selenium hates being run in another process
         await wrap_in_async(self.bot.maps_api.download_maps, thread_pool=True)
-        self.index += 1
+
+    async def handle_error(self, error: BaseException):
+        await submit_error_message(error, "updating stats", self.bot)
 
 
 setup = BackgroundUpdates.setup

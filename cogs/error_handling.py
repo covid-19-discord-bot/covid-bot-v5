@@ -1,6 +1,7 @@
 # coding=utf-8
 import datetime
 import traceback
+from io import StringIO
 from typing import Optional
 
 import discord
@@ -46,10 +47,19 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
     tb = f"```py\n{''.join(traceback.format_tb(exc.__traceback__))}\n```"
     error_embed.add_field(name="Exception Name", value=str(exc.__class__))
     error_embed.add_field(name="Exception Reason", value=str(exc), inline=False)
-    error_embed.add_field(name="Exception Traceback", value=tb if len(tb) < 1024 else "Too long!")
-    sentry_sdk.capture_exception(exc)
-    await error_channel.send(embed=error_embed)
-    sentry_sdk.set_context()
+    kwargs = {}
+    if len(tb) < 1024:
+        error_embed.add_field(name="Exception Traceback", value=tb)
+    else:
+        error_embed.add_field(name="Exception Traceback", value="Attached File")
+        kwargs["file"] = discord.File(StringIO(''.join(traceback.format_tb(exc.__traceback__))),
+                                      filename="traceback.txt")
+    kwargs["embed"] = error_embed
+    try:
+        sentry_sdk.capture_exception(exc)
+    except Exception as e:
+        bot.logger.exception("Error while sending exception to Sentry!", exc_info=e)
+    await error_channel.send(**kwargs)
 
 
 class CommandErrorHandler(Cog):
