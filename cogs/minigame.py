@@ -5,6 +5,7 @@ import typing
 from datetime import timedelta, datetime
 from discord.ext import commands
 from utils import models
+from utils.checks import BotIgnore
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.models import get_player, save_player, get_from_db, DiscordGuild, Statistics
@@ -12,7 +13,10 @@ from utils.models import get_player, save_player, get_from_db, DiscordGuild, Sta
 
 async def game_enabled(ctx: MyContext):
     db_guild = await get_from_db(ctx.guild)
-    return db_guild.minigame_enabled
+    if db_guild.minigame_enabled:
+        return True
+    else:
+        raise BotIgnore()
 
 
 class Coronavirus(Cog):
