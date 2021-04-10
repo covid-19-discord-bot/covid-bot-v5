@@ -35,7 +35,8 @@ class SuggestionsCommands(Cog):
         suggestion = " ".join(suggestion)
         description = "By %s.\nReact with ✅ to vote for this suggestion, and ❌ to vote against this suggestion.\n0/0 can deny a suggestion by reacting with 🛑.\n" % (ctx.author.mention)
         suggestion_embed = discord.Embed(title="Suggestion",
-                                         description=description)
+                                         description=description,
+                                         color=discord.Color.dark_red())
         suggestion_embed.add_field(name="Suggestion", value=suggestion)
         try:
             suggestion_channel = self.bot.get_channel(796428867715596358)
@@ -53,7 +54,7 @@ class SuggestionsCommands(Cog):
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         if payload.emoji.name == "🛑" and payload.channel_id == 796428867715596358:
             if payload.user_id in self.bot.owner_ids and payload.message_id in active_suggestions:
-                denied_suggestion = discord.Embed(title="Denied Suggestion!",
+                denied_suggestion = discord.Embed(color=discord.Color.dark_red(), title="Denied Suggestion!",
                                                   description="This suggestion was denied by 0/0#0001."). \
                     add_field(name="Suggestion", value=active_suggestions[payload.message_id])
                 channel: discord.TextChannel = self.bot.get_channel(payload.channel_id)

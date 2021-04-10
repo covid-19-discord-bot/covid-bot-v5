@@ -53,7 +53,7 @@ class FutureSimulations(Cog):
             return None
         recovered: ndarray = data['recovered']
         deaths: ndarray = data['deaths']
-        data_embed = discord.Embed(title=_("Data for Day {0}", date_to_parse)). \
+        data_embed = discord.Embed(color=discord.Color.dark_red(), title=_("Data for Day {0}", date_to_parse)). \
             add_field(name="Infected", value=str(round(infected[date_to_parse - 1]))). \
             add_field(name="Recovered", value=str(round(recovered[date_to_parse - 1]))). \
             add_field(name="Deaths", value=str(round(deaths[date_to_parse - 1])))
@@ -172,7 +172,7 @@ class FutureSimulations(Cog):
                                                         "(tomorrow), and `last` to jump to the last day in your "
                                                         "simulation. Type a number to jump straight to that day. Type "
                                                         "`exit` to exit the paginator (for example, if you want to "
-                                                        "modify sim data)."))
+                                                        "modify sim data)."), color=discord.Color.dark_red())
         sim_details_embed.add_field(name=_("Total infections by end of simulation"), value=infected.max(axis=0))
         sim_details_embed.add_field(name=_("Total recoveries by end of simulation"), value=recovered.max(axis=0))
         sim_details_embed.add_field(name=_("Total deaths by end of simulation"), value=deaths.max(axis=0))

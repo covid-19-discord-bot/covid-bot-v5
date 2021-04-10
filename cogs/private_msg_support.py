@@ -123,7 +123,7 @@ class PrivateMessagesSupport(Cog):
                     user = await self.get_user(ticket_channel.name)
 
                     inactivity_embed = discord.Embed(
-                        color=discord.Color.orange(),
+                        color=discord.Color.dark_red(),
                         title="DM Timed Out",
                         description="It seems like nothing has been said here for a long time, "
                                     "so I've gone ahead and closed your ticket, deleting its history. "
@@ -248,7 +248,7 @@ class PrivateMessagesSupport(Cog):
 
         await channel.send(embed=info_embed)
 
-        welcome_embed = discord.Embed(color=discord.Color.green(), title="Support ticket opened")
+        welcome_embed = discord.Embed(color=discord.Color.dark_red(), title="Support ticket opened")
         welcome_embed.description = "Welcome to COVID-19 Bot DM support.\nMessages here are relayed to a select " \
                                     "group of volunteers and bot moderators to help you use the bot. For general " \
                                     "questions, we also have a support server " \
@@ -269,7 +269,7 @@ class PrivateMessagesSupport(Cog):
         self.bot.logger.info(f"[SUPPORT] answering {user.name}#{user.discriminator} with a message from "
                              f"{message.author.name}#{message.author.discriminator}")
 
-        support_embed = discord.Embed(color=discord.Color.blurple(), title="Support response")
+        support_embed = discord.Embed(color=discord.Color.dark_red(), title="Support response")
         support_embed.set_author(name=f"{message.author.name}#{message.author.discriminator}",
                                  icon_url=str(message.author.avatar_url))
         support_embed.description = message.content
@@ -302,7 +302,7 @@ class PrivateMessagesSupport(Cog):
         user = message.author
 
         if self.invites_regex.search(content):
-            dm_invite_embed = discord.Embed(color=discord.Color.purple(),
+            dm_invite_embed = discord.Embed(color=discord.Color.dark_red(),
                                             title="This is not how you invite COVID-19 Bot.")
             dm_invite_embed.description = "COVID-19 Bot, like other discord bots, can't join servers by using an " \
                                           "invite link.\nYou instead have to be a server admin (or at least have the" \
@@ -405,7 +405,7 @@ class PrivateMessagesSupport(Cog):
         user = await self.get_user(ctx.channel.name)
 
         close_embed = discord.Embed(
-            color=discord.Color.red(),
+            color=discord.Color.dark_red(),
             title="DM Closed",
             description="Your support ticket was closed and the history deleted. Thanks for using COVID-19 Bot DM "
                         "support. If you need anything else, feel free to open a new ticket by sending a message here."

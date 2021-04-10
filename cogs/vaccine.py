@@ -21,7 +21,7 @@ class VaccineCog(Cog):
             vaccine_phases = ""
             for phase in self.bot.vaccine_api.phases:
                 vaccine_phases += _("{0}: {1} candidates\n", phase['phase'], phase['candidates'])
-            vaccine_embed = discord.Embed(name=_("Vaccine Updates"),
+            vaccine_embed = discord.Embed(color=discord.Color.dark_red(), name=_("Vaccine Updates"),
                                           description=_("(For more details, run `{0}help vaccine`)\nThere are a total "
                                                         "of **{1} vaccine candidates**.\n__**Phases**__\n{2}",
                                                         ctx.prefix, self.bot.vaccine_api.total_candidates,
@@ -36,7 +36,7 @@ class VaccineCog(Cog):
         List all the possible vaccine candidates for COVID-19!
         """
         _ = await ctx.get_translate_function()
-        vaccine_embed = discord.Embed(title=_("Vaccine Candidates"),
+        vaccine_embed = discord.Embed(color=discord.Color.dark_red(), title=_("Vaccine Candidates"),
                                       description=_("To get more details on a vaccine candidate, run "
                                                     "`{0}vaccine details <id>`\n"
                                                     "The ID of any given candidate is under the name.", ctx.prefix))
@@ -80,7 +80,7 @@ class VaccineCog(Cog):
         else:
             desc = _("Description is too long! Download the attachment to see it!")
             file = discord.File(io.BytesIO(bytes(vaccine["details"], encoding="utf-8")), filename="description.txt")
-        vaccine_embed = discord.Embed(title=vaccine['candidate'],
+        vaccine_embed = discord.Embed(color=discord.Color.dark_red(), title=vaccine['candidate'],
                                       description=desc)
         vaccine_embed.add_field(name=_("Mechanism"), value=vaccine["mechanism"])
         sponsor_str = ""

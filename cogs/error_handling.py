@@ -43,7 +43,7 @@ async def submit_error_message(exc: BaseException, doing: str, bot: MyBot, ctx: 
     else:
         desc = "No context was passed, possibly a slash command?"
     error_embed = discord.Embed(title=f"Fatal error while working on {doing}!",
-                                description=desc)
+                                description=desc, color=discord.Color.dark_red())
     tb = f"```py\n{''.join(traceback.format_tb(exc.__traceback__))}\n```"
     error_embed.add_field(name="Exception Name", value=str(exc.__class__))
     error_embed.add_field(name="Exception Reason", value=str(exc), inline=False)
