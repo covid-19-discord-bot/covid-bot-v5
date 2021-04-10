@@ -95,8 +95,7 @@ async def graph(ctx: MyContext, name: str):
     et = time.perf_counter_ns()
     f = discord.File(graph_buffer, filename="image.png")
     tt = et - st
-    e = discord.Embed(title=_("Graph for {0}", name[1].title() if name[1] else 'world'))
-    e.color = discord.Color.dark_red()
+    e = discord.Embed(title=_("Graph for {0}", name[1].title() if name[1] else 'world'), color=discord.Color.dark_red())
     e.set_footer(text=_("Took {0} seconds ({1} nanoseconds) to generate • Cache Status: {2}",
                         format(round(tt / 1000000000, 1), ","), format(tt, ","), "HIT" if cache_hit else "MISS"))
     e.set_image(url="attachment://image.png")

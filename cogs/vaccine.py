@@ -36,10 +36,10 @@ class VaccineCog(Cog):
         List all the possible vaccine candidates for COVID-19!
         """
         _ = await ctx.get_translate_function()
-        vaccine_embed = discord.Embed(color=discord.Color.dark_red(), title=_("Vaccine Candidates"),
+        vaccine_embed = discord.Embed(title=_("Vaccine Candidates"),
                                       description=_("To get more details on a vaccine candidate, run "
                                                     "`{0}vaccine details <id>`\n"
-                                                    "The ID of any given candidate is under the name.", ctx.prefix))
+                                                    "The ID of any given candidate is under the name.", ctx.prefix), color=discord.Color.dark_red())
         max_pages = ceil(len(self.bot.vaccine_api.candidates) / 24)
         ids = {}
         for data, i in zip(self.bot.vaccine_api.candidates, range(len(self.bot.vaccine_api.candidates))):
