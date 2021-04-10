@@ -108,7 +108,7 @@ class RestAPI(Cog):
 
     async def vote_reminder(self, user: discord.User):
         await asyncio.sleep(86460)
-        e = discord.Embed(title="Vote Reminder", description="Hi there {0}! It's been 12 hours since you voted, and "
+        e = discord.Embed(color=discord.Color.dark_red(), title="Vote Reminder", description="Hi there {0}! It's been 12 hours since you voted, and "
                                                              "this is a friendly reminder to do so again! Here's the "
                                                              "link: https://top.gg/bot/675390513020403731/vote. "
                                                              "Thanks again for using this bot.".

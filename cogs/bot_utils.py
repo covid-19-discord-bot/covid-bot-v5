@@ -18,7 +18,7 @@ class UtilsCommands(Cog):
         Credits. Thanks to all these people!
         """
         _ = await ctx.get_translate_function()
-        credits_embed = discord.Embed(color=discord.Color.dark_green(), title=_("Credits"))
+        credits_embed = discord.Embed(color=discord.Color.dark_red(), title=_("Credits"))
         symphonic: discord.User = await self.bot.fetch_user(263128260009787392)
         zeroslashzero: discord.User = await self.bot.fetch_user(661660243033456652)
         eyes: discord.User = await self.bot.fetch_user(138751484517941259)
@@ -42,7 +42,7 @@ class UtilsCommands(Cog):
         Invite the bot and get support!
         """
         _ = await ctx.get_translate_function()
-        invite_embed = discord.Embed(color=discord.Color.purple(), title=_("Invite Links"))
+        invite_embed = discord.Embed(color=discord.Color.dark_red(), title=_("Invite Links"))
         oauth_url = "https://covid19.imaskeleton.me/invite"
         invite_embed.add_field(name=_("Bot Invite Link"), value=oauth_url)
         invite_embed.add_field(name=_("Discord Server Invite Link"), value=self.bot.support_server_invite)
@@ -93,7 +93,8 @@ class UtilsCommands(Cog):
                                                  "more servers, giving me (the dev) more incentive to add more "
                                                  "features!\n"
                                                  "If you want a specific feature, let me know with the `/suggest` "
-                                                 "command!"))
+                                                 "command!"),
+                                    color=discord.Color.dark_red())
         vote_embed.add_field(name="discord.boats",
                              value="https://discord.boats/bot/675390513020403731/vote")
         vote_embed.add_field(name="bots.discordlabs.org",

@@ -57,7 +57,7 @@ class SupportServerCommands(Cog):
         self.bot.logger.debug("Updating status message", guild=status_channel.guild, channel=status_channel)
 
         await purge_channel_messages(status_channel)
-        embed = discord.Embed(colour=discord.Colour.blurple(),
+        embed = discord.Embed(colour=discord.Color.dark_red(),
                               title=f"{self.bot.user.name}'s status")
         try:
             user_count = 0

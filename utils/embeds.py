@@ -41,7 +41,8 @@ async def basic_stats_embed(location: tuple, today: datetime.date, *, ctx: MyCon
                                 description=_("Why such a small amount of data compared to country stats?\n"
                                               "Some provinces may report the same amount of data, but these provinces "
                                               "make up such a small amount of all provinces, meaning it's not worth it "
-                                              "to try to show it for all of them."))
+                                              "to try to show it for all of them."),
+                                color=discord.Color.dark_red())
     for name, value in data_points:
         if stats[value] == 0:
             stats_embed.add_field(name=name, value=_("{0} (could also have no data)", format(stats[value], ',')))
@@ -287,7 +288,7 @@ async def owid_embed(name: str, *, ctx: Optional[MyContext] = None, bot: Optiona
 async def list_embed(ctx: MyContext, letter: str) -> [discord.Embed, None]:
     _ = await ctx.get_translate_function()
     _list = await ctx.bot.worldometers_api.get_all_iso_codes()
-    embed = discord.Embed(color=discord.Color.blue(),
+    embed = discord.Embed(color=discord.Color.dark_red(),
                           title=_("Country List"),
                           description=_("Use either the country name, or the ISO2/ISO3 code when getting stats with "
                                         "`/covid <name>`!"))

@@ -26,7 +26,7 @@ class BoatHelp(HelpCommand):
 
     async def send_bot_help(self, mapping):
         _ = await self.context.get_translate_function()
-        embed = discord.Embed(title=_("Help"))
+        embed = discord.Embed(title=_("Help"), color=discord.Color.dark_red())
         if self.context.bot.description:
             embed.description = self.context.bot.description
         for cog, commands in mapping.items():
@@ -42,7 +42,8 @@ class BoatHelp(HelpCommand):
     async def send_cog_help(self, cog: Cog):
         _ = await self.context.get_translate_function()
         embed = discord.Embed(title=cog.qualified_name,
-                              description=cog.description)
+                              description=cog.description,
+                              color=discord.Color.dark_red())
         for command in cog.walk_commands():
             if isinstance(command, Command) and not command.hidden:
                 embed.add_field(name=self.get_command_signature(command), value=command.help)
@@ -54,7 +55,7 @@ class BoatHelp(HelpCommand):
 
     async def send_group_help(self, group: Group):
         _ = await self.context.get_translate_function()
-        embed = discord.Embed(title=group.qualified_name, description=group.description)
+        embed = discord.Embed(title=group.qualified_name, description=group.description, color=discord.Color.dark_red())
         for command in group.walk_commands():
             if isinstance(command, Command) and not command.hidden and command.parent == group:
                 if command.short_doc:
@@ -72,7 +73,7 @@ class BoatHelp(HelpCommand):
 
     async def send_command_help(self, command: Command):
         _ = await self.context.get_translate_function()
-        embed = discord.Embed(title=self.get_command_signature(command))
+        embed = discord.Embed(title=self.get_command_signature(command), color=discord.Color.dark_red())
         if command.help:
             embed.add_field(name=_("Help"), value=command.help)
         else:
@@ -97,7 +98,7 @@ class BoatHelp(HelpCommand):
 
     async def send_error_message(self, error):
         _ = await self.context.get_translate_function()
-        embed = discord.Embed(title=_("Error"), description=error)
+        embed = discord.Embed(title=_("Error"), description=error, color=discord.Color.dark_red())
         channel = self.get_destination()
         await channel.send(embed=embed)
 

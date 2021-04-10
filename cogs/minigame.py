@@ -889,7 +889,7 @@ class Coronavirus(Cog):
             who = ctx.author
         player = await get_player(who)
 
-        achievements_embed = discord.Embed(colour=discord.Colour.blurple(), title=_("Achievements"))
+        achievements_embed = discord.Embed(colour=discord.Color.dark_red(), title=_("Achievements"))
         achievements_embed.set_author(name=f"{who.name}#{who.discriminator}", icon_url=str(who.avatar_url))
 
         for achievement_name, achievement in models.AchievementsEmojis.__members__.items():
@@ -897,7 +897,7 @@ class Coronavirus(Cog):
             if player.achievements.__getattribute__(achievement_name):
                 achievements_embed.add_field(name=achievement_emoji, value=achievement_name, inline=True)
 
-        inventory_embed = discord.Embed(colour=discord.Colour.blurple(), title="Inventory")
+        inventory_embed = discord.Embed(colour=discord.Color.dark_red(), title="Inventory")
         inventory_embed.set_author(name=f"{who.name}#{who.discriminator}", icon_url=str(who.avatar_url))
 
         for item_name, item in models.ItemsEmojis.__members__.items():
@@ -908,7 +908,7 @@ class Coronavirus(Cog):
 
         inventory_embed.add_field(name=_("Isolation"), value=str(player.isolation.name), inline=False)
 
-        other_embed = discord.Embed(colour=discord.Colour.blurple(), title=_("Other"))
+        other_embed = discord.Embed(colour=discord.Color.dark_red(), title=_("Other"))
         other_embed.set_author(name=f"{who.name}#{who.discriminator}", icon_url=str(who.avatar_url))
         other_embed.add_field(name=_("Is a doctor"), value=str(player.doctor), inline=True)
         other_embed.add_field(name=_("Is immunodeficient"), value=str(player.immunodeficient), inline=True)
@@ -942,7 +942,7 @@ class Coronavirus(Cog):
         """
         _ = await ctx.get_translate_function()
 
-        embed = discord.Embed(colour=discord.Colour.dark_green(),
+        embed = discord.Embed(colour=discord.Color.dark_red(),
                               title=_("Have you been infected yet?"),
                               description=_("Global game statistics. • Event made by Eyesofcreeper#0001 in one night, "
                                             "inspired by Rapptz event bot.\nWho said statistics had to be exact?\n"
@@ -970,7 +970,7 @@ class Coronavirus(Cog):
         """
         _ = await ctx.get_translate_function()
 
-        embed = discord.Embed(color=discord.Color.dark_green(),
+        embed = discord.Embed(color=discord.Color.dark_red(),
                               title=_("Global Top Users"),
                               description=_("These are the users who have made the most vaccines. The top user at the "
                                             "end of each month can claim a gift of Nitro Classic!"))

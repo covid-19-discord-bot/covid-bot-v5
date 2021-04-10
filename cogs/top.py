@@ -14,7 +14,8 @@ from utils.ctx_class import MyContext
 
 def incorrect_sort(_: Callable) -> discord.Embed:
     not_correct_type_embed = discord.Embed(title=_("Incorrect Top List Type"),
-                                           description=_("Try sorting with one of the following:"))
+                                           description=_("Try sorting with one of the following:"),
+                                           color=discord.Color.dark_red())
     for _type in ["cases", "recovered", "deaths", "critical", "tests"]:
         not_correct_type_embed.add_field(name="\u200b", value=_type)
     return not_correct_type_embed
@@ -38,7 +39,8 @@ class TopCommands(Cog):
             await ctx.send(embed=incorrect_sort(_))
             return
         top_embed = discord.Embed(title=_("Top List"),
-                                  description=_("Run `{0}help top` for a list of all possible sorts!", ctx.prefix))
+                                  description=_("Run `{0}help top` for a list of all possible sorts!", ctx.prefix),
+                                  color=discord.Color.dark_red())
         for country, i in zip(_list, range(1, len(_list))):
             top_embed.add_field(name=_("{0}: {1}", i, country["country"]),
                                 value=format(int(country[_type.lower()]), ","))

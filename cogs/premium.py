@@ -49,7 +49,7 @@ class PremiumSettings(Cog):
                                                  "To claim your rewards after donating, ping 0/0#0001 in the bot's "
                                                  "support server: `/invite`. Thanks!\n"
                                                  "Here's a list of perks you might like:",
-                                     color=discord.Color.from_rgb(136, 138, 133))
+                                     color=discord.Color.dark_red())
         donate_embed.add_field(name="Perk 01", value="Access to premium features globally")
         donate_embed.add_field(name="Perk 02", value="Give up to 3 guilds access to premium features")
         donate_embed.add_field(name="Perk 03", value="Get autoupdates in DMs")

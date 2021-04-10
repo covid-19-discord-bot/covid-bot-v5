@@ -34,7 +34,7 @@ class MapsCommands(Cog):
 
         map_type_embed = discord.Embed(title=_("Map Types"),
                                        description=_("Use one of these map types when running `{0}maps "
-                                                     "show <name>`.", ctx.prefix))
+                                                     "show <name>`.", ctx.prefix), color=discord.Color.dark_red())
         for item in map_identifiers:
             map_type_embed.add_field(name=map_identifiers[item][1], value=item)
 
@@ -51,7 +51,7 @@ class MapsCommands(Cog):
             await ctx.send(_("I don't know what map you're looking for! Run `{0}maps types` to see all the "
                              "maps I can show you!", ctx.prefix))
             return
-        map_embed = discord.Embed(title=_("Map for {0}", map_identifiers[map_type][1]))
+        map_embed = discord.Embed(title=_("Map for {0}", map_identifiers[map_type][1]), color=discord.Color.dark_red())
         try:
             map_buffer = await wrap_in_async(self.bot.maps_api.get_map, map_type, thread_pool=True)
         except KeyError:

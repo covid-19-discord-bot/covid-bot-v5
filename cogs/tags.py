@@ -55,9 +55,8 @@ class TagMenuSource(menus.ListPageSource):
         super().__init__(data, per_page=1)
 
     async def format_page(self, menu, entry):
-        e = discord.Embed()
+        e = discord.Embed(color=discord.Color.dark_red())
         e.title = self.tag.name.replace('_', ' ').title()
-
         if len(entry) == 0:
             entry = " "
 
@@ -106,7 +105,7 @@ class TagsListMenuSource(menus.ListPageSource):
         super().__init__(tags, per_page=10)
 
     async def format_page(self, menu: menus.MenuPages, entries):
-        e = discord.Embed()
+        e = discord.Embed(color=discord.Color.dark_red())
         e.description = "This is the list of all the tags on this server. They are ordered by official tags and " \
                         "most used first.\nThe list doesn't include tag aliases"
 

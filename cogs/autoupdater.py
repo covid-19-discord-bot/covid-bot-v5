@@ -708,7 +708,8 @@ class AutoUpdaterCog(Cog):
         cmd_usage = f"{ctx.prefix}autoupdate disable <id>"
         update_embed = discord.Embed(title=_("List of Updaters"),
                                      description=_("To disable one of these updaters, run {0}, replacing {1} with the "
-                                                   "ID.", cmd_usage, "`<id>`"))
+                                                   "ID.", cmd_usage, "`<id>`"),
+                                    color=discord.Color.dark_red())
         async for updater in AutoupdaterData().filter(discord_id=ctx.channel.id):
             update_embed.add_field(name=updater.id, value=_("Country: {0}\n"
                                                             "Delay: {1} seconds", updater.country_name, updater.delay))
