@@ -38,7 +38,7 @@ class Coronavirus(Cog):
             return
 
         find_chance = int(player.isolation / 2)
-        if random.randint(0, 1000) <= find_chance:
+        if random.randint(0, 10000) <= find_chance:
             # herb = fields.IntField(default=0)  # Can be found
             # music_cd = fields.IntField(default=0)  # Can be found
             items = models.ItemsEmojis
