@@ -76,8 +76,8 @@ class SupportServerCommands(Cog):
         t_2 = time.perf_counter()
         ping = round(t_2 - t_1)  # calculate the time needed to trigger typing
 
-        embed.add_field(name="Average Latency", value=f"{round(self.bot.latency/1000, 2)}ms", inline=True)
-        embed.add_field(name="Current ping", value=f"{round(ping/1000, 2)}ms", inline=True)
+        embed.add_field(name="Average Latency", value=f"{round(self.bot.latency*1000, 2)}ms", inline=True)
+        embed.add_field(name="Current ping", value=f"{round(ping*1000, 2)}ms", inline=True)
         embed.add_field(name="Shards Count", value=f"{self.bot.shard_count}", inline=True)
 
         def get_bot_uptime():
@@ -117,14 +117,14 @@ class SupportServerCommands(Cog):
         for shard, latency in latencies:
             if shard == ctx.guild.shard_id:
                 message += ""
-            message += _("•\t Shard ID {0}: {1}ms", shard, round(latency/1000, 2))
+            message += _("•\t Shard ID {0}: {1}ms", shard, round(latency*1000, 2))
             if shard in self.bot.shards_ready:
                 message += _(" (ready)")
             if shard == ctx.guild.shard_id:
                 message += _(" (current shard)")
             message += "\n"
 
-        message += _("\n\nAvg latency: {0}ms", round(self.bot.latency/1000, 2))
+        message += _("\n\nAvg latency: {0}ms", round(self.bot.latency*1000, 2))
         if self.bot.is_ready():  # should always be true
             message += _(" (bot ready)")
 
