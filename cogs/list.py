@@ -46,7 +46,8 @@ class ListCommands(Cog):
         _ = await ctx.get_translate_function()
         emb = discord.Embed(title=_("List of {0}", _type[1]),
                             description=_("Use `{0}covid {1} <name>` when getting stats for a {1}!",
-                                          ctx.prefix, _type[0]))
+                                          ctx.prefix, _type[0]),
+                            color=discord.Color.dark_red())
         for continent in continents:
             emb.add_field(name=_("Name"), value=continent)
         return emb
@@ -117,7 +118,7 @@ class ListCommands(Cog):
         _ = await ctx.get_translate_function()
         state_list_embed = discord.Embed(title=_("List of American States"),
                                          description=_("Use the `{0}covid states <name>` command when getting "
-                                                       "stats for `<name>`!", ctx.prefix))
+                                                       "stats for `<name>`!", ctx.prefix), color=discord.Color.dark_red())
         max_pages = ceil(len(self.bot.worldometers_api.american_states) / 24)
         if not 0 < page <= max_pages:
             await ctx.reply(_("The page number you have selected is not between 1 and "
